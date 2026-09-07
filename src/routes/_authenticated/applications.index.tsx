@@ -208,7 +208,13 @@ function ApplicationsPage() {
                     <td className="px-5 py-3 text-muted-foreground">
                       {formatSalary(app.salary_min, app.salary_max, app.currency ?? "EUR")}
                     </td>
-                    <td className="px-5 py-3 text-muted-foreground">{fmtDate(app.applied_at)}</td>
+                    <td className="px-5 py-3 text-muted-foreground">
+                      {fmtDate(app.applied_at)}
+                      {daysSinceApplied(app) !== null && (
+                        <span className="block text-xs">{daysSinceApplied(app)} días</span>
+                      )}
+                    </td>
+
                     <td className="px-5 py-3">
                       {app.next_action ? (
                         <span>
