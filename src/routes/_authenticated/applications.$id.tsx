@@ -24,12 +24,10 @@ import {
 } from "@/components/application-tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CompanyMark, EmptyState, Pill, SectionCard, StageBadge } from "@/components/ui-bits";
 import {
-  useAddTimelineEvent,
   useApplication,
   useApplicationDocuments,
   useCalendar,
@@ -56,7 +54,6 @@ import {
   WORK_MODE_LABEL,
   formatSalary,
   priorityTone,
-  type ApplicationWithCompany,
   type EventKind,
 
   type Stage,
