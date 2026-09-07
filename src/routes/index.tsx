@@ -97,7 +97,7 @@ function Landing() {
           <div className="grid-paper pointer-events-none absolute inset-0 opacity-[0.35]" />
           <div className="relative mx-auto max-w-6xl px-5 py-20 md:px-8 md:py-28">
             <span className="inline-flex items-center gap-2 rounded-full border border-gold/35 bg-gold/12 px-3 py-1 text-xs font-medium text-gold-foreground">
-              <ShieldCheck className="size-3.5" /> Privado por diseño
+              <ShieldCheck className="size-3.5" /> Solo tú gestionas tu futuro
             </span>
             <h1 className="mt-6 max-w-3xl font-display text-4xl font-semibold leading-[1.08] tracking-tight md:text-6xl">
               Tu búsqueda de empleo, por fin en un solo sitio.
