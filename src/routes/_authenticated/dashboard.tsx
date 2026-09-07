@@ -1,68 +1,64 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  Briefcase,
-  CalendarClock,
-  CheckCircle2,
-  Circle,
-  Sparkles,
-  Target,
-  TrendingUp,
-} from "lucide-react";
+import { ArrowRight, CalendarClock, ExternalLink, Sparkles } from "lucide-react";
 
-import { EmptyState, KpiCard, PageHeader, SectionCard, StageBadge, CompanyMark, Pill } from "@/components/ui-bits";
+import { CompanyMark, EmptyState, StageBadge } from "@/components/ui-bits";
 import { Button } from "@/components/ui/button";
-import { useApplications, useCalendar, useSaveTask, useTasks } from "@/lib/api";
+import { useApplications, useCalendar, useProfile } from "@/lib/api";
+import { attentionFeed, nextActionTone } from "@/lib/next-action";
 import { PIPELINE_STAGES, STAGE_META, isActive } from "@/lib/domain";
 import { daysFromToday, fmtDateTime, relativeDay } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Panel — NextRound" },
+      { title: "Inicio — NextRound" },
       {
         name: "description",
         content:
-          "Vista general de tu búsqueda: candidaturas activas, próximas entrevistas, tareas y objetivos de la semana.",
+          "Lo que necesita tu atención hoy: pruebas, entrevistas y seguimientos de tus candidaturas.",
       },
-      { property: "og:title", content: "Panel — NextRound" },
+      { property: "og:title", content: "Inicio — NextRound" },
       {
         property: "og:description",
-        content: "Candidaturas activas, entrevistas de la semana y tus próximas acciones.",
+        content: "Tu asistente de búsqueda de empleo te dice qué hacer ahora mismo.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: DashboardPage,
+  component: HomePage,
 });
 
-function DashboardPage() {
+function greeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 6) return "Buenas noches";
+  if (hour < 13) return "Buenos días";
+  if (hour < 21) return "Buenas tardes";
+  return "Buenas noches";
+}
+
+function HomePage() {
   const { data: applications = [], isLoading } = useApplications();
   const { data: events = [] } = useCalendar();
-  const { data: tasks = [] } = useTasks();
-  const saveTask = useSaveTask();
+  const { data: profile } = useProfile();
 
+  const firstName = (profile?.full_name ?? "").split(" ")[0] || "de nuevo";
   const active = applications.filter((app) => isActive(app.stage) && !app.archived);
-  const responded = applications.filter(
-    (app) => !["saved", "applied"].includes(app.stage),
-  ).length;
+  const responded = applications.filter((app) => !["saved", "applied"].includes(app.stage)).length;
   const sent = applications.filter((app) => app.stage !== "saved").length;
   const responseRate = sent ? Math.round((responded / sent) * 100) : 0;
   const offers = applications.filter((app) => app.stage === "offer").length;
 
+  const feed = attentionFeed(applications, { events }, 4);
   const upcoming = events
     .filter((event) => new Date(event.starts_at).getTime() >= Date.now() - 3_600_000)
-    .slice(0, 5);
+    .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
+    .slice(0, 4);
   const interviewsThisWeek = events.filter((event) => {
     const diff = daysFromToday(event.starts_at);
     return diff !== null && diff >= 0 && diff <= 7;
   }).length;
-
-  const openTasks = tasks.filter((task) => !task.done).slice(0, 6);
-  const nextActions = active
-    .filter((app) => app.next_action)
-    .sort((a, b) => (a.next_action_at ?? "9999").localeCompare(b.next_action_at ?? "9999"))
-    .slice(0, 5);
 
   const counts = PIPELINE_STAGES.map((stage) => ({
     stage,
@@ -71,189 +67,161 @@ function DashboardPage() {
   const maxCount = Math.max(1, ...counts.map((entry) => entry.count));
 
   return (
-    <div className="space-y-7">
-      <PageHeader
-        title="Tu panel"
-        description="Todo lo que necesita atención hoy, en un solo sitio."
-        actions={
-          <Button asChild variant="outline">
-            <Link to="/applications">Ver candidaturas</Link>
-          </Button>
-        }
-      />
+    <div className="space-y-16 py-8">
+      <section className="space-y-8">
+        <div>
+          <p className="text-sm text-muted-foreground">{greeting()}, {firstName}</p>
+          <h1 className="mt-2 max-w-2xl font-display text-3xl font-semibold leading-tight tracking-tight sm:text-[2.6rem]">
+            {isLoading
+              ? "Cargando tu búsqueda…"
+              : feed.length === 0
+                ? "Hoy no tienes nada urgente."
+                : `Tienes ${feed.length} ${feed.length === 1 ? "cosa" : "cosas"} que necesitan atención`}
+          </h1>
+        </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard
-          label="Activas"
-          value={isLoading ? "—" : active.length}
-          hint="procesos en marcha"
-          icon={<Briefcase className="size-4" />}
-        />
-        <KpiCard
-          label="Entrevistas 7 días"
-          value={interviewsThisWeek}
-          hint="en tu calendario"
-          icon={<CalendarClock className="size-4" />}
-        />
-        <KpiCard
-          label="Tasa de respuesta"
-          value={`${responseRate}%`}
-          hint={`${responded} de ${sent} enviadas`}
-          icon={<TrendingUp className="size-4" />}
-        />
-        <KpiCard
-          label="Ofertas"
-          value={offers}
-          hint="pendientes de decisión"
-          icon={<Sparkles className="size-4" />}
-        />
-      </div>
+        {feed.length === 0 ? (
+          <EmptyState
+            title="Todo al día"
+            description="Buen momento para añadir candidaturas nuevas o pulir tu CV."
+            icon={<Sparkles className="size-6" />}
+            action={
+              <Button asChild>
+                <Link to="/applications">Ver candidaturas</Link>
+              </Button>
+            }
+          />
+        ) : (
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {feed.map(({ app, action }) => (
+              <li
+                key={app.id}
+                className="group rounded-2xl bg-surface p-5 shadow-soft transition-shadow hover:shadow-lift"
+              >
+                <div className="flex items-center gap-3">
+                  <CompanyMark name={app.companies?.name ?? app.role_title} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-display text-base font-semibold tracking-tight">
+                      {app.companies?.name ?? app.role_title}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">{app.role_title}</p>
+                  </div>
+                  <span
+                    className={cn(
+                      "rounded-full border px-2 py-0.5 text-[10px] font-medium",
+                      nextActionTone(action.tone),
+                    )}
+                  >
+                    {STAGE_META[app.stage].short}
+                  </span>
+                </div>
 
-      <div className="grid gap-5 lg:grid-cols-3">
-        <SectionCard
-          title="Próximas citas"
-          subtitle="Entrevistas, pruebas y deadlines"
-          className="lg:col-span-2"
-          action={
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/calendar">Calendario</Link>
-            </Button>
-          }
-          bodyClassName="p-0"
-        >
+                <p className="mt-4 text-sm font-medium leading-snug">{action.label}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{action.detail}</p>
+
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <Button asChild size="sm" className="rounded-xl">
+                    <Link to="/applications/$id" params={{ id: app.id }}>
+                      {action.ctaLabel}
+                    </Link>
+                  </Button>
+                  {app.candidate_portal_url && (
+                    <Button asChild size="sm" variant="outline" className="gap-1.5 rounded-xl">
+                      <a href={app.candidate_portal_url} target="_blank" rel="noreferrer">
+                        Abrir portal <ExternalLink className="size-3.5" />
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="grid gap-10 lg:grid-cols-2">
+        <div>
+          <div className="flex items-baseline justify-between">
+            <h2 className="font-display text-lg font-semibold tracking-tight">Próximas citas</h2>
+            <Link to="/calendar" className="text-xs text-muted-foreground hover:text-foreground">
+              Calendario
+            </Link>
+          </div>
           {upcoming.length === 0 ? (
-            <div className="px-5 py-8">
-              <EmptyState
-                title="Sin citas próximas"
-                description="Cuando agendes una entrevista aparecerá aquí."
-                icon={<CalendarClock className="size-6" />}
-              />
-            </div>
+            <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+              <CalendarClock className="size-4" /> Nada agendado todavía.
+            </p>
           ) : (
-            <ul className="divide-y divide-border">
+            <ul className="mt-4 divide-y divide-border">
               {upcoming.map((event) => (
-                <li key={event.id} className="flex items-center gap-4 px-5 py-3.5">
+                <li key={event.id} className="flex items-center gap-4 py-3.5">
                   <div className="w-24 shrink-0">
                     <p className="text-xs font-semibold">{relativeDay(event.starts_at)}</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {fmtDateTime(event.starts_at)}
-                    </p>
+                    <p className="text-[11px] text-muted-foreground">{fmtDateTime(event.starts_at)}</p>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{event.title}</p>
-                    {event.location && (
-                      <p className="truncate text-xs text-muted-foreground">{event.location}</p>
-                    )}
-                  </div>
-                  <Pill>{event.duration_min ?? 30} min</Pill>
+                  <p className="min-w-0 flex-1 truncate text-sm">{event.title}</p>
+                  <span className="text-[11px] text-muted-foreground">
+                    {event.duration_min ?? 30} min
+                  </span>
                 </li>
               ))}
             </ul>
           )}
-        </SectionCard>
+        </div>
 
-        <SectionCard title="Pipeline" subtitle="Distribución por etapa">
-          <ul className="space-y-3">
+        <div>
+          <h2 className="font-display text-lg font-semibold tracking-tight">Pipeline</h2>
+          <ul className="mt-4 space-y-3">
             {counts.map(({ stage, count }) => (
               <li key={stage}>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium">{STAGE_META[stage].label}</span>
+                  <span>{STAGE_META[stage].label}</span>
                   <span className="tabular-nums text-muted-foreground">{count}</span>
                 </div>
-                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-2">
+                <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-surface-2">
                   <div
-                    className={`h-full rounded-full ${STAGE_META[stage].dot}`}
+                    className={cn("h-full rounded-full", STAGE_META[stage].dot)}
                     style={{ width: `${(count / maxCount) * 100}%` }}
                   />
                 </div>
               </li>
             ))}
           </ul>
-        </SectionCard>
-      </div>
+        </div>
+      </section>
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        <SectionCard
-          title="Próximas acciones"
-          subtitle="Lo que has apuntado en cada candidatura"
-          bodyClassName="p-0"
-        >
-          {nextActions.length === 0 ? (
-            <div className="px-5 py-8">
-              <EmptyState
-                title="Nada pendiente"
-                description="Añade una próxima acción en tus candidaturas activas."
-                icon={<Target className="size-6" />}
-              />
-            </div>
-          ) : (
-            <ul className="divide-y divide-border">
-              {nextActions.map((app) => (
-                <li key={app.id}>
-                  <Link
-                    to="/applications/$id"
-                    params={{ id: app.id }}
-                    className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-accent/50"
-                  >
-                    <CompanyMark name={app.companies?.name ?? app.role_title} size="sm" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{app.next_action}</p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {app.companies?.name ?? "Sin empresa"} · {app.role_title}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <StageBadge stage={app.stage} />
-                      <p className="mt-1 text-[11px] text-muted-foreground">
-                        {relativeDay(app.next_action_at)}
-                      </p>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </SectionCard>
+      <section>
+        <h2 className="font-display text-lg font-semibold tracking-tight">Tu búsqueda en cifras</h2>
+        <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-8 border-t border-border pt-6 sm:grid-cols-4">
+          <Metric label="Candidaturas" value={applications.length} />
+          <Metric label="Procesos activos" value={active.length} />
+          <Metric label="Tasa de respuesta" value={`${responseRate}%`} hint={`${responded}/${sent}`} />
+          <Metric label="Ofertas" value={offers} />
+        </dl>
+        <div className="mt-6">
+          <Link
+            to="/analytics"
+            className="inline-flex items-center gap-1.5 text-sm text-violet hover:underline"
+          >
+            Ver insights completos <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Entrevistas en los próximos 7 días: {interviewsThisWeek}
+        </p>
+      </section>
+    </div>
+  );
+}
 
-        <SectionCard
-          title="Tareas abiertas"
-          subtitle="Marca lo que ya hayas hecho"
-          action={
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/tasks">Ver todas</Link>
-            </Button>
-          }
-          bodyClassName="p-0"
-        >
-          {openTasks.length === 0 ? (
-            <div className="px-5 py-8">
-              <EmptyState
-                title="Todo hecho"
-                description="No tienes tareas pendientes ahora mismo."
-                icon={<CheckCircle2 className="size-6" />}
-              />
-            </div>
-          ) : (
-            <ul className="divide-y divide-border">
-              {openTasks.map((task) => (
-                <li key={task.id} className="flex items-center gap-3 px-5 py-3">
-                  <button
-                    onClick={() => saveTask.mutate({ id: task.id, values: { done: true } })}
-                    aria-label="Marcar como hecha"
-                    className="text-muted-foreground transition-colors hover:text-success"
-                  >
-                    <Circle className="size-4" />
-                  </button>
-                  <span className="min-w-0 flex-1 truncate text-sm">{task.title}</span>
-                  <span className="text-[11px] text-muted-foreground">
-                    {relativeDay(task.due_date)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </SectionCard>
-      </div>
+function Metric({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
+  return (
+    <div>
+      <dd className="font-display text-3xl font-semibold tabular-nums tracking-tight">{value}</dd>
+      <dt className="mt-1 text-xs text-muted-foreground">
+        {label}
+        {hint ? ` · ${hint}` : ""}
+      </dt>
     </div>
   );
 }

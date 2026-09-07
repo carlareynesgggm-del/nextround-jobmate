@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { Link, createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
 import {
-  AlarmClock,
   ArrowLeft,
   CalendarPlus,
   Circle,
   CheckCircle2,
+  Download,
   ExternalLink,
   KeyRound,
   Pencil,
   Plus,
+  Sparkles,
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -43,22 +44,22 @@ import {
   useTasks,
   useTimeline,
 } from "@/lib/api";
-import { ALERT_TONE, applicationAlerts, daysSinceApplied } from "@/lib/alerts";
+import { nextActionTone, nextBestAction } from "@/lib/next-action";
+import { exportApplicationSummary } from "@/lib/export-pdf";
+import { daysSinceApplied } from "@/lib/alerts";
 import {
   EVENT_KIND_LABEL,
   EVENT_KIND_TONE,
   PIPELINE_STAGES,
-  PRIORITY_LABEL,
   STAGES,
   STAGE_META,
   WORK_MODE_LABEL,
   formatSalary,
-  priorityTone,
   type EventKind,
-
   type Stage,
 } from "@/lib/domain";
 import { fmtDate, fmtDateTime, relativeDay } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/applications/$id")({
   head: () => ({
@@ -67,12 +68,12 @@ export const Route = createFileRoute("/_authenticated/applications/$id")({
       {
         name: "description",
         content:
-          "Workspace completo de una candidatura: oferta guardada, documentos enviados, proceso, contactos y notas.",
+          "Todo el recorrido de una candidatura: siguiente paso, oferta guardada, proceso, documentos y notas.",
       },
       { property: "og:title", content: "Detalle de candidatura — NextRound" },
       {
         property: "og:description",
-        content: "Todo el recorrido de una candidatura: etapas, oferta, documentos, contactos y notas.",
+        content: "Sabe exactamente en qué punto estás y qué toca hacer ahora.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -88,6 +89,7 @@ function ApplicationDetail() {
   const { data: calendar = [] } = useCalendar();
   const { data: timeline = [] } = useTimeline(id);
   const { data: links = [] } = useApplicationDocuments(id);
+  const { data: notes = [] } = useNotes();
   const moveStage = useMoveStage();
   const deleteApplication = useDeleteApplication();
   const [editOpen, setEditOpen] = useState(false);
@@ -114,11 +116,11 @@ function ApplicationDetail() {
   const stageIndex = PIPELINE_STAGES.indexOf(app.stage);
   const progress = Math.round(((stageIndex + 1) / PIPELINE_STAGES.length) * 100);
   const days = daysSinceApplied(app);
-  const alerts = applicationAlerts(app, { events: calendar, timeline });
+  const action = nextBestAction(app, { events: calendar, timeline, links });
   const cvLink = links.find((link) => link.role === "cv" || link.documents?.kind === "cv");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10 py-6">
       <Link
         to="/applications"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -126,29 +128,32 @@ function ApplicationDetail() {
         <ArrowLeft className="size-4" /> Candidaturas
       </Link>
 
-      <header className="space-y-5 rounded-2xl border border-border bg-surface p-6 shadow-soft">
-        <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+      <header className="space-y-7">
+        <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
           <div className="flex gap-4">
             <CompanyMark name={app.companies?.name ?? app.role_title} size="lg" />
             <div>
-              <h1 className="font-display text-2xl font-semibold tracking-tight">
+              <p className="font-display text-sm font-medium text-muted-foreground">
+                {app.companies?.name ?? "Sin empresa"}
+              </p>
+              <h1 className="mt-0.5 font-display text-3xl font-semibold leading-tight tracking-tight">
                 {app.role_title}
               </h1>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                {app.companies?.name ?? "Sin empresa"}
-                {app.location ? ` · ${app.location}` : ""}
-                {app.work_mode ? ` · ${WORK_MODE_LABEL[app.work_mode]}` : ""}
-                {app.employment_type ? ` · ${app.employment_type}` : ""}
+              <p className="mt-2 text-sm text-muted-foreground">
+                {[
+                  app.location,
+                  app.work_mode ? WORK_MODE_LABEL[app.work_mode] : null,
+                  app.employment_type,
+                  formatSalary(app.salary_min, app.salary_max, app.currency ?? "EUR"),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
               </p>
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <StageBadge stage={app.stage} />
-                <Pill tone={priorityTone(app.priority ?? "medium")}>
-                  Prioridad {PRIORITY_LABEL[app.priority ?? "medium"]}
-                </Pill>
-                <Pill>{formatSalary(app.salary_min, app.salary_max, app.currency ?? "EUR")}</Pill>
-                {app.application_type && <Pill>{app.application_type}</Pill>}
-                {days !== null && <Pill>{days} días desde el envío</Pill>}
-              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Enviada el {fmtDate(app.applied_at)}
+                {days !== null ? ` · hace ${days} días` : ""} · Etapa actual:{" "}
+                <span className="text-foreground">{STAGE_META[app.stage].label}</span>
+              </p>
             </div>
           </div>
 
@@ -159,7 +164,7 @@ function ApplicationDetail() {
                 moveStage.mutate({ application: app, to: event.target.value as Stage })
               }
               aria-label="Cambiar etapa"
-              className="h-9 rounded-lg border border-input bg-surface px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+              className="h-9 rounded-xl border border-input bg-surface px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
             >
               {STAGES.map((stage) => (
                 <option key={stage} value={stage}>
@@ -167,35 +172,24 @@ function ApplicationDetail() {
                 </option>
               ))}
             </select>
-            {app.job_url && (
-              <Button asChild variant="outline" size="sm" className="gap-1.5">
-                <a href={app.job_url} target="_blank" rel="noreferrer">
-                  Ver oferta <ExternalLink className="size-3.5" />
-                </a>
-              </Button>
-            )}
-            {app.candidate_portal_url && (
-              <Button asChild variant="outline" size="sm" className="gap-1.5">
-                <a href={app.candidate_portal_url} target="_blank" rel="noreferrer">
-                  <KeyRound className="size-3.5" /> Portal del candidato
-                </a>
-              </Button>
-            )}
             <Button
               variant="outline"
               size="sm"
-              className="gap-1.5"
-              onClick={() => setTab("events")}
+              className="gap-1.5 rounded-xl"
+              onClick={() =>
+                exportApplicationSummary(app, {
+                  timeline,
+                  events: calendar.filter((event) => event.application_id === app.id),
+                  notes: notes
+                    .filter((note) => note.application_id === app.id)
+                    .map((note) => note.body ?? ""),
+                })
+              }
             >
-              <CalendarPlus className="size-3.5" /> Añadir evento
+              <Download className="size-3.5" /> Resumen PDF
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              onClick={() => setEditOpen(true)}
-            >
-              <Pencil className="size-3.5" /> Editar candidatura
+            <Button variant="outline" size="sm" className="gap-1.5 rounded-xl" onClick={() => setEditOpen(true)}>
+              <Pencil className="size-3.5" /> Editar
             </Button>
             <Button
               variant="ghost"
@@ -207,211 +201,161 @@ function ApplicationDetail() {
                 navigate({ to: "/applications" });
               }}
             >
-              <Trash2 className="size-3.5" /> Eliminar
+              <Trash2 className="size-3.5" />
             </Button>
           </div>
         </div>
 
-        <div className="grid gap-4 border-t border-border pt-4 md:grid-cols-3">
-          <div className="md:col-span-2">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>
-                Progreso del proceso · {STAGE_META[app.stage].label}
-              </span>
-              <span className="tabular-nums">{progress}%</span>
-            </div>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-2">
-              <div
-                className="h-full rounded-full bg-primary transition-all"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
+        <div className="max-w-2xl">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>Progreso del proceso</span>
+            <span className="tabular-nums">{progress}%</span>
           </div>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Próxima acción
-            </p>
-            <p className="mt-1 text-sm">
-              {app.next_action ?? "Sin definir"}
-              {app.next_action_at && (
-                <span className="text-muted-foreground">
-                  {" "}
-                  · {fmtDate(app.next_action_at)} ({relativeDay(app.next_action_at)})
-                </span>
-              )}
-            </p>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-2">
+            <div className="h-full rounded-full bg-violet transition-all" style={{ width: `${progress}%` }} />
+          </div>
+          <div className="scrollbar-slim mt-3 flex items-center gap-1 overflow-x-auto">
+            {PIPELINE_STAGES.map((stage, index) => (
+              <button
+                key={stage}
+                onClick={() => moveStage.mutate({ application: app, to: stage })}
+                className={cn(
+                  "whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors",
+                  stageIndex >= index
+                    ? "bg-violet/12 text-violet"
+                    : "text-muted-foreground hover:bg-accent",
+                )}
+              >
+                {STAGE_META[stage].short}
+              </button>
+            ))}
           </div>
         </div>
 
-        {alerts.length > 0 && (
-          <div className="flex flex-wrap gap-2 border-t border-border pt-4">
-            {alerts.map((alert) => (
-              <Pill key={alert.id} tone={ALERT_TONE[alert.tone]}>
-                <AlarmClock className="size-3" /> {alert.label} · {alert.detail}
-              </Pill>
-            ))}
+        {action && (
+          <div className="rounded-2xl bg-surface p-5 shadow-soft">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Siguiente mejor acción
+            </p>
+            <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-display text-lg font-semibold tracking-tight">{action.label}</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">{action.detail}</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={cn(
+                    "rounded-full border px-2 py-0.5 text-[10px] font-medium",
+                    nextActionTone(action.tone),
+                  )}
+                >
+                  {STAGE_META[app.stage].label}
+                </span>
+                <Button size="sm" className="gap-1.5 rounded-xl" onClick={() => setTab("process")}>
+                  <Sparkles className="size-3.5" /> Preparar con IA
+                </Button>
+                {app.candidate_portal_url && (
+                  <Button asChild size="sm" variant="outline" className="gap-1.5 rounded-xl">
+                    <a href={app.candidate_portal_url} target="_blank" rel="noreferrer">
+                      <KeyRound className="size-3.5" /> Portal del candidato
+                    </a>
+                  </Button>
+                )}
+                {app.job_url && (
+                  <Button asChild size="sm" variant="ghost" className="gap-1.5">
+                    <a href={app.job_url} target="_blank" rel="noreferrer">
+                      Ver oferta <ExternalLink className="size-3.5" />
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </header>
 
-      <div className="scrollbar-slim flex items-center gap-1 overflow-x-auto rounded-2xl border border-border bg-surface px-4 py-3">
-        {PIPELINE_STAGES.map((stage, index) => {
-          const reached = stageIndex >= index;
-          return (
-            <div key={stage} className="flex items-center gap-1">
-              <button
-                onClick={() => moveStage.mutate({ application: app, to: stage })}
-                className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                  reached
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-surface-2 text-muted-foreground hover:bg-accent"
-                }`}
-              >
-                {STAGE_META[stage].short}
-              </button>
-              {index < PIPELINE_STAGES.length - 1 && (
-                <span
-                  className={`h-px w-5 ${stageIndex > index ? "bg-primary" : "bg-border"}`}
-                  aria-hidden
-                />
-              )}
-            </div>
-          );
-        })}
-      </div>
-
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="scrollbar-slim max-w-full overflow-x-auto">
           <TabsTrigger value="overview">Resumen</TabsTrigger>
-          <TabsTrigger value="jd">Oferta</TabsTrigger>
-          <TabsTrigger value="application">Candidatura</TabsTrigger>
-          <TabsTrigger value="documents">Documentos</TabsTrigger>
+          <TabsTrigger value="job">Oferta</TabsTrigger>
           <TabsTrigger value="process">Proceso</TabsTrigger>
-          <TabsTrigger value="contacts">Contactos</TabsTrigger>
+          <TabsTrigger value="documents">Documentos</TabsTrigger>
           <TabsTrigger value="notes">Notas</TabsTrigger>
-          <TabsTrigger value="tasks">Tareas</TabsTrigger>
-          <TabsTrigger value="events">Entrevistas</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="mt-5">
-          <div className="grid gap-5 lg:grid-cols-3">
-            <SectionCard title="Detalles" className="lg:col-span-2">
-              <dl className="grid gap-4 sm:grid-cols-2">
-                <Detail label="Empresa" value={app.companies?.name ?? "—"} />
-                <Detail label="Puesto" value={app.role_title} />
-                <Detail label="Etapa actual" value={STAGE_META[app.stage].label} />
-                <Detail label="Enviada el" value={fmtDate(app.applied_at)} />
-                <Detail
-                  label="Días desde el envío"
-                  value={days === null ? "Sin enviar" : `${days} días`}
-                />
-                <Detail label="Tipo de candidatura" value={app.application_type ?? "—"} />
-                <Detail label="Tipo de empleo" value={app.employment_type ?? "—"} />
-                <Detail label="Origen" value={app.source ?? "—"} />
-                <Detail label="Ubicación" value={app.location ?? "—"} />
-                <Detail
-                  label="Modalidad"
-                  value={app.work_mode ? WORK_MODE_LABEL[app.work_mode] : "—"}
-                />
-                <Detail
-                  label="Rango salarial"
-                  value={formatSalary(app.salary_min, app.salary_max, app.currency ?? "EUR")}
-                />
-                <Detail label="Interés" value={`${app.excitement ?? 3}/5`} />
-                <Detail
-                  label="CV enviado"
-                  value={
-                    cvLink?.documents
-                      ? `${cvLink.documents.name}${
-                          cvLink.documents.version ? ` · ${cvLink.documents.version}` : ""
-                        }`
-                      : "Sin CV vinculado"
-                  }
-                />
-                <Detail
-                  label="Próximo paso y fecha límite"
-                  value={
-                    app.next_action
-                      ? `${app.next_action} · ${
-                          app.next_action_at ? fmtDate(app.next_action_at) : "sin fecha"
-                        }`
-                      : "Sin definir"
-                  }
-                />
-              </dl>
-              {app.description && (
-                <div className="mt-5 border-t border-border pt-4">
-                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    Descripción
-                  </p>
-                  <p className="mt-2 line-clamp-6 whitespace-pre-wrap text-sm leading-relaxed">
-                    {app.description}
-                  </p>
-                </div>
-              )}
-            </SectionCard>
+        <TabsContent value="overview" className="mt-7 space-y-8">
+          <dl className="grid gap-x-8 gap-y-6 sm:grid-cols-3">
+            <Detail label="Empresa" value={app.companies?.name ?? "—"} />
+            <Detail label="Puesto" value={app.role_title} />
+            <Detail label="Ubicación" value={app.location ?? "—"} />
+            <Detail
+              label="Salario"
+              value={formatSalary(app.salary_min, app.salary_max, app.currency ?? "EUR")}
+            />
+            <Detail label="Tipo de empleo" value={app.employment_type ?? "—"} />
+            <Detail label="Enviada el" value={fmtDate(app.applied_at)} />
+            <Detail
+              label="Días desde el envío"
+              value={days === null ? "Sin enviar" : `${days} días`}
+            />
+            <Detail label="Etapa actual" value={STAGE_META[app.stage].label} />
+            <Detail
+              label="Próxima acción"
+              value={
+                app.next_action
+                  ? `${app.next_action}${
+                      app.next_action_at ? ` · ${relativeDay(app.next_action_at)}` : ""
+                    }`
+                  : "Sin definir"
+              }
+            />
+            <Detail
+              label="Portal del candidato"
+              value={app.candidate_portal_url ?? "—"}
+              href={app.candidate_portal_url}
+            />
+            <Detail label="Email de acceso" value={app.portal_username ?? "—"} />
+            <Detail
+              label="CV enviado"
+              value={
+                cvLink?.documents
+                  ? `${cvLink.documents.name}${
+                      cvLink.documents.version ? ` · ${cvLink.documents.version}` : ""
+                    }`
+                  : "Sin CV vinculado"
+              }
+            />
+          </dl>
 
-            <SectionCard title="Empresa">
-              {app.companies ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <CompanyMark name={app.companies.name} />
-                    <div>
-                      <p className="text-sm font-medium">{app.companies.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {app.companies.industry ?? "Sector sin definir"}
-                      </p>
-                    </div>
-                  </div>
-                  {app.companies.location && (
-                    <p className="text-sm text-muted-foreground">{app.companies.location}</p>
-                  )}
-                  {app.companies.website && (
-                    <a
-                      href={app.companies.website}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
-                    >
-                      Web <ExternalLink className="size-3.5" />
-                    </a>
-                  )}
-                  <Button asChild variant="outline" size="sm" className="w-full">
-                    <Link to="/companies">Ver empresas</Link>
-                  </Button>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Esta candidatura no tiene empresa asociada.
-                </p>
-              )}
-            </SectionCard>
-          </div>
-        </TabsContent>
+          {app.description && (
+            <div className="max-w-3xl">
+              <h3 className="font-display text-base font-semibold tracking-tight">Contexto</h3>
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+                {app.description}
+              </p>
+            </div>
+          )}
 
-        <TabsContent value="jd" className="mt-5">
-          <JobDescriptionTab application={app} />
-        </TabsContent>
-        <TabsContent value="application" className="mt-5">
           <ApplicationInfoTab application={app} />
         </TabsContent>
-        <TabsContent value="documents" className="mt-5">
-          <DocumentsTab application={app} />
+
+        <TabsContent value="job" className="mt-7">
+          <JobDescriptionTab application={app} />
         </TabsContent>
-        <TabsContent value="process" className="mt-5">
+
+        <TabsContent value="process" className="mt-7 space-y-10">
           <ProcessTab application={app} />
-        </TabsContent>
-        <TabsContent value="contacts" className="mt-5">
+          <EventsTab applicationId={app.id} />
+          <TasksTab applicationId={app.id} />
           <ContactsTab application={app} />
         </TabsContent>
-        <TabsContent value="notes" className="mt-5">
+
+        <TabsContent value="documents" className="mt-7">
+          <DocumentsTab application={app} />
+        </TabsContent>
+
+        <TabsContent value="notes" className="mt-7">
           <NotesTab applicationId={app.id} />
-        </TabsContent>
-        <TabsContent value="tasks" className="mt-5">
-          <TasksTab applicationId={app.id} />
-        </TabsContent>
-        <TabsContent value="events" className="mt-5">
-          <EventsTab applicationId={app.id} />
         </TabsContent>
       </Tabs>
 
@@ -420,14 +364,27 @@ function ApplicationDetail() {
   );
 }
 
-
-function Detail({ label, value }: { label: string; value: string }) {
+function Detail({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: string;
+  href?: string | null;
+}) {
   return (
     <div>
-      <dt className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-        {label}
-      </dt>
-      <dd className="mt-1 text-sm">{value}</dd>
+      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dd className="mt-1 break-words text-sm">
+        {href ? (
+          <a href={href} target="_blank" rel="noreferrer" className="text-violet hover:underline">
+            Abrir portal
+          </a>
+        ) : (
+          value
+        )}
+      </dd>
     </div>
   );
 }
