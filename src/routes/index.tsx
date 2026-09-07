@@ -2,33 +2,40 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   ArrowRight,
   BarChart3,
-  CalendarDays,
-  CheckSquare,
+  BellRing,
+  BookOpenCheck,
+  CalendarClock,
+  ClipboardCheck,
+  Compass,
   FileText,
-  KanbanSquare,
-  ShieldCheck,
-  StickyNote,
+  Layers,
+  LinkIcon,
+  ListChecks,
+  Radar,
+  Sparkles,
+  Target,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { STAGE_META } from "@/lib/domain";
+import { AiDemo } from "@/components/marketing/ai-demo";
+import { ProductPreview } from "@/components/marketing/product-preview";
 import { useT } from "@/lib/i18n/provider";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "NextRound — tu búsqueda de empleo, por fin ordenada" },
+      { title: "NextRound — De la candidatura a la oferta" },
       {
         name: "description",
         content:
-          "NextRound centraliza candidaturas, entrevistas, versiones de CV, notas y tareas en un panel privado. Deja la hoja de cálculo atrás.",
+          "NextRound centraliza cada candidatura, prepara tus entrevistas y pruebas con IA y te dice siempre cuál es tu siguiente paso hasta la oferta.",
       },
-      { property: "og:title", content: "NextRound — tu búsqueda de empleo, por fin ordenada" },
+      { property: "og:title", content: "NextRound — De la candidatura a la oferta" },
       {
         property: "og:description",
         content:
-          "Pipeline visual de candidaturas, calendario de entrevistas, CV Vault y analytics de conversión.",
+          "Sigue cada proceso, prepárate con NextRound AI y no vuelvas a perderte una entrevista o un seguimiento.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -37,60 +44,96 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
+function usePillars() {
+  const t = useT();
+  return [
+    {
+      icon: Radar,
+      title: t("SEGUIR"),
+      body: t(
+        "Cada candidatura, CV enviado, portal del candidato, fecha límite y etapa del proceso en un solo sitio.",
+      ),
+    },
+    {
+      icon: Sparkles,
+      title: t("PREPARAR"),
+      body: t(
+        "NextRound AI prepara tus entrevistas, pruebas y seguimientos a partir de la oferta y el CV real que enviaste.",
+      ),
+    },
+    {
+      icon: Target,
+      title: t("CONSEGUIR"),
+      body: t("Sabe siempre cuál es tu siguiente paso, hasta llegar a la oferta."),
+    },
+  ];
+}
+
 function useFeatures() {
   const t = useT();
   return [
     {
-      icon: KanbanSquare,
-      title: t("Pipeline visual"),
-      body: t("Mueve cada candidatura entre etapas y ve de un vistazo dónde está atascado el proceso."),
+      icon: Layers,
+      title: t("Seguimiento de candidaturas"),
+      body: t("Todas tus candidaturas activas, con etapa, empresa y prioridad de un vistazo."),
     },
     {
-      icon: CalendarDays,
-      title: t("Calendario propio"),
-      body: t("Entrevistas, pruebas técnicas y fechas límite en una vista mensual clara."),
+      icon: ClipboardCheck,
+      title: t("Descripción de la oferta guardada"),
+      body: t("Guarda el texto exacto de la oferta para volver a leerlo antes de cada entrevista."),
+    },
+    {
+      icon: LinkIcon,
+      title: t("Enlace al portal del candidato"),
+      body: t("Accede directo al portal de la empresa sin rebuscar en el correo."),
     },
     {
       icon: FileText,
-      title: t("CV Vault"),
-      body: t("Guarda versiones de tu CV y cartas, y marca la que usas por defecto."),
+      title: t("Versión de CV enviada"),
+      body: t("Recuerda exactamente qué CV mandaste a cada proceso, sin dudarlo nunca más."),
     },
     {
-      icon: StickyNote,
-      title: t("Notas con contexto"),
-      body: t("Feedback, preguntas y aprendizajes vinculados a la candidatura correcta."),
+      icon: BookOpenCheck,
+      title: t("Cronología del proceso"),
+      body: t("Cada llamada, email y cambio de etapa, ordenado y con contexto."),
     },
     {
-      icon: CheckSquare,
-      title: t("Tareas con fecha"),
-      body: t("Divide la preparación en pasos concretos y no dejes nada colgando."),
+      icon: Sparkles,
+      title: t("Preparación de entrevistas"),
+      body: t("Preguntas probables y puntos clave a partir de la oferta y tu experiencia."),
+    },
+    {
+      icon: ListChecks,
+      title: t("Preparación de pruebas"),
+      body: t("Un plan concreto para cada prueba técnica o de aptitud que tengas por delante."),
+    },
+    {
+      icon: CalendarClock,
+      title: t("Calendario y fechas límite"),
+      body: t("Entrevistas, pruebas y plazos en una vista mensual que no se te escapa."),
+    },
+    {
+      icon: BellRing,
+      title: t("Recordatorios de seguimiento"),
+      body: t("Avisos cuando un proceso lleva demasiado tiempo en silencio."),
     },
     {
       icon: BarChart3,
-      title: t("Analytics honestos"),
-      body: t("Tasa de respuesta, conversión a entrevista y actividad semanal real."),
+      title: t("Analítica de candidaturas"),
+      body: t("Tasa de respuesta, de entrevista y de oferta, por sector, origen y CV."),
+    },
+    {
+      icon: Compass,
+      title: t("Copiloto de carrera con IA"),
+      body: t("Pregunta qué hacer hoy y recibe una respuesta con prioridades reales."),
     },
   ];
 }
 
 function Landing() {
   const t = useT();
+  const PILLARS = usePillars();
   const FEATURES = useFeatures();
-
-  const pipelineStages = [
-    ["saved", t("Guardadas"), 4],
-    ["applied", t("Enviadas"), 9],
-    ["screening", t("Screening"), 3],
-    ["interview", t("Entrevista"), 2],
-    ["technical", t("Técnica"), 1],
-    ["offer", t("Oferta"), 1],
-  ] as const;
-
-  const steps = [
-    ["1", t("Registra"), t("Añade la candidatura con puesto, empresa, salario y origen.")],
-    ["2", t("Sigue"), t("Mueve la etapa, agenda entrevistas y apunta tu próxima acción.")],
-    ["3", t("Aprende"), t("Revisa tus métricas y ajusta dónde inviertes el esfuerzo.")],
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -109,7 +152,7 @@ function Landing() {
             </Button>
             <Button asChild size="sm" className="gap-1.5">
               <Link to="/auth">
-                {t("Empezar gratis")} <ArrowRight className="size-3.5" />
+                {t("Empieza gratis")} <ArrowRight className="size-3.5" />
               </Link>
             </Button>
           </div>
@@ -120,102 +163,92 @@ function Landing() {
         <section className="relative overflow-hidden border-b border-border">
           <div className="grid-paper pointer-events-none absolute inset-0 opacity-[0.35]" />
           <div className="relative mx-auto max-w-6xl px-5 py-20 md:px-8 md:py-28">
-            <span className="inline-flex items-center gap-2 rounded-full border border-gold/35 bg-gold/12 px-3 py-1 text-xs font-medium text-gold-foreground">
-              <ShieldCheck className="size-3.5" /> {t("Solo tú gestionas tu futuro")}
+            <span className="inline-flex items-center gap-2 rounded-full border border-violet/30 bg-violet/10 px-3 py-1 text-xs font-medium text-violet">
+              <Sparkles className="size-3.5" /> {t("NextRound — From application to offer.")}
             </span>
             <h1 className="mt-6 max-w-3xl font-display text-4xl font-semibold leading-[1.08] tracking-tight md:text-6xl">
-              {t("Tu búsqueda de empleo, por fin en un solo sitio.")}
+              {t("Toda tu búsqueda de empleo, por fin en un solo sitio.")}
             </h1>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
               {t(
-                "NextRound reúne candidaturas, entrevistas, versiones de tu CV, notas y tareas en un panel que sí entiende cómo se busca trabajo de verdad.",
+                "Controla cada candidatura, recuerda exactamente qué enviaste, no vuelvas a perderte una entrevista o una prueba y sabe siempre qué hacer después.",
               )}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button asChild size="lg" className="gap-2">
                 <Link to="/auth">
-                  {t("Crear mi cuenta")} <ArrowRight className="size-4" />
+                  {t("Empieza gratis")} <ArrowRight className="size-4" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link to="/auth">{t("Ya tengo cuenta")}</Link>
+                <a href="#como-funciona">{t("Ver cómo funciona")}</a>
               </Button>
             </div>
 
-            <div className="mt-14 rounded-2xl border border-border bg-surface p-4 shadow-lift md:p-6">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                {t("Tu pipeline")}
-              </p>
-              <div className="scrollbar-slim mt-4 flex gap-3 overflow-x-auto pb-2">
-                {pipelineStages.map(([stage, label, count]) => (
-                  <div
-                    key={stage}
-                    className="w-40 shrink-0 rounded-xl border border-border bg-surface-2 p-3"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium">{label}</span>
-                      <span className="text-xs tabular-nums text-muted-foreground">{count}</span>
-                    </div>
-                    <div className="mt-3 space-y-2">
-                      {Array.from({ length: Math.min(count, 3) }).map((_, index) => (
-                        <div
-                          key={index}
-                          className="rounded-lg border border-border bg-surface px-2.5 py-2"
-                        >
-                          <div className="h-2 w-2/3 rounded bg-foreground/10" />
-                          <div className="mt-1.5 flex items-center gap-1.5">
-                            <span className={`size-1.5 rounded-full ${STAGE_META[stage].dot}`} />
-                            <div className="h-1.5 w-1/2 rounded bg-foreground/[0.07]" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ProductPreview />
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-5 py-20 md:px-8">
-          <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">
-            {t("Todo lo que la hoja de cálculo no hace")}
-          </h2>
-          <p className="mt-3 max-w-xl text-sm text-muted-foreground md:text-base">
-            {t(
-              "Seis piezas que trabajan juntas para que no pierdas ninguna oportunidad por falta de seguimiento.",
-            )}
-          </p>
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((feature) => {
-              const Icon = feature.icon;
+        <section id="como-funciona" className="mx-auto max-w-6xl px-5 py-20 md:px-8">
+          <div className="grid gap-8 md:grid-cols-3">
+            {PILLARS.map((pillar) => {
+              const Icon = pillar.icon;
               return (
-                <article
-                  key={feature.title}
-                  className="rounded-2xl border border-border bg-surface p-5 shadow-soft transition-shadow hover:shadow-lift"
-                >
-                  <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <div key={pillar.title}>
+                  <span className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <Icon className="size-5" />
                   </span>
-                  <h3 className="mt-4 font-display text-base font-semibold">{feature.title}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                    {feature.body}
-                  </p>
-                </article>
+                  <h3 className="mt-4 font-display text-sm font-semibold tracking-[0.14em] text-muted-foreground">
+                    {pillar.title}
+                  </h3>
+                  <p className="mt-2 text-base leading-relaxed">{pillar.body}</p>
+                </div>
               );
             })}
           </div>
         </section>
 
         <section className="border-y border-border bg-surface-2/60">
-          <div className="mx-auto grid max-w-6xl gap-8 px-5 py-16 md:grid-cols-3 md:px-8">
-            {steps.map(([step, title, body]) => (
-              <div key={step}>
-                <span className="font-display text-4xl font-semibold text-gold">{step}</span>
-                <h3 className="mt-2 font-display text-lg font-semibold">{title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{body}</p>
-              </div>
-            ))}
+          <div className="mx-auto max-w-6xl px-5 py-20 md:px-8">
+            <div className="max-w-xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-violet/30 bg-violet/10 px-3 py-1 text-xs font-medium text-violet">
+                <Sparkles className="size-3.5" /> {t("Copiloto de carrera")}
+              </span>
+              <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight md:text-4xl">
+                {t("Conoce NextRound AI")}
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
+                {t(
+                  "Entiende tus procesos reales porque conoce tus candidaturas, tus fechas y los CV que enviaste. Pregúntale qué hacer hoy.",
+                )}
+              </p>
+            </div>
+            <div className="mt-10 max-w-2xl">
+              <AiDemo />
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-5 py-20 md:px-8">
+          <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">
+            {t("Todo lo que necesitas para llevar un proceso serio")}
+          </h2>
+          <p className="mt-3 max-w-xl text-sm text-muted-foreground md:text-base">
+            {t("Cada pieza trabaja junto a las demás para que no pierdas ninguna oportunidad.")}
+          </p>
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <article key={feature.title} className="rounded-2xl border border-border bg-surface p-5">
+                  <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Icon className="size-5" />
+                  </span>
+                  <h3 className="mt-4 font-display text-base font-semibold">{feature.title}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{feature.body}</p>
+                </article>
+              );
+            })}
           </div>
         </section>
 
@@ -228,7 +261,7 @@ function Landing() {
           </p>
           <Button asChild size="lg" className="mt-7 gap-2">
             <Link to="/auth">
-              {t("Empezar ahora")} <ArrowRight className="size-4" />
+              {t("Empieza gratis")} <ArrowRight className="size-4" />
             </Link>
           </Button>
         </section>
@@ -236,7 +269,7 @@ function Landing() {
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-xs text-muted-foreground md:flex-row md:px-8">
-          <p>{t("NextRound · Tu centro de mando para la búsqueda de empleo.")}</p>
+          <p>{t("NextRound · De la candidatura a la oferta.")}</p>
           <Link to="/auth" className="hover:text-foreground">
             {t("Entrar")}
           </Link>
