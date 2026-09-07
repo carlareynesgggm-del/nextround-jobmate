@@ -40,6 +40,7 @@ function AlertDot({ app, events }: { app: ApplicationWithCompany; events: Calend
   }
   if (alerts.length === 0) return null;
   const alert = alerts[0];
+  if (!alert) return null;
   return (
     <span
       title={`${t(alert.label)} · ${alert.detail}`}
