@@ -231,3 +231,21 @@ function VaultPage() {
     </div>
   );
 }
+
+type DocGroup = { key: string; title: string; kind: DocKind; docs: DocumentRow[] };
+
+/** Agrupa documentos por nombre base para que las versiones de un mismo CV vivan juntas. */
+function groupDocuments(documents: DocumentRow[]): DocGroup[] {
+  const groups = new Map<string, DocGroup>();
+  for (const doc of documents) {
+    const title = doc.name.replace(/[\s_-]*v?\d+(\.\d+)?$/i, "").trim() || doc.name;
+    const key = `${doc.kind}:${title.toLowerCase()}`;
+    const group = groups.get(key) ?? { key, title, kind: doc.kind, docs: [] };
+    group.docs.push(doc);
+    groups.set(key, group);
+  }
+  return [...groups.values()].map((group) => ({
+    ...group,
+    docs: group.docs.sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? "")),
+  }));
+}
