@@ -161,7 +161,7 @@ export function useProfile() {
 
 /* -------------------------------- mutations ------------------------------- */
 
-type ApplicationInput = Partial<ApplicationRow> & { role_title: string };
+type ApplicationInput = Partial<ApplicationRow>;
 
 export function useSaveApplication() {
   const qc = useQueryClient();
@@ -176,7 +176,11 @@ export function useSaveApplication() {
       return unwrap(
         await supabase
           .from("applications")
-          .insert({ ...values, user_id: userId })
+          .insert({ ...values, role_title: values.role_title ?? "Sin título", user_id: userId })
+          .select("id")
+          .single(),
+      );
+
           .select("id")
           .single(),
       );
