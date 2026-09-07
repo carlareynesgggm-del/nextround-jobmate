@@ -48,7 +48,7 @@ function AuthPage() {
     setBusy(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -57,9 +57,18 @@ function AuthPage() {
           },
         });
         if (error) throw error;
+        if (!data.session) {
+          const retry = await supabase.auth.signInWithPassword({ email, password });
+          if (retry.error) {
+            toast.success("Cuenta creada. Confirma tu email para entrar.");
+            setMode("signin");
+            return;
+          }
+        }
         toast.success("Cuenta creada. Ya puedes entrar.");
         navigate({ to: "/dashboard", replace: true });
       } else {
+
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         navigate({ to: "/dashboard", replace: true });
