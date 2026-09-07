@@ -309,7 +309,7 @@ function Detail({ label, value }: { label: string; value: string }) {
   );
 }
 
-function ActivityTab({ application }: { application: Parameters<typeof useAddTimelineEvent> extends never ? never : NonNullable<ReturnType<typeof useApplication>["data"]> }) {
+function ActivityTab({ application }: { application: ApplicationWithCompany }) {
   const { data: timeline = [] } = useTimeline(application.id);
   const addEvent = useAddTimelineEvent();
   const [title, setTitle] = useState("");
