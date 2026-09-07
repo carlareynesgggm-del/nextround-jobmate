@@ -160,10 +160,10 @@ type ApplicationInput = Partial<ApplicationRow> & { role_title: string };
 export function useSaveApplication() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, values }: { id?: string; values: ApplicationInput }) => {
+    mutationFn: async ({ id, values }: { id?: string; values: ApplicationInput }): Promise<{ id: string }> => {
       if (id) {
         return unwrap(
-          await supabase.from("applications").update(values).eq("id", id).select(APP_SELECT).single(),
+          await supabase.from("applications").update(values).eq("id", id).select("id").single(),
         );
       }
       const userId = await currentUserId();
@@ -171,14 +171,15 @@ export function useSaveApplication() {
         await supabase
           .from("applications")
           .insert({ ...values, user_id: userId })
-          .select(APP_SELECT)
+          .select("id")
           .single(),
       );
     },
     onSuccess: (row) => {
       qc.invalidateQueries({ queryKey: qk.applications });
-      if (row && "id" in row) qc.invalidateQueries({ queryKey: qk.application(row.id as string) });
+      qc.invalidateQueries({ queryKey: qk.application(row.id) });
     },
+
   });
 }
 
