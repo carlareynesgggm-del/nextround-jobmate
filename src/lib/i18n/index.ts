@@ -9,6 +9,12 @@ import { chunk as calendar } from "./chunks/calendar";
 import { chunk as vault } from "./chunks/vault";
 import { chunk as insights } from "./chunks/insights";
 import { chunk as misc } from "./chunks/misc";
+import { chunk as v2home } from "./chunks/v2home";
+import { chunk as v2apps } from "./chunks/v2apps";
+import { chunk as v2detail } from "./chunks/v2detail";
+import { chunk as v2add } from "./chunks/v2add";
+import { chunk as v2ai } from "./chunks/v2ai";
+import { chunk as v2marketing } from "./chunks/v2marketing";
 
 export type Lang = "es" | "en" | "fr" | "de";
 
@@ -31,6 +37,12 @@ const CHUNKS = [
   vault,
   insights,
   misc,
+  v2home,
+  v2apps,
+  v2detail,
+  v2add,
+  v2ai,
+  v2marketing,
 ];
 
 type Triple = [string, string, string];

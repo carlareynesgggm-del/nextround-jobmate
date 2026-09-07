@@ -65,66 +65,120 @@ export type Database = {
       application_events: {
         Row: {
           application_id: string
+          assessment_url: string | null
           attachments: string[]
           created_at: string
           deadline_at: string | null
           detail: string | null
+          duration_min: number | null
+          expected_response_at: string | null
           from_stage: Database["public"]["Enums"]["app_stage"] | null
           id: string
+          instructions: string | null
           interviewer: string | null
+          interviewer_email: string | null
+          interviewer_linkedin: string | null
+          interviewer_role: string | null
           is_demo: boolean
           kind: Database["public"]["Enums"]["event_kind"] | null
+          location: string | null
+          meeting_url: string | null
+          next_steps: string | null
           occurred_at: string
           outcome: string | null
           position: number
+          prep_notes: string | null
+          provider: string | null
+          questions_asked: string | null
+          salary_mentioned: string | null
           scheduled_at: string | null
           stage: Database["public"]["Enums"]["app_stage"] | null
+          stage_type: string | null
           status: string
+          timezone: string | null
           title: string
           to_stage: Database["public"]["Enums"]["app_stage"] | null
           user_id: string | null
+          went_poorly: string | null
+          went_well: string | null
         }
         Insert: {
           application_id: string
+          assessment_url?: string | null
           attachments?: string[]
           created_at?: string
           deadline_at?: string | null
           detail?: string | null
+          duration_min?: number | null
+          expected_response_at?: string | null
           from_stage?: Database["public"]["Enums"]["app_stage"] | null
           id?: string
+          instructions?: string | null
           interviewer?: string | null
+          interviewer_email?: string | null
+          interviewer_linkedin?: string | null
+          interviewer_role?: string | null
           is_demo?: boolean
           kind?: Database["public"]["Enums"]["event_kind"] | null
+          location?: string | null
+          meeting_url?: string | null
+          next_steps?: string | null
           occurred_at?: string
           outcome?: string | null
           position?: number
+          prep_notes?: string | null
+          provider?: string | null
+          questions_asked?: string | null
+          salary_mentioned?: string | null
           scheduled_at?: string | null
           stage?: Database["public"]["Enums"]["app_stage"] | null
+          stage_type?: string | null
           status?: string
+          timezone?: string | null
           title: string
           to_stage?: Database["public"]["Enums"]["app_stage"] | null
           user_id?: string | null
+          went_poorly?: string | null
+          went_well?: string | null
         }
         Update: {
           application_id?: string
+          assessment_url?: string | null
           attachments?: string[]
           created_at?: string
           deadline_at?: string | null
           detail?: string | null
+          duration_min?: number | null
+          expected_response_at?: string | null
           from_stage?: Database["public"]["Enums"]["app_stage"] | null
           id?: string
+          instructions?: string | null
           interviewer?: string | null
+          interviewer_email?: string | null
+          interviewer_linkedin?: string | null
+          interviewer_role?: string | null
           is_demo?: boolean
           kind?: Database["public"]["Enums"]["event_kind"] | null
+          location?: string | null
+          meeting_url?: string | null
+          next_steps?: string | null
           occurred_at?: string
           outcome?: string | null
           position?: number
+          prep_notes?: string | null
+          provider?: string | null
+          questions_asked?: string | null
+          salary_mentioned?: string | null
           scheduled_at?: string | null
           stage?: Database["public"]["Enums"]["app_stage"] | null
+          stage_type?: string | null
           status?: string
+          timezone?: string | null
           title?: string
           to_stage?: Database["public"]["Enums"]["app_stage"] | null
           user_id?: string | null
+          went_poorly?: string | null
+          went_well?: string | null
         }
         Relationships: [
           {
@@ -138,16 +192,26 @@ export type Database = {
       }
       applications: {
         Row: {
+          academic_credits: string | null
+          application_plan: string | null
+          application_ref: string | null
           application_type: string | null
           applied_at: string | null
           archived: boolean
+          availability: string | null
           candidate_portal_url: string | null
           company_id: string | null
+          country: string | null
           created_at: string
           currency: string
+          deadline_at: string | null
+          degree_requirement: string | null
           description: string | null
+          duration_months: number | null
           employment_type: string | null
+          end_date: string | null
           excitement: number
+          gpa_requirement: string | null
           id: string
           is_demo: boolean
           jd_benefits: string | null
@@ -157,36 +221,65 @@ export type Database = {
           jd_salary_text: string | null
           jd_saved_at: string | null
           jd_skills: string[]
+          job_ref: string | null
           job_url: string | null
+          language_requirements: string | null
           location: string | null
           next_action: string | null
           next_action_at: string | null
+          offer_benefits: string | null
+          offer_bonus: string | null
+          offer_currency: string | null
+          offer_deadline_at: string | null
+          offer_decision: string | null
+          offer_equity: string | null
+          offer_rating: number | null
+          offer_salary: number | null
+          offer_start_date: string | null
           portal_notes: string | null
           portal_password_ref: string | null
           portal_provider: string | null
           portal_username: string | null
           priority: string
           referral_name: string | null
+          relocation_support: boolean | null
           role_title: string
           salary_max: number | null
           salary_min: number | null
+          salary_period: string | null
           source: string | null
           stage: Database["public"]["Enums"]["app_stage"]
+          start_date: string | null
+          timezone: string | null
+          university_agreement: boolean | null
           updated_at: string
           user_id: string | null
+          visa_sponsorship: boolean | null
+          why_interested: string | null
+          work_authorisation: string | null
           work_mode: Database["public"]["Enums"]["work_mode"] | null
         }
         Insert: {
+          academic_credits?: string | null
+          application_plan?: string | null
+          application_ref?: string | null
           application_type?: string | null
           applied_at?: string | null
           archived?: boolean
+          availability?: string | null
           candidate_portal_url?: string | null
           company_id?: string | null
+          country?: string | null
           created_at?: string
           currency?: string
+          deadline_at?: string | null
+          degree_requirement?: string | null
           description?: string | null
+          duration_months?: number | null
           employment_type?: string | null
+          end_date?: string | null
           excitement?: number
+          gpa_requirement?: string | null
           id?: string
           is_demo?: boolean
           jd_benefits?: string | null
@@ -196,36 +289,65 @@ export type Database = {
           jd_salary_text?: string | null
           jd_saved_at?: string | null
           jd_skills?: string[]
+          job_ref?: string | null
           job_url?: string | null
+          language_requirements?: string | null
           location?: string | null
           next_action?: string | null
           next_action_at?: string | null
+          offer_benefits?: string | null
+          offer_bonus?: string | null
+          offer_currency?: string | null
+          offer_deadline_at?: string | null
+          offer_decision?: string | null
+          offer_equity?: string | null
+          offer_rating?: number | null
+          offer_salary?: number | null
+          offer_start_date?: string | null
           portal_notes?: string | null
           portal_password_ref?: string | null
           portal_provider?: string | null
           portal_username?: string | null
           priority?: string
           referral_name?: string | null
+          relocation_support?: boolean | null
           role_title: string
           salary_max?: number | null
           salary_min?: number | null
+          salary_period?: string | null
           source?: string | null
           stage?: Database["public"]["Enums"]["app_stage"]
+          start_date?: string | null
+          timezone?: string | null
+          university_agreement?: boolean | null
           updated_at?: string
           user_id?: string | null
+          visa_sponsorship?: boolean | null
+          why_interested?: string | null
+          work_authorisation?: string | null
           work_mode?: Database["public"]["Enums"]["work_mode"] | null
         }
         Update: {
+          academic_credits?: string | null
+          application_plan?: string | null
+          application_ref?: string | null
           application_type?: string | null
           applied_at?: string | null
           archived?: boolean
+          availability?: string | null
           candidate_portal_url?: string | null
           company_id?: string | null
+          country?: string | null
           created_at?: string
           currency?: string
+          deadline_at?: string | null
+          degree_requirement?: string | null
           description?: string | null
+          duration_months?: number | null
           employment_type?: string | null
+          end_date?: string | null
           excitement?: number
+          gpa_requirement?: string | null
           id?: string
           is_demo?: boolean
           jd_benefits?: string | null
@@ -235,23 +357,42 @@ export type Database = {
           jd_salary_text?: string | null
           jd_saved_at?: string | null
           jd_skills?: string[]
+          job_ref?: string | null
           job_url?: string | null
+          language_requirements?: string | null
           location?: string | null
           next_action?: string | null
           next_action_at?: string | null
+          offer_benefits?: string | null
+          offer_bonus?: string | null
+          offer_currency?: string | null
+          offer_deadline_at?: string | null
+          offer_decision?: string | null
+          offer_equity?: string | null
+          offer_rating?: number | null
+          offer_salary?: number | null
+          offer_start_date?: string | null
           portal_notes?: string | null
           portal_password_ref?: string | null
           portal_provider?: string | null
           portal_username?: string | null
           priority?: string
           referral_name?: string | null
+          relocation_support?: boolean | null
           role_title?: string
           salary_max?: number | null
           salary_min?: number | null
+          salary_period?: string | null
           source?: string | null
           stage?: Database["public"]["Enums"]["app_stage"]
+          start_date?: string | null
+          timezone?: string | null
+          university_agreement?: boolean | null
           updated_at?: string
           user_id?: string | null
+          visa_sponsorship?: boolean | null
+          why_interested?: string | null
+          work_authorisation?: string | null
           work_mode?: Database["public"]["Enums"]["work_mode"] | null
         }
         Relationships: [
@@ -363,6 +504,7 @@ export type Database = {
         Row: {
           application_id: string | null
           company_id: string | null
+          contact_type: string | null
           created_at: string
           email: string | null
           id: string
@@ -377,6 +519,7 @@ export type Database = {
         Insert: {
           application_id?: string | null
           company_id?: string | null
+          contact_type?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -391,6 +534,7 @@ export type Database = {
         Update: {
           application_id?: string | null
           company_id?: string | null
+          contact_type?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -426,11 +570,15 @@ export type Database = {
           is_default: boolean
           is_demo: boolean
           kind: Database["public"]["Enums"]["doc_kind"]
+          language: string | null
           mime_type: string | null
           name: string
+          notes: string | null
           size_bytes: number | null
           storage_path: string | null
           tags: string[]
+          target_industry: string | null
+          target_role: string | null
           user_id: string | null
           version: string | null
         }
@@ -440,11 +588,15 @@ export type Database = {
           is_default?: boolean
           is_demo?: boolean
           kind?: Database["public"]["Enums"]["doc_kind"]
+          language?: string | null
           mime_type?: string | null
           name: string
+          notes?: string | null
           size_bytes?: number | null
           storage_path?: string | null
           tags?: string[]
+          target_industry?: string | null
+          target_role?: string | null
           user_id?: string | null
           version?: string | null
         }
@@ -454,11 +606,15 @@ export type Database = {
           is_default?: boolean
           is_demo?: boolean
           kind?: Database["public"]["Enums"]["doc_kind"]
+          language?: string | null
           mime_type?: string | null
           name?: string
+          notes?: string | null
           size_bytes?: number | null
           storage_path?: string | null
           tags?: string[]
+          target_industry?: string | null
+          target_role?: string | null
           user_id?: string | null
           version?: string | null
         }
@@ -521,7 +677,9 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          follow_up_days: number
           full_name: string | null
+          graduation_year: number | null
           headline: string | null
           id: string
           location: string | null
@@ -531,7 +689,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          follow_up_days?: number
           full_name?: string | null
+          graduation_year?: number | null
           headline?: string | null
           id: string
           location?: string | null
@@ -541,7 +701,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          follow_up_days?: number
           full_name?: string | null
+          graduation_year?: number | null
           headline?: string | null
           id?: string
           location?: string | null
@@ -607,12 +769,15 @@ export type Database = {
         | "saved"
         | "applied"
         | "screening"
+        | "assessment"
         | "interview"
         | "technical"
         | "final"
         | "offer"
+        | "accepted"
         | "rejected"
         | "withdrawn"
+        | "ghosted"
       doc_kind: "cv" | "cover_letter" | "portfolio" | "certificate" | "other"
       event_kind:
         | "interview"
@@ -753,12 +918,15 @@ export const Constants = {
         "saved",
         "applied",
         "screening",
+        "assessment",
         "interview",
         "technical",
         "final",
         "offer",
+        "accepted",
         "rejected",
         "withdrawn",
+        "ghosted",
       ],
       doc_kind: ["cv", "cover_letter", "portfolio", "certificate", "other"],
       event_kind: [
