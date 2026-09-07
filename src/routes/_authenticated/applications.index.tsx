@@ -18,6 +18,7 @@ import {
   type ApplicationWithCompany,
   type Stage,
 } from "@/lib/domain";
+import { daysSinceApplied } from "@/lib/alerts";
 import { fmtDate, relativeDay } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/applications/")({
