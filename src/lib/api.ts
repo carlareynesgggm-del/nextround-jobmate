@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { supabase } from "@/integrations/supabase/client";
 import type {
+  AppDocumentRow,
+  AppDocumentWithDoc,
   ApplicationRow,
   ApplicationWithCompany,
   CalendarRow,
@@ -13,6 +15,7 @@ import type {
   TaskRow,
   TimelineRow,
 } from "@/lib/domain";
+
 
 const APP_SELECT = "*, companies(id,name,industry,location,website)";
 
@@ -31,6 +34,9 @@ export const qk = {
   applications: ["applications"] as const,
   application: (id: string) => ["application", id] as const,
   timeline: (id: string) => ["timeline", id] as const,
+  appDocs: (id: string) => ["appDocs", id] as const,
+  allAppDocs: ["appDocs", "all"] as const,
+
   companies: ["companies"] as const,
   contacts: ["contacts"] as const,
   tasks: ["tasks"] as const,
@@ -155,7 +161,7 @@ export function useProfile() {
 
 /* -------------------------------- mutations ------------------------------- */
 
-type ApplicationInput = Partial<ApplicationRow> & { role_title: string };
+type ApplicationInput = Partial<ApplicationRow>;
 
 export function useSaveApplication() {
   const qc = useQueryClient();
@@ -170,7 +176,7 @@ export function useSaveApplication() {
       return unwrap(
         await supabase
           .from("applications")
-          .insert({ ...values, user_id: userId })
+          .insert({ ...values, role_title: values.role_title ?? "Sin título", user_id: userId })
           .select("id")
           .single(),
       );
@@ -448,5 +454,217 @@ export function useAddTimelineEvent() {
       ),
     onSuccess: (_row, vars) =>
       qc.invalidateQueries({ queryKey: qk.timeline(vars.application.id) }),
+  });
+}
+
+/* ------------------- documentos vinculados a candidaturas ------------------ */
+
+export function useApplicationDocuments(applicationId: string) {
+  return useQuery({
+    queryKey: qk.appDocs(applicationId),
+    queryFn: async () =>
+      unwrap(
+        await supabase
+          .from("application_documents")
+          .select("*, documents(*)")
+          .eq("application_id", applicationId),
+      ) as AppDocumentWithDoc[],
+  });
+}
+
+export function useAllApplicationDocuments() {
+  return useQuery({
+    queryKey: qk.allAppDocs,
+    queryFn: async () =>
+      unwrap(
+        await supabase.from("application_documents").select("*, documents(*)"),
+      ) as AppDocumentWithDoc[],
+  });
+}
+
+export function useLinkDocument() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      application,
+      documentId,
+      role,
+      submitted = true,
+      note,
+    }: {
+      application: ApplicationRow;
+      documentId: string;
+      role?: string | null;
+      submitted?: boolean;
+      note?: string | null;
+    }) =>
+      unwrap(
+        await supabase
+          .from("application_documents")
+          .insert({
+            application_id: application.id,
+            document_id: documentId,
+            user_id: application.user_id,
+            is_demo: application.is_demo,
+            role: role ?? null,
+            submitted,
+            note: note ?? null,
+          })
+          .select()
+          .single(),
+      ),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["appDocs"] }),
+  });
+}
+
+export function useUpdateApplicationDocument() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      applicationId,
+      documentId,
+      values,
+    }: {
+      applicationId: string;
+      documentId: string;
+      values: Partial<AppDocumentRow>;
+    }) => {
+      const { error } = await supabase
+        .from("application_documents")
+        .update(values)
+        .eq("application_id", applicationId)
+        .eq("document_id", documentId);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["appDocs"] }),
+  });
+}
+
+export function useUnlinkDocument() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      applicationId,
+      documentId,
+    }: {
+      applicationId: string;
+      documentId: string;
+    }) => {
+      const { error } = await supabase
+        .from("application_documents")
+        .delete()
+        .eq("application_id", applicationId)
+        .eq("document_id", documentId);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["appDocs"] }),
+  });
+}
+
+/* -------------------------- etapas del proceso ---------------------------- */
+
+export function useSaveTimelineEvent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      application,
+      values,
+    }: {
+      id?: string;
+      application: ApplicationRow;
+      values: Partial<TimelineRow>;
+    }) => {
+      if (id) {
+        return unwrap(
+          await supabase.from("application_events").update(values).eq("id", id).select().single(),
+        );
+      }
+      return unwrap(
+        await supabase
+          .from("application_events")
+          .insert({
+            ...values,
+            title: values.title ?? "Nuevo hito",
+            application_id: application.id,
+            user_id: application.user_id,
+            is_demo: application.is_demo,
+          })
+          .select()
+          .single(),
+      );
+    },
+    onSuccess: (_row, vars) => {
+      qc.invalidateQueries({ queryKey: qk.timeline(vars.application.id) });
+      qc.invalidateQueries({ queryKey: qk.applications });
+    },
+  });
+}
+
+export function useDeleteTimelineEvent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id }: { id: string; applicationId: string }) => {
+      const { error } = await supabase.from("application_events").delete().eq("id", id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: (_data, vars) =>
+      qc.invalidateQueries({ queryKey: qk.timeline(vars.applicationId) }),
+  });
+}
+
+export function useReorderTimelineEvents() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      applicationId,
+      ordered,
+    }: {
+      applicationId: string;
+      ordered: TimelineRow[];
+    }) => {
+      for (const [index, row] of ordered.entries()) {
+        const { error } = await supabase
+          .from("application_events")
+          .update({ position: index })
+          .eq("id", row.id);
+        if (error) throw new Error(error.message);
+      }
+    },
+    onSuccess: (_data, vars) =>
+      qc.invalidateQueries({ queryKey: qk.timeline(vars.applicationId) }),
+  });
+}
+
+/* -------------------------------- contactos ------------------------------- */
+
+export function useSaveContact() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, values }: { id?: string; values: Partial<ContactRow> }) => {
+      if (id) {
+        return unwrap(await supabase.from("contacts").update(values).eq("id", id).select().single());
+      }
+      const userId = await currentUserId();
+      return unwrap(
+        await supabase
+          .from("contacts")
+          .insert({ ...values, name: values.name ?? "Sin nombre", user_id: userId })
+          .select()
+          .single(),
+      );
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.contacts }),
+  });
+}
+
+export function useDeleteContact() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("contacts").delete().eq("id", id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk.contacts }),
   });
 }

@@ -13,10 +13,47 @@ export type DocumentRow = Database["public"]["Tables"]["documents"]["Row"];
 export type CalendarRow = Database["public"]["Tables"]["calendar_events"]["Row"];
 export type TimelineRow = Database["public"]["Tables"]["application_events"]["Row"];
 export type ContactRow = Database["public"]["Tables"]["contacts"]["Row"];
+export type AppDocumentRow = Database["public"]["Tables"]["application_documents"]["Row"];
+
+export type AppDocumentWithDoc = AppDocumentRow & { documents: DocumentRow | null };
 
 export type ApplicationWithCompany = ApplicationRow & {
   companies: Pick<CompanyRow, "id" | "name" | "industry" | "location" | "website"> | null;
 };
+
+export const EMPLOYMENT_TYPES = [
+  "Jornada completa",
+  "Media jornada",
+  "Contrato temporal",
+  "Freelance",
+  "Prácticas",
+] as const;
+
+export const APPLICATION_TYPES = [
+  "Portal de empleo",
+  "Web de la empresa",
+  "Referido",
+  "Recruiter",
+  "Email directo",
+  "LinkedIn",
+] as const;
+
+export const PROCESS_STATUS_LABEL: Record<string, string> = {
+  scheduled: "Programada",
+  pending: "Pendiente",
+  done: "Completada",
+  passed: "Superada",
+  failed: "No superada",
+  cancelled: "Cancelada",
+};
+
+export function processStatusTone(status: string): string {
+  if (status === "passed" || status === "done") return "bg-success/15 text-success border-success/30";
+  if (status === "failed" || status === "cancelled") return "bg-danger/10 text-danger border-danger/25";
+  if (status === "scheduled") return "bg-info/10 text-info border-info/25";
+  return "bg-warning/15 text-gold-foreground border-warning/30";
+}
+
 
 export const STAGES: Stage[] = [
   "saved",
