@@ -180,10 +180,6 @@ export function useSaveApplication() {
           .select("id")
           .single(),
       );
-
-          .select("id")
-          .single(),
-      );
     },
     onSuccess: (row) => {
       qc.invalidateQueries({ queryKey: qk.applications });
