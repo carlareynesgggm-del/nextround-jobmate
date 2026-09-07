@@ -17,6 +17,7 @@ import { Route as AuthenticatedCompaniesRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedNotesRouteImport } from './routes/_authenticated/notes'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
+import { Route as AuthenticatedVaultRouteImport } from './routes/_authenticated/vault'
 import { Route as AuthenticatedApplicationsIndexRouteImport } from './routes/_authenticated/applications.index'
 import { Route as AuthenticatedApplicationsIdRouteImport } from './routes/_authenticated/applications.$id'
 
@@ -59,6 +60,11 @@ const AuthenticatedTasksRoute = AuthenticatedTasksRouteImport.update({
   path: '/tasks',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedVaultRoute = AuthenticatedVaultRouteImport.update({
+  id: '/vault',
+  path: '/vault',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedApplicationsIndexRoute =
   AuthenticatedApplicationsIndexRouteImport.update({
     id: '/applications/',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/notes': typeof AuthenticatedNotesRoute
   '/tasks': typeof AuthenticatedTasksRoute
+  '/vault': typeof AuthenticatedVaultRoute
   '/applications/$id': typeof AuthenticatedApplicationsIdRoute
   '/applications/': typeof AuthenticatedApplicationsIndexRoute
 }
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/notes': typeof AuthenticatedNotesRoute
   '/tasks': typeof AuthenticatedTasksRoute
+  '/vault': typeof AuthenticatedVaultRoute
   '/applications/$id': typeof AuthenticatedApplicationsIdRoute
   '/applications': typeof AuthenticatedApplicationsIndexRoute
 }
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/notes': typeof AuthenticatedNotesRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
+  '/_authenticated/vault': typeof AuthenticatedVaultRoute
   '/_authenticated/applications/$id': typeof AuthenticatedApplicationsIdRoute
   '/_authenticated/applications/': typeof AuthenticatedApplicationsIndexRoute
 }
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/notes'
     | '/tasks'
+    | '/vault'
     | '/applications/$id'
     | '/applications/'
   fileRoutesByTo: FileRoutesByTo
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/notes'
     | '/tasks'
+    | '/vault'
     | '/applications/$id'
     | '/applications'
   id:
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/notes'
     | '/_authenticated/tasks'
+    | '/_authenticated/vault'
     | '/_authenticated/applications/$id'
     | '/_authenticated/applications/'
   fileRoutesById: FileRoutesById
@@ -208,6 +220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTasksRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/vault': {
+      id: '/_authenticated/vault'
+      path: '/vault'
+      fullPath: '/vault'
+      preLoaderRoute: typeof AuthenticatedVaultRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/applications/': {
       id: '/_authenticated/applications/'
       path: '/applications'
@@ -231,6 +250,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedNotesRoute: typeof AuthenticatedNotesRoute
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
+  AuthenticatedVaultRoute: typeof AuthenticatedVaultRoute
   AuthenticatedApplicationsIdRoute: typeof AuthenticatedApplicationsIdRoute
   AuthenticatedApplicationsIndexRoute: typeof AuthenticatedApplicationsIndexRoute
 }
@@ -241,6 +261,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedNotesRoute: AuthenticatedNotesRoute,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,
+  AuthenticatedVaultRoute: AuthenticatedVaultRoute,
   AuthenticatedApplicationsIdRoute: AuthenticatedApplicationsIdRoute,
   AuthenticatedApplicationsIndexRoute: AuthenticatedApplicationsIndexRoute,
 }
