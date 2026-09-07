@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { supabase } from "@/integrations/supabase/client";
 import type {
+  AppDocumentRow,
+  AppDocumentWithDoc,
   ApplicationRow,
   ApplicationWithCompany,
   CalendarRow,
@@ -13,6 +15,7 @@ import type {
   TaskRow,
   TimelineRow,
 } from "@/lib/domain";
+
 
 const APP_SELECT = "*, companies(id,name,industry,location,website)";
 
