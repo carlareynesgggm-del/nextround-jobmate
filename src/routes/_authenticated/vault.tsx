@@ -152,61 +152,100 @@ function VaultPage() {
           icon={<FileText className="size-6" />}
         />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {documents.map((doc) => (
-            <SectionCard key={doc.id}>
-              <div className="flex items-start gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <FileText className="size-5" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <h3 className="truncate font-display text-sm font-semibold">{doc.name}</h3>
-                  <p className="text-[11px] text-muted-foreground">
-                    {fmtDate(doc.created_at)}
-                    {doc.size_bytes ? ` · ${Math.round(doc.size_bytes / 1024)} KB` : ""}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                <Pill>{DOC_KIND_LABEL[doc.kind]}</Pill>
-                {doc.version && <Pill>{doc.version}</Pill>}
-                {doc.is_default && (
-                  <Pill tone="border-gold/35 bg-gold/15 text-gold-foreground">Por defecto</Pill>
-                )}
-              </div>
-
-              <div className="mt-4 flex items-center gap-1.5">
+        <div className="space-y-8">
+          {groupDocuments(documents).map((group) => (
+            <section key={group.key}>
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="font-display text-lg font-semibold tracking-tight">{group.title}</h2>
+                <Pill>{DOC_KIND_LABEL[group.kind]}</Pill>
+                <Pill>
+                  {group.docs.length} {group.docs.length === 1 ? "versión" : "versiones"}
+                </Pill>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  className="gap-1.5"
-                  onClick={() => openDocument(doc)}
+                  className="ml-auto gap-1.5"
+                  onClick={() => {
+                    setKind(group.kind);
+                    setName(group.title);
+                    setVersion(`v${group.docs.length + 1}`);
+                    document.getElementById("d-file")?.scrollIntoView({ behavior: "smooth" });
+                  }}
                 >
-                  <Download className="size-3.5" /> Abrir
+                  <Upload className="size-3.5" /> Nueva versión
                 </Button>
-                {!doc.is_default && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-1.5"
-                    onClick={() => setDefault.mutate(doc)}
-                  >
-                    <Star className="size-3.5" /> Por defecto
-                  </Button>
-                )}
-                <button
-                  onClick={() => remove.mutate(doc)}
-                  aria-label="Eliminar documento"
-                  className="ml-auto text-muted-foreground hover:text-danger"
-                >
-                  <Trash2 className="size-3.5" />
-                </button>
               </div>
-            </SectionCard>
+
+              <ul className="mt-3 divide-y divide-border rounded-2xl bg-surface px-4 shadow-soft">
+                {group.docs.map((doc) => (
+                  <li key={doc.id} className="flex flex-wrap items-center gap-3 py-4">
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-violet/10 text-violet">
+                      <FileText className="size-4" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">
+                        {doc.version || "Versión inicial"}
+                        {doc.is_default && (
+                          <span className="ml-2 rounded-full border border-violet/30 bg-violet/10 px-1.5 py-0.5 text-[10px] font-medium text-violet">
+                            En uso
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {doc.name} · {fmtDate(doc.created_at)}
+                        {doc.size_bytes ? ` · ${Math.round(doc.size_bytes / 1024)} KB` : ""}
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 rounded-xl"
+                      onClick={() => openDocument(doc)}
+                    >
+                      <Download className="size-3.5" /> Abrir
+                    </Button>
+                    {!doc.is_default && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="gap-1.5"
+                        onClick={() => setDefault.mutate(doc)}
+                      >
+                        <Star className="size-3.5" /> Usar por defecto
+                      </Button>
+                    )}
+                    <button
+                      onClick={() => remove.mutate(doc)}
+                      aria-label="Eliminar documento"
+                      className="text-muted-foreground transition-colors hover:text-danger"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
           ))}
         </div>
       )}
     </div>
   );
+}
+
+type DocGroup = { key: string; title: string; kind: DocKind; docs: DocumentRow[] };
+
+/** Agrupa documentos por nombre base para que las versiones de un mismo CV vivan juntas. */
+function groupDocuments(documents: DocumentRow[]): DocGroup[] {
+  const groups = new Map<string, DocGroup>();
+  for (const doc of documents) {
+    const title = doc.name.replace(/[\s_-]*v?\d+(\.\d+)?$/i, "").trim() || doc.name;
+    const key = `${doc.kind}:${title.toLowerCase()}`;
+    const group = groups.get(key) ?? { key, title, kind: doc.kind, docs: [] };
+    group.docs.push(doc);
+    groups.set(key, group);
+  }
+  return [...groups.values()].map((group) => ({
+    ...group,
+    docs: group.docs.sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? "")),
+  }));
 }
