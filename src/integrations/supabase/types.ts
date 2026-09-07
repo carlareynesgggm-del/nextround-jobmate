@@ -17,20 +17,32 @@ export type Database = {
       application_documents: {
         Row: {
           application_id: string
+          created_at: string
           document_id: string
           is_demo: boolean
+          note: string | null
+          role: string | null
+          submitted: boolean
           user_id: string | null
         }
         Insert: {
           application_id: string
+          created_at?: string
           document_id: string
           is_demo?: boolean
+          note?: string | null
+          role?: string | null
+          submitted?: boolean
           user_id?: string | null
         }
         Update: {
           application_id?: string
+          created_at?: string
           document_id?: string
           is_demo?: boolean
+          note?: string | null
+          role?: string | null
+          submitted?: boolean
           user_id?: string | null
         }
         Relationships: [
@@ -53,36 +65,63 @@ export type Database = {
       application_events: {
         Row: {
           application_id: string
+          attachments: string[]
           created_at: string
+          deadline_at: string | null
           detail: string | null
           from_stage: Database["public"]["Enums"]["app_stage"] | null
           id: string
+          interviewer: string | null
           is_demo: boolean
+          kind: Database["public"]["Enums"]["event_kind"] | null
           occurred_at: string
+          outcome: string | null
+          position: number
+          scheduled_at: string | null
+          stage: Database["public"]["Enums"]["app_stage"] | null
+          status: string
           title: string
           to_stage: Database["public"]["Enums"]["app_stage"] | null
           user_id: string | null
         }
         Insert: {
           application_id: string
+          attachments?: string[]
           created_at?: string
+          deadline_at?: string | null
           detail?: string | null
           from_stage?: Database["public"]["Enums"]["app_stage"] | null
           id?: string
+          interviewer?: string | null
           is_demo?: boolean
+          kind?: Database["public"]["Enums"]["event_kind"] | null
           occurred_at?: string
+          outcome?: string | null
+          position?: number
+          scheduled_at?: string | null
+          stage?: Database["public"]["Enums"]["app_stage"] | null
+          status?: string
           title: string
           to_stage?: Database["public"]["Enums"]["app_stage"] | null
           user_id?: string | null
         }
         Update: {
           application_id?: string
+          attachments?: string[]
           created_at?: string
+          deadline_at?: string | null
           detail?: string | null
           from_stage?: Database["public"]["Enums"]["app_stage"] | null
           id?: string
+          interviewer?: string | null
           is_demo?: boolean
+          kind?: Database["public"]["Enums"]["event_kind"] | null
           occurred_at?: string
+          outcome?: string | null
+          position?: number
+          scheduled_at?: string | null
+          stage?: Database["public"]["Enums"]["app_stage"] | null
+          status?: string
           title?: string
           to_stage?: Database["public"]["Enums"]["app_stage"] | null
           user_id?: string | null
@@ -99,20 +138,35 @@ export type Database = {
       }
       applications: {
         Row: {
+          application_type: string | null
           applied_at: string | null
           archived: boolean
+          candidate_portal_url: string | null
           company_id: string | null
           created_at: string
           currency: string
           description: string | null
+          employment_type: string | null
           excitement: number
           id: string
           is_demo: boolean
+          jd_benefits: string | null
+          jd_preferred: string | null
+          jd_requirements: string | null
+          jd_responsibilities: string | null
+          jd_salary_text: string | null
+          jd_saved_at: string | null
+          jd_skills: string[]
           job_url: string | null
           location: string | null
           next_action: string | null
           next_action_at: string | null
+          portal_notes: string | null
+          portal_password_ref: string | null
+          portal_provider: string | null
+          portal_username: string | null
           priority: string
+          referral_name: string | null
           role_title: string
           salary_max: number | null
           salary_min: number | null
@@ -123,20 +177,35 @@ export type Database = {
           work_mode: Database["public"]["Enums"]["work_mode"] | null
         }
         Insert: {
+          application_type?: string | null
           applied_at?: string | null
           archived?: boolean
+          candidate_portal_url?: string | null
           company_id?: string | null
           created_at?: string
           currency?: string
           description?: string | null
+          employment_type?: string | null
           excitement?: number
           id?: string
           is_demo?: boolean
+          jd_benefits?: string | null
+          jd_preferred?: string | null
+          jd_requirements?: string | null
+          jd_responsibilities?: string | null
+          jd_salary_text?: string | null
+          jd_saved_at?: string | null
+          jd_skills?: string[]
           job_url?: string | null
           location?: string | null
           next_action?: string | null
           next_action_at?: string | null
+          portal_notes?: string | null
+          portal_password_ref?: string | null
+          portal_provider?: string | null
+          portal_username?: string | null
           priority?: string
+          referral_name?: string | null
           role_title: string
           salary_max?: number | null
           salary_min?: number | null
@@ -147,20 +216,35 @@ export type Database = {
           work_mode?: Database["public"]["Enums"]["work_mode"] | null
         }
         Update: {
+          application_type?: string | null
           applied_at?: string | null
           archived?: boolean
+          candidate_portal_url?: string | null
           company_id?: string | null
           created_at?: string
           currency?: string
           description?: string | null
+          employment_type?: string | null
           excitement?: number
           id?: string
           is_demo?: boolean
+          jd_benefits?: string | null
+          jd_preferred?: string | null
+          jd_requirements?: string | null
+          jd_responsibilities?: string | null
+          jd_salary_text?: string | null
+          jd_saved_at?: string | null
+          jd_skills?: string[]
           job_url?: string | null
           location?: string | null
           next_action?: string | null
           next_action_at?: string | null
+          portal_notes?: string | null
+          portal_password_ref?: string | null
+          portal_provider?: string | null
+          portal_username?: string | null
           priority?: string
+          referral_name?: string | null
           role_title?: string
           salary_max?: number | null
           salary_min?: number | null
@@ -277,6 +361,7 @@ export type Database = {
       }
       contacts: {
         Row: {
+          application_id: string | null
           company_id: string | null
           created_at: string
           email: string | null
@@ -290,6 +375,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          application_id?: string | null
           company_id?: string | null
           created_at?: string
           email?: string | null
@@ -303,6 +389,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          application_id?: string | null
           company_id?: string | null
           created_at?: string
           email?: string | null
@@ -316,6 +403,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "contacts_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "contacts_company_id_fkey"
             columns: ["company_id"]
