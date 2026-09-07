@@ -5,6 +5,7 @@ import {
   Briefcase,
   CalendarDays,
   FileText,
+  HelpCircle,
   Home,
   LogOut,
   Menu,
