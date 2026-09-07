@@ -20,26 +20,35 @@ import { useT } from "@/lib/i18n/provider";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/applications/")({
-  validateSearch: (search: Record<string, unknown>): AppsSearch => ({
-    view: search.view === "kanban" ? "kanban" : "table",
-    q: typeof search.q === "string" ? search.q : undefined,
-    quick: typeof search.quick === "string" ? (search.quick as QuickFilter) : undefined,
-    sort: typeof search.sort === "string" ? (search.sort as SortKey) : undefined,
-    stage: typeof search.stage === "string" ? (search.stage as AppsSearch["stage"]) : undefined,
-    company: typeof search.company === "string" ? search.company : undefined,
-    location: typeof search.location === "string" ? search.location : undefined,
-    country: typeof search.country === "string" ? search.country : undefined,
-    industry: typeof search.industry === "string" ? search.industry : undefined,
-    type: typeof search.type === "string" ? search.type : undefined,
-    mode: typeof search.mode === "string" ? (search.mode as AppsSearch["mode"]) : undefined,
-    cv: typeof search.cv === "string" ? search.cv : undefined,
-    source: typeof search.source === "string" ? search.source : undefined,
-    priority: typeof search.priority === "string" ? search.priority : undefined,
-    appliedFrom: typeof search.appliedFrom === "string" ? search.appliedFrom : undefined,
-    appliedTo: typeof search.appliedTo === "string" ? search.appliedTo : undefined,
-    deadlineFrom: typeof search.deadlineFrom === "string" ? search.deadlineFrom : undefined,
-    deadlineTo: typeof search.deadlineTo === "string" ? search.deadlineTo : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): AppsSearch => {
+    const out: Record<string, unknown> = {
+      view: search["view"] === "kanban" ? "kanban" : "table",
+    };
+    const keys = [
+      "q",
+      "quick",
+      "sort",
+      "stage",
+      "company",
+      "location",
+      "country",
+      "industry",
+      "type",
+      "mode",
+      "cv",
+      "source",
+      "priority",
+      "appliedFrom",
+      "appliedTo",
+      "deadlineFrom",
+      "deadlineTo",
+    ];
+    for (const key of keys) {
+      const value = search[key];
+      if (typeof value === "string" && value) out[key] = value;
+    }
+    return out as AppsSearch;
+  },
   head: () => ({
     meta: [
       { title: "Candidaturas — NextRound" },

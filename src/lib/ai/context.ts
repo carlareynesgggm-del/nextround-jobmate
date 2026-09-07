@@ -37,7 +37,7 @@ export async function buildUserContext(accessToken: string, applicationId?: stri
         .from("applications")
         .select("*, companies(id,name,industry,location,website)")
         .order("updated_at", { ascending: false }),
-      db.from("tasks").select("*").order("due_at", { ascending: true }).limit(30),
+      db.from("tasks").select("*").order("due_date", { ascending: true }).limit(30),
       db.from("calendar_events").select("*").order("starts_at", { ascending: true }).limit(30),
       db.from("notes").select("*").order("created_at", { ascending: false }).limit(40),
       db.from("contacts").select("*").limit(60),
@@ -46,8 +46,8 @@ export async function buildUserContext(accessToken: string, applicationId?: stri
   const apps = applications ?? [];
   const active = apps.filter((a) => !a.archived && !["rejected", "withdrawn", "ghosted"].includes(a.stage));
 
-  let timelineByApp: Record<string, any[]> = {};
-  let appDocsByApp: Record<string, any[]> = {};
+  const timelineByApp: Record<string, any[]> = {};
+  const appDocsByApp: Record<string, any[]> = {};
   const relevantIds = applicationId ? [applicationId] : active.map((a) => a.id).slice(0, 12);
   if (relevantIds.length > 0) {
     const { data: timeline } = await db
@@ -59,11 +59,11 @@ export async function buildUserContext(accessToken: string, applicationId?: stri
       .from("application_documents")
       .select("*, documents(id,name,kind)")
       .in("application_id", relevantIds);
-    for (const t of timeline ?? []) {
-      (timelineByApp[t.application_id] ??= []).push(t);
+    for (const ev of timeline ?? []) {
+      (timelineByApp[ev["application_id"]] ??= []).push(ev);
     }
     for (const d of appDocs ?? []) {
-      (appDocsByApp[d.application_id] ??= []).push(d);
+      (appDocsByApp[d["application_id"]] ??= []).push(d);
     }
   }
 
@@ -128,7 +128,7 @@ export async function buildUserContext(accessToken: string, applicationId?: stri
       "## Contactos",
       ...contacts
         .slice(0, 20)
-        .map((c) => `· ${c.name}${c.role ? ` (${c.role})` : ""}${c.company ? ` — ${c.company}` : ""}`),
+        .map((c) => `· ${c.name}${c.role_title ? ` (${c.role_title})` : ""}${c.contact_type ? ` — ${c.contact_type}` : ""}`),
     );
   }
 
@@ -138,7 +138,7 @@ export async function buildUserContext(accessToken: string, applicationId?: stri
       ...tasks
         .filter((t) => !t.done)
         .slice(0, 15)
-        .map((t) => `· ${t.title}${t.due_at ? ` (vence ${t.due_at})` : ""}`),
+        .map((t) => `· ${t.title}${t.due_date ? ` (vence ${t.due_date})` : ""}`),
     );
   }
 
@@ -157,8 +157,11 @@ export async function buildUserContext(accessToken: string, applicationId?: stri
     );
   }
 
+  const meta = user?.user_metadata as Record<string, unknown> | undefined;
+  const fullName = typeof meta?.["full_name"] === "string" ? (meta["full_name"] as string) : undefined;
+
   return {
-    userName: (user?.user_metadata as any)?.full_name?.split(" ")?.[0] || user?.email?.split("@")[0] || "candidato/a",
+    userName: fullName?.split(" ")?.[0] || user?.email?.split("@")[0] || "candidato/a",
     activeCount: active.length,
     applications: apps,
     contextMarkdown: parts.join("\n\n"),

@@ -121,9 +121,17 @@ function HomePage() {
           />
         ) : (
           <ul className="grid gap-4 lg:grid-cols-2">
-            {feed.map(({ app, action }) => (
-              <AttentionCard key={app.id} app={app} action={action} event={feedEvents.get(app.id)} />
-            ))}
+            {feed.map(({ app, action }) => {
+              const event = feedEvents.get(app.id);
+              return (
+                <AttentionCard
+                  key={app.id}
+                  app={app}
+                  action={action}
+                  {...(event ? { event } : {})}
+                />
+              );
+            })}
           </ul>
         )}
       </section>

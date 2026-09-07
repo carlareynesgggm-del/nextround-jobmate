@@ -12,6 +12,7 @@ import {
   Phone,
   Plus,
   Save,
+  Sparkles,
   Trash2,
   X,
 } from "lucide-react";
@@ -581,26 +582,64 @@ type ProcessForm = {
   title: string;
   stage: string;
   kind: string;
+  stage_type: string;
   status: string;
   scheduled_at: string;
   deadline_at: string;
-  interviewer: string;
   detail: string;
   outcome: string;
   attachments: string;
+  location: string;
+  meeting_url: string;
+  duration_min: string;
+  // interview
+  interviewer: string;
+  interviewer_role: string;
+  interviewer_email: string;
+  interviewer_linkedin: string;
+  timezone: string;
+  questions_asked: string;
+  went_well: string;
+  went_poorly: string;
+  salary_mentioned: string;
+  next_steps: string;
+  expected_response_at: string;
+  // test
+  provider: string;
+  assessment_url: string;
+  instructions: string;
+  prep_notes: string;
 };
 
 const emptyProcessForm: ProcessForm = {
   title: "",
   stage: "",
   kind: "interview",
+  stage_type: "interview",
   status: "scheduled",
   scheduled_at: "",
   deadline_at: "",
-  interviewer: "",
   detail: "",
   outcome: "",
   attachments: "",
+  location: "",
+  meeting_url: "",
+  duration_min: "",
+  interviewer: "",
+  interviewer_role: "",
+  interviewer_email: "",
+  interviewer_linkedin: "",
+  timezone: "",
+  questions_asked: "",
+  went_well: "",
+  went_poorly: "",
+  salary_mentioned: "",
+  next_steps: "",
+  expected_response_at: "",
+  provider: "",
+  assessment_url: "",
+  instructions: "",
+  prep_notes: "",
 };
 
 function rowToForm(row: TimelineRow): ProcessForm {
@@ -608,14 +647,44 @@ function rowToForm(row: TimelineRow): ProcessForm {
     title: row.title,
     stage: row.stage ?? row.to_stage ?? "",
     kind: row.kind ?? "interview",
+    stage_type: row.stage_type ?? row.kind ?? "interview",
     status: row.status ?? "scheduled",
     scheduled_at: toLocalInput(row.scheduled_at ?? row.occurred_at),
     deadline_at: toLocalInput(row.deadline_at),
-    interviewer: row.interviewer ?? "",
     detail: row.detail ?? "",
     outcome: row.outcome ?? "",
     attachments: (row.attachments ?? []).join(", "),
+    location: row.location ?? "",
+    meeting_url: row.meeting_url ?? "",
+    duration_min: row.duration_min?.toString() ?? "",
+    interviewer: row.interviewer ?? "",
+    interviewer_role: row.interviewer_role ?? "",
+    interviewer_email: row.interviewer_email ?? "",
+    interviewer_linkedin: row.interviewer_linkedin ?? "",
+    timezone: row.timezone ?? "",
+    questions_asked: row.questions_asked ?? "",
+    went_well: row.went_well ?? "",
+    went_poorly: row.went_poorly ?? "",
+    salary_mentioned: row.salary_mentioned ?? "",
+    next_steps: row.next_steps ?? "",
+    expected_response_at: toLocalInput(row.expected_response_at),
+    provider: row.provider ?? "",
+    assessment_url: row.assessment_url ?? "",
+    instructions: row.instructions ?? "",
+    prep_notes: row.prep_notes ?? "",
   };
+}
+
+function buildPrepPrompt(application: ApplicationWithCompany, form: ProcessForm): string {
+  const company = application.companies?.name ?? "la empresa";
+  if (form.stage_type === "test") {
+    return `Ayúdame a preparar la prueba técnica "${form.title}" para el puesto de ${application.role_title} en ${company}${
+      form.provider ? ` (proveedor: ${form.provider})` : ""
+    }. ${form.instructions ? `Instrucciones: ${form.instructions}.` : ""}`.trim();
+  }
+  return `Ayúdame a preparar la entrevista "${form.title}" para el puesto de ${application.role_title} en ${company}${
+    form.interviewer ? ` con ${form.interviewer}${form.interviewer_role ? ` (${form.interviewer_role})` : ""}` : ""
+  }.`.trim();
 }
 
 export function ProcessTab({ application }: { application: ApplicationWithCompany }) {
@@ -639,6 +708,17 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
     [timeline],
   );
 
+  const prepareWithAi = (targetForm: ProcessForm) => {
+    window.dispatchEvent(
+      new CustomEvent("nextround:ai", {
+        detail: {
+          applicationId: application.id,
+          prompt: buildPrepPrompt(application, targetForm),
+        },
+      }),
+    );
+  };
+
   const submit = async (id?: string) => {
     if (!form.title.trim()) {
       toast.error(t("Pon un título a la etapa."));
@@ -652,14 +732,34 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
       values: {
         title: form.title.trim(),
         stage: (form.stage || null) as Stage | null,
-        kind: (form.kind || null) as EventKind | null,
+        kind: (form.stage_type || form.kind || null) as EventKind | null,
+        stage_type: form.stage_type || null,
         status: form.status,
         scheduled_at: scheduled,
         occurred_at: scheduled ?? new Date().toISOString(),
         deadline_at: form.deadline_at ? new Date(form.deadline_at).toISOString() : null,
-        interviewer: form.interviewer || null,
         detail: form.detail || null,
         outcome: form.outcome || null,
+        location: form.location || null,
+        meeting_url: form.meeting_url || null,
+        duration_min: form.duration_min ? Number(form.duration_min) : null,
+        interviewer: form.interviewer || null,
+        interviewer_role: form.interviewer_role || null,
+        interviewer_email: form.interviewer_email || null,
+        interviewer_linkedin: form.interviewer_linkedin || null,
+        timezone: form.timezone || null,
+        questions_asked: form.questions_asked || null,
+        went_well: form.went_well || null,
+        went_poorly: form.went_poorly || null,
+        salary_mentioned: form.salary_mentioned || null,
+        next_steps: form.next_steps || null,
+        expected_response_at: form.expected_response_at
+          ? new Date(form.expected_response_at).toISOString()
+          : null,
+        provider: form.provider || null,
+        assessment_url: form.assessment_url || null,
+        instructions: form.instructions || null,
+        prep_notes: form.prep_notes || null,
         attachments: form.attachments
           .split(",")
           .map((item) => item.trim())
@@ -694,7 +794,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
             placeholder={t("Entrevista con hiring manager")}
           />
         </Field>
-        <Field label={t("Etapa")}>
+        <Field label={t("Etapa del pipeline")}>
           <select
             value={form.stage}
             onChange={(event) => setForm({ ...form, stage: event.target.value })}
@@ -708,10 +808,12 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
             ))}
           </select>
         </Field>
-        <Field label={t("Tipo")}>
+        <Field label={t("Tipo de hito")}>
           <select
-            value={form.kind}
-            onChange={(event) => setForm({ ...form, kind: event.target.value })}
+            value={form.stage_type}
+            onChange={(event) =>
+              setForm({ ...form, stage_type: event.target.value, kind: event.target.value })
+            }
             className={selectClass}
           >
             {(Object.keys(EVENT_KIND_LABEL) as EventKind[]).map((kind) => (
@@ -750,13 +852,159 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
             className="mt-1.5"
           />
         </Field>
-        <Field label={t("Entrevistador")}>
+        <Field label={t("Duración (minutos)")}>
           <Input
-            value={form.interviewer}
-            onChange={(event) => setForm({ ...form, interviewer: event.target.value })}
+            type="number"
+            value={form.duration_min}
+            onChange={(event) => setForm({ ...form, duration_min: event.target.value })}
             className="mt-1.5"
           />
         </Field>
+        <Field label={t("Ubicación / modalidad")}>
+          <Input
+            value={form.location}
+            onChange={(event) => setForm({ ...form, location: event.target.value })}
+            className="mt-1.5"
+          />
+        </Field>
+        <Field label={t("Enlace de la reunión")}>
+          <Input
+            value={form.meeting_url}
+            onChange={(event) => setForm({ ...form, meeting_url: event.target.value })}
+            className="mt-1.5"
+            placeholder="https://…"
+          />
+        </Field>
+      </div>
+
+      {form.stage_type === "test" ? (
+        <div className="mt-5 grid gap-4 rounded-xl border border-border bg-surface-2/40 p-4 md:grid-cols-2">
+          <p className="font-display text-sm font-semibold md:col-span-2">{t("Detalles de la prueba")}</p>
+          <Field label={t("Proveedor de la prueba")}>
+            <Input
+              value={form.provider}
+              onChange={(event) => setForm({ ...form, provider: event.target.value })}
+              className="mt-1.5"
+              placeholder="HackerRank, Codility…"
+            />
+          </Field>
+          <Field label={t("Enlace de la prueba")}>
+            <Input
+              value={form.assessment_url}
+              onChange={(event) => setForm({ ...form, assessment_url: event.target.value })}
+              className="mt-1.5"
+              placeholder="https://…"
+            />
+          </Field>
+          <Field label={t("Instrucciones")}>
+            <Textarea
+              rows={3}
+              value={form.instructions}
+              onChange={(event) => setForm({ ...form, instructions: event.target.value })}
+              className="mt-1.5"
+            />
+          </Field>
+          <Field label={t("Notas de preparación")}>
+            <Textarea
+              rows={3}
+              value={form.prep_notes}
+              onChange={(event) => setForm({ ...form, prep_notes: event.target.value })}
+              className="mt-1.5"
+            />
+          </Field>
+        </div>
+      ) : (
+        <div className="mt-5 grid gap-4 rounded-xl border border-border bg-surface-2/40 p-4 md:grid-cols-2">
+          <p className="font-display text-sm font-semibold md:col-span-2">{t("Detalles de la entrevista")}</p>
+          <Field label={t("Entrevistador")}>
+            <Input
+              value={form.interviewer}
+              onChange={(event) => setForm({ ...form, interviewer: event.target.value })}
+              className="mt-1.5"
+            />
+          </Field>
+          <Field label={t("Puesto del entrevistador")}>
+            <Input
+              value={form.interviewer_role}
+              onChange={(event) => setForm({ ...form, interviewer_role: event.target.value })}
+              className="mt-1.5"
+            />
+          </Field>
+          <Field label={t("Email del entrevistador")}>
+            <Input
+              value={form.interviewer_email}
+              onChange={(event) => setForm({ ...form, interviewer_email: event.target.value })}
+              className="mt-1.5"
+            />
+          </Field>
+          <Field label={t("LinkedIn del entrevistador")}>
+            <Input
+              value={form.interviewer_linkedin}
+              onChange={(event) => setForm({ ...form, interviewer_linkedin: event.target.value })}
+              className="mt-1.5"
+              placeholder="https://linkedin.com/in/…"
+            />
+          </Field>
+          <Field label={t("Zona horaria")}>
+            <Input
+              value={form.timezone}
+              onChange={(event) => setForm({ ...form, timezone: event.target.value })}
+              className="mt-1.5"
+              placeholder="Europe/Madrid"
+            />
+          </Field>
+          <p className="font-display text-sm font-semibold md:col-span-2">{t("Notas posteriores")}</p>
+          <Field label={t("Preguntas realizadas")}>
+            <Textarea
+              rows={3}
+              value={form.questions_asked}
+              onChange={(event) => setForm({ ...form, questions_asked: event.target.value })}
+              className="mt-1.5"
+            />
+          </Field>
+          <Field label={t("Qué fue bien")}>
+            <Textarea
+              rows={3}
+              value={form.went_well}
+              onChange={(event) => setForm({ ...form, went_well: event.target.value })}
+              className="mt-1.5"
+            />
+          </Field>
+          <Field label={t("Qué fue mal")}>
+            <Textarea
+              rows={3}
+              value={form.went_poorly}
+              onChange={(event) => setForm({ ...form, went_poorly: event.target.value })}
+              className="mt-1.5"
+            />
+          </Field>
+          <Field label={t("Salario mencionado")}>
+            <Input
+              value={form.salary_mentioned}
+              onChange={(event) => setForm({ ...form, salary_mentioned: event.target.value })}
+              className="mt-1.5"
+            />
+          </Field>
+          <Field label={t("Próximos pasos")}>
+            <Textarea
+              rows={2}
+              value={form.next_steps}
+              onChange={(event) => setForm({ ...form, next_steps: event.target.value })}
+              className="mt-1.5"
+            />
+          </Field>
+          <Field label={t("Fecha esperada de respuesta")}>
+            <Input
+              type="datetime-local"
+              value={form.expected_response_at}
+              onChange={(event) => setForm({ ...form, expected_response_at: event.target.value })}
+              className="mt-1.5"
+            />
+          </Field>
+        </div>
+      )}
+
+      <div className="mt-5 grid gap-4 md:grid-cols-2">
         <Field label={t("Resultado")}>
           <Input
             value={form.outcome}
@@ -765,7 +1013,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
             placeholder={t("Pasas a la siguiente ronda")}
           />
         </Field>
-        <Field label={t("Notas")}>
+        <Field label={t("Notas generales")}>
           <Textarea
             rows={3}
             value={form.detail}
@@ -782,9 +1030,13 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
           />
         </Field>
       </div>
-      <div className="mt-4 flex items-center gap-2">
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <Button className="gap-1.5" onClick={() => submit(id)}>
           <Save className="size-4" /> {t("Guardar")}
+        </Button>
+        <Button variant="outline" className="gap-1.5" onClick={() => prepareWithAi(form)}>
+          <Sparkles className="size-4" /> {t("Preparar con IA")}
         </Button>
         <Button
           variant="ghost"
@@ -849,6 +1101,13 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
                     </div>
                     <div className="flex items-center gap-1">
                       <button
+                        onClick={() => prepareWithAi(rowToForm(row))}
+                        aria-label={t("Preparar con IA")}
+                        className="text-muted-foreground hover:text-violet"
+                      >
+                        <Sparkles className="size-3.5" />
+                      </button>
+                      <button
                         onClick={() => move(index, -1)}
                         aria-label={t("Subir etapa")}
                         className="text-muted-foreground hover:text-foreground"
@@ -891,7 +1150,20 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
                       {PROCESS_STATUS_LABEL[row.status ?? "done"] ?? row.status}
                     </Pill>
                     {row.interviewer && <Pill>{t("Con {name}", { name: row.interviewer })}</Pill>}
+                    {row.provider && <Pill>{row.provider}</Pill>}
                   </div>
+                  {(row.meeting_url || row.assessment_url) && (
+                    <p className="mt-3 text-sm">
+                      <a
+                        href={row.meeting_url ?? row.assessment_url ?? "#"}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-violet hover:underline"
+                      >
+                        <Link2 className="size-3.5" /> {t("Abrir enlace")}
+                      </a>
+                    </p>
+                  )}
                   {row.detail && (
                     <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed">{row.detail}</p>
                   )}
@@ -899,6 +1171,24 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
                     <p className="mt-2 text-sm">
                       <span className="text-muted-foreground">{t("Resultado: ")}</span>
                       {row.outcome}
+                    </p>
+                  )}
+                  {row.went_well && (
+                    <p className="mt-2 text-sm">
+                      <span className="text-muted-foreground">{t("Qué fue bien: ")}</span>
+                      {row.went_well}
+                    </p>
+                  )}
+                  {row.went_poorly && (
+                    <p className="mt-2 text-sm">
+                      <span className="text-muted-foreground">{t("Qué fue mal: ")}</span>
+                      {row.went_poorly}
+                    </p>
+                  )}
+                  {row.next_steps && (
+                    <p className="mt-2 text-sm">
+                      <span className="text-muted-foreground">{t("Próximos pasos: ")}</span>
+                      {row.next_steps}
                     </p>
                   )}
                   {(row.attachments ?? []).length > 0 && (
@@ -919,6 +1209,8 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
     </div>
   );
 }
+
+
 
 /* -------------------------------- Contacts -------------------------------- */
 
