@@ -20,6 +20,8 @@ import { AlertsBell } from "@/components/alerts-bell";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
 import { cn } from "@/lib/utils";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { useT } from "@/lib/i18n/provider";
 
 const NAV = [
   { to: "/dashboard", label: "Inicio", icon: Home },
@@ -36,6 +38,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { user } = useSession();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const t = useT();
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -43,7 +46,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   const email = user?.email ?? "";
-  const displayName = email.split("@")[0] ?? "Cuenta";
+  const displayName = email.split("@")[0] ?? t("Cuenta");
 
   function navLink(item: { to: string; label: string; icon: typeof Home }) {
     const active = pathname === item.to || pathname.startsWith(`${item.to}/`);
@@ -61,7 +64,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
       >
         <Icon className={cn("size-4", active ? "text-sidebar-primary" : "opacity-70")} />
-        {item.label}
+        {t(item.label)}
       </Link>
     );
   }
@@ -84,14 +87,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           className="w-full justify-start gap-2 rounded-xl"
         >
           <Plus className="size-4" />
-          Nueva candidatura
+          {t("Nueva candidatura")}
         </Button>
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 px-3">{NAV.map(navLink)}</nav>
 
       <div className="space-y-1 p-3">
-        {navLink({ to: "/settings", label: "Ajustes", icon: Settings })}
+        <LanguageSwitcher variant="sidebar" />
+        {navLink({ to: "/settings", label: t("Ajustes"), icon: Settings })}
         <div className="flex items-center gap-3 rounded-xl px-3 py-2">
           <span className="flex size-8 items-center justify-center rounded-full bg-sidebar-accent text-xs font-semibold text-sidebar-accent-foreground">
             {displayName.slice(0, 2).toUpperCase()}
@@ -102,7 +106,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
           <button
             onClick={signOut}
-            aria-label="Cerrar sesión"
+            aria-label={t("Cerrar sesión")}
             className="rounded-lg p-1.5 text-sidebar-foreground/55 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
           >
             <LogOut className="size-4" />
@@ -122,7 +126,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
             className="absolute inset-0 bg-foreground/30"
-            aria-label="Cerrar menú"
+            aria-label={t("Cerrar menú")}
             onClick={() => setMobileOpen(false)}
           />
           <div className="absolute inset-y-0 left-0 w-72">
@@ -130,7 +134,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <button
               onClick={() => setMobileOpen(false)}
               className="absolute right-3 top-5 rounded-lg p-1.5 text-sidebar-foreground/70"
-              aria-label="Cerrar"
+              aria-label={t("Cerrar")}
             >
               <X className="size-4" />
             </button>
@@ -142,7 +146,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-20 flex items-center gap-2 bg-background/80 px-4 py-3 backdrop-blur md:px-8">
           <button
             onClick={() => setMobileOpen(true)}
-            aria-label="Abrir menú"
+            aria-label={t("Abrir menú")}
             className="rounded-xl border border-border p-2 lg:hidden"
           >
             <Menu className="size-4" />
@@ -150,17 +154,18 @@ export function AppShell({ children }: { children: ReactNode }) {
           <span className="font-display text-sm font-semibold lg:hidden">NextRound</span>
           <div className="ml-auto flex items-center gap-1.5">
             <AlertsBell />
+            <LanguageSwitcher />
             <Button
               variant="outline"
               size="sm"
               className="hidden gap-1.5 rounded-xl sm:inline-flex"
               onClick={() => setAiOpen(true)}
             >
-              Pregunta a NextRound AI
+              {t("Pregunta a NextRound AI")}
             </Button>
             <Button size="sm" className="gap-1.5 rounded-xl lg:hidden" onClick={() => setNewOpen(true)}>
               <Plus className="size-3.5" />
-              Nueva
+              {t("Nueva")}
             </Button>
           </div>
         </header>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useT } from "@/lib/i18n/provider";
 import { Link, createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
 import {
   ArrowLeft,
@@ -83,6 +84,7 @@ export const Route = createFileRoute("/_authenticated/applications/$id")({
 });
 
 function ApplicationDetail() {
+  const t = useT();
   const { id } = useParams({ from: "/_authenticated/applications/$id" });
   const navigate = useNavigate();
   const { data: app, isLoading } = useApplication(id);
@@ -102,11 +104,11 @@ function ApplicationDetail() {
   if (!app) {
     return (
       <EmptyState
-        title="Candidatura no encontrada"
-        description="Puede que se haya eliminado."
+        title={t("Candidatura no encontrada")}
+        description={t("Puede que se haya eliminado.")}
         action={
           <Button asChild variant="outline">
-            <Link to="/applications">Volver a candidaturas</Link>
+            <Link to="/applications">{t("Volver a candidaturas")}</Link>
           </Button>
         }
       />
@@ -125,7 +127,7 @@ function ApplicationDetail() {
         to="/applications"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
-        <ArrowLeft className="size-4" /> Candidaturas
+        <ArrowLeft className="size-4" /> {t("Candidaturas")}
       </Link>
 
       <header className="space-y-7">
@@ -134,7 +136,7 @@ function ApplicationDetail() {
             <CompanyMark name={app.companies?.name ?? app.role_title} size="lg" />
             <div>
               <p className="font-display text-sm font-medium text-muted-foreground">
-                {app.companies?.name ?? "Sin empresa"}
+                {app.companies?.name ?? t("Sin empresa")}
               </p>
               <h1 className="mt-0.5 font-display text-3xl font-semibold leading-tight tracking-tight">
                 {app.role_title}
@@ -150,9 +152,10 @@ function ApplicationDetail() {
                   .join(" · ")}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Enviada el {fmtDate(app.applied_at)}
-                {days !== null ? ` · hace ${days} días` : ""} · Etapa actual:{" "}
-                <span className="text-foreground">{STAGE_META[app.stage].label}</span>
+                {t("Enviada el {date}", { date: fmtDate(app.applied_at) })}
+                {days !== null ? t(" · hace {n} días", { n: days }) : ""}
+                {t(" · Etapa actual: ")}
+                <span className="text-foreground">{t(STAGE_META[app.stage].label)}</span>
               </p>
             </div>
           </div>
@@ -163,12 +166,12 @@ function ApplicationDetail() {
               onChange={(event) =>
                 moveStage.mutate({ application: app, to: event.target.value as Stage })
               }
-              aria-label="Cambiar etapa"
+              aria-label={t("Cambiar etapa")}
               className="h-9 rounded-xl border border-input bg-surface px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
             >
               {STAGES.map((stage) => (
                 <option key={stage} value={stage}>
-                  {STAGE_META[stage].label}
+                  {t(STAGE_META[stage].label)}
                 </option>
               ))}
             </select>
@@ -186,10 +189,10 @@ function ApplicationDetail() {
                 })
               }
             >
-              <Download className="size-3.5" /> Resumen PDF
+              <Download className="size-3.5" /> {t("Resumen PDF")}
             </Button>
             <Button variant="outline" size="sm" className="gap-1.5 rounded-xl" onClick={() => setEditOpen(true)}>
-              <Pencil className="size-3.5" /> Editar
+              <Pencil className="size-3.5" /> {t("Editar")}
             </Button>
             <Button
               variant="ghost"
@@ -197,7 +200,7 @@ function ApplicationDetail() {
               className="gap-1.5 text-danger hover:text-danger"
               onClick={async () => {
                 await deleteApplication.mutateAsync(app.id);
-                toast.success("Candidatura eliminada");
+                toast.success(t("Candidatura eliminada"));
                 navigate({ to: "/applications" });
               }}
             >
@@ -208,7 +211,7 @@ function ApplicationDetail() {
 
         <div className="max-w-2xl">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Progreso del proceso</span>
+            <span>{t("Progreso del proceso")}</span>
             <span className="tabular-nums">{progress}%</span>
           </div>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-2">
@@ -226,7 +229,7 @@ function ApplicationDetail() {
                     : "text-muted-foreground hover:bg-accent",
                 )}
               >
-                {STAGE_META[stage].short}
+                {t(STAGE_META[stage].short)}
               </button>
             ))}
           </div>
@@ -235,7 +238,7 @@ function ApplicationDetail() {
         {action && (
           <div className="rounded-2xl bg-surface p-5 shadow-soft">
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Siguiente mejor acción
+              {t("Siguiente mejor acción")}
             </p>
             <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -249,22 +252,22 @@ function ApplicationDetail() {
                     nextActionTone(action.tone),
                   )}
                 >
-                  {STAGE_META[app.stage].label}
+                  {t(STAGE_META[app.stage].label)}
                 </span>
                 <Button size="sm" className="gap-1.5 rounded-xl" onClick={() => setTab("process")}>
-                  <Sparkles className="size-3.5" /> Preparar con IA
+                  <Sparkles className="size-3.5" /> {t("Preparar con IA")}
                 </Button>
                 {app.candidate_portal_url && (
                   <Button asChild size="sm" variant="outline" className="gap-1.5 rounded-xl">
                     <a href={app.candidate_portal_url} target="_blank" rel="noreferrer">
-                      <KeyRound className="size-3.5" /> Portal del candidato
+                      <KeyRound className="size-3.5" /> {t("Portal del candidato")}
                     </a>
                   </Button>
                 )}
                 {app.job_url && (
                   <Button asChild size="sm" variant="ghost" className="gap-1.5">
                     <a href={app.job_url} target="_blank" rel="noreferrer">
-                      Ver oferta <ExternalLink className="size-3.5" />
+                      {t("Ver oferta")} <ExternalLink className="size-3.5" />
                     </a>
                   </Button>
                 )}
@@ -276,60 +279,60 @@ function ApplicationDetail() {
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="scrollbar-slim max-w-full overflow-x-auto">
-          <TabsTrigger value="overview">Resumen</TabsTrigger>
-          <TabsTrigger value="job">Oferta</TabsTrigger>
-          <TabsTrigger value="process">Proceso</TabsTrigger>
-          <TabsTrigger value="documents">Documentos</TabsTrigger>
-          <TabsTrigger value="notes">Notas</TabsTrigger>
+          <TabsTrigger value="overview">{t("Resumen")}</TabsTrigger>
+          <TabsTrigger value="job">{t("Oferta")}</TabsTrigger>
+          <TabsTrigger value="process">{t("Proceso")}</TabsTrigger>
+          <TabsTrigger value="documents">{t("Documentos")}</TabsTrigger>
+          <TabsTrigger value="notes">{t("Notas")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-7 space-y-8">
           <dl className="grid gap-x-8 gap-y-6 sm:grid-cols-3">
-            <Detail label="Empresa" value={app.companies?.name ?? "—"} />
-            <Detail label="Puesto" value={app.role_title} />
-            <Detail label="Ubicación" value={app.location ?? "—"} />
+            <Detail label={t("Empresa")} value={app.companies?.name ?? "—"} />
+            <Detail label={t("Puesto")} value={app.role_title} />
+            <Detail label={t("Ubicación")} value={app.location ?? "—"} />
             <Detail
-              label="Salario"
+              label={t("Salario")}
               value={formatSalary(app.salary_min, app.salary_max, app.currency ?? "EUR")}
             />
-            <Detail label="Tipo de empleo" value={app.employment_type ?? "—"} />
-            <Detail label="Enviada el" value={fmtDate(app.applied_at)} />
+            <Detail label={t("Tipo de empleo")} value={app.employment_type ?? "—"} />
+            <Detail label={t("Enviada el")} value={fmtDate(app.applied_at)} />
             <Detail
-              label="Días desde el envío"
-              value={days === null ? "Sin enviar" : `${days} días`}
+              label={t("Días desde el envío")}
+              value={days === null ? t("Sin enviar") : t("{n} días", { n: days })}
             />
-            <Detail label="Etapa actual" value={STAGE_META[app.stage].label} />
+            <Detail label={t("Etapa actual")} value={t(STAGE_META[app.stage].label)} />
             <Detail
-              label="Próxima acción"
+              label={t("Próxima acción")}
               value={
                 app.next_action
                   ? `${app.next_action}${
                       app.next_action_at ? ` · ${relativeDay(app.next_action_at)}` : ""
                     }`
-                  : "Sin definir"
+                  : t("Sin definir")
               }
             />
             <Detail
-              label="Portal del candidato"
+              label={t("Portal del candidato")}
               value={app.candidate_portal_url ?? "—"}
               href={app.candidate_portal_url}
             />
-            <Detail label="Email de acceso" value={app.portal_username ?? "—"} />
+            <Detail label={t("Email de acceso")} value={app.portal_username ?? "—"} />
             <Detail
-              label="CV enviado"
+              label={t("CV enviado")}
               value={
                 cvLink?.documents
                   ? `${cvLink.documents.name}${
                       cvLink.documents.version ? ` · ${cvLink.documents.version}` : ""
                     }`
-                  : "Sin CV vinculado"
+                  : t("Sin CV vinculado")
               }
             />
           </dl>
 
           {app.description && (
             <div className="max-w-3xl">
-              <h3 className="font-display text-base font-semibold tracking-tight">Contexto</h3>
+              <h3 className="font-display text-base font-semibold tracking-tight">{t("Contexto")}</h3>
               <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
                 {app.description}
               </p>
@@ -373,13 +376,14 @@ function Detail({
   value: string;
   href?: string | null;
 }) {
+  const t = useT();
   return (
     <div>
       <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd className="mt-1 break-words text-sm">
         {href ? (
           <a href={href} target="_blank" rel="noreferrer" className="text-violet hover:underline">
-            Abrir portal
+            {t("Abrir portal")}
           </a>
         ) : (
           value
@@ -391,6 +395,7 @@ function Detail({
 
 
 function NotesTab({ applicationId }: { applicationId: string }) {
+  const t = useT();
   const { data: notes = [] } = useNotes();
   const saveNote = useSaveNote();
   const deleteNote = useDeleteNote();
@@ -399,12 +404,12 @@ function NotesTab({ applicationId }: { applicationId: string }) {
 
   return (
     <div className="space-y-5">
-      <SectionCard title="Nueva nota">
+      <SectionCard title={t("Nueva nota")}>
         <Textarea
           value={body}
           onChange={(event) => setBody(event.target.value)}
           rows={3}
-          placeholder="Preguntas para la próxima entrevista, feedback recibido…"
+          placeholder={t("Preguntas para la próxima entrevista, feedback recibido…")}
         />
         <Button
           className="mt-3 gap-1.5"
@@ -414,25 +419,25 @@ function NotesTab({ applicationId }: { applicationId: string }) {
               values: { application_id: applicationId, body: body.trim() },
             });
             setBody("");
-            toast.success("Nota guardada");
+            toast.success(t("Nota guardada"));
           }}
         >
-          <Plus className="size-4" /> Guardar nota
+          <Plus className="size-4" /> {t("Guardar nota")}
         </Button>
       </SectionCard>
 
       {mine.length === 0 ? (
-        <EmptyState title="Sin notas" description="Todo lo que apuntes aparecerá aquí." />
+        <EmptyState title={t("Sin notas")} description={t("Todo lo que apuntes aparecerá aquí.")} />
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {mine.map((note) => (
-            <SectionCard key={note.id} title={note.title ?? "Nota"}>
+            <SectionCard key={note.id} title={note.title ?? t("Nota")}>
               <p className="whitespace-pre-wrap text-sm leading-relaxed">{note.body}</p>
               <button
                 onClick={() => deleteNote.mutate(note.id)}
                 className="mt-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-danger"
               >
-                <Trash2 className="size-3.5" /> Eliminar
+                <Trash2 className="size-3.5" /> {t("Eliminar")}
               </button>
             </SectionCard>
           ))}
@@ -443,6 +448,7 @@ function NotesTab({ applicationId }: { applicationId: string }) {
 }
 
 function TasksTab({ applicationId }: { applicationId: string }) {
+  const t = useT();
   const { data: tasks = [] } = useTasks();
   const saveTask = useSaveTask();
   const deleteTask = useDeleteTask();
@@ -452,12 +458,12 @@ function TasksTab({ applicationId }: { applicationId: string }) {
 
   return (
     <div className="space-y-5">
-      <SectionCard title="Nueva tarea">
+      <SectionCard title={t("Nueva tarea")}>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
-            placeholder="Preparar caso práctico"
+            placeholder={t("Preparar caso práctico")}
           />
           <Input
             type="date"
@@ -480,13 +486,13 @@ function TasksTab({ applicationId }: { applicationId: string }) {
               setDue("");
             }}
           >
-            <Plus className="size-4" /> Añadir
+            <Plus className="size-4" /> {t("Añadir")}
           </Button>
         </div>
       </SectionCard>
 
       {mine.length === 0 ? (
-        <EmptyState title="Sin tareas" description="Divide la preparación en pasos concretos." />
+        <EmptyState title={t("Sin tareas")} description={t("Divide la preparación en pasos concretos.")} />
       ) : (
         <SectionCard bodyClassName="p-0">
           <ul className="divide-y divide-border">
@@ -494,7 +500,7 @@ function TasksTab({ applicationId }: { applicationId: string }) {
               <li key={task.id} className="flex items-center gap-3 px-5 py-3">
                 <button
                   onClick={() => saveTask.mutate({ id: task.id, values: { done: !task.done } })}
-                  aria-label="Cambiar estado"
+                  aria-label={t("Cambiar estado")}
                   className={task.done ? "text-success" : "text-muted-foreground"}
                 >
                   {task.done ? (
@@ -515,7 +521,7 @@ function TasksTab({ applicationId }: { applicationId: string }) {
                 </span>
                 <button
                   onClick={() => deleteTask.mutate(task.id)}
-                  aria-label="Eliminar tarea"
+                  aria-label={t("Eliminar tarea")}
                   className="text-muted-foreground hover:text-danger"
                 >
                   <Trash2 className="size-3.5" />
@@ -530,6 +536,7 @@ function TasksTab({ applicationId }: { applicationId: string }) {
 }
 
 function EventsTab({ applicationId }: { applicationId: string }) {
+  const t = useT();
   const { data: events = [] } = useCalendar();
   const saveEvent = useSaveEvent();
   const deleteEvent = useDeleteEvent();
@@ -540,12 +547,12 @@ function EventsTab({ applicationId }: { applicationId: string }) {
 
   return (
     <div className="space-y-5">
-      <SectionCard title="Agendar">
+      <SectionCard title={t("Agendar")}>
         <div className="grid gap-3 sm:grid-cols-4">
           <Input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
-            placeholder="Entrevista con hiring manager"
+            placeholder={t("Entrevista con hiring manager")}
             className="sm:col-span-2"
           />
           <select
@@ -555,7 +562,7 @@ function EventsTab({ applicationId }: { applicationId: string }) {
           >
             {(Object.keys(EVENT_KIND_LABEL) as EventKind[]).map((value) => (
               <option key={value} value={value}>
-                {EVENT_KIND_LABEL[value]}
+                {t(EVENT_KIND_LABEL[value])}
               </option>
             ))}
           </select>
@@ -569,7 +576,7 @@ function EventsTab({ applicationId }: { applicationId: string }) {
           className="mt-3 gap-1.5"
           onClick={async () => {
             if (!title.trim() || !startsAt) {
-              toast.error("Añade título y fecha.");
+              toast.error(t("Añade título y fecha."));
               return;
             }
             await saveEvent.mutateAsync({
@@ -582,28 +589,28 @@ function EventsTab({ applicationId }: { applicationId: string }) {
             });
             setTitle("");
             setStartsAt("");
-            toast.success("Evento agendado");
+            toast.success(t("Evento agendado"));
           }}
         >
-          <CalendarPlus className="size-4" /> Agendar
+          <CalendarPlus className="size-4" /> {t("Agendar")}
         </Button>
       </SectionCard>
 
       {mine.length === 0 ? (
-        <EmptyState title="Sin entrevistas" description="Agenda la próxima cita del proceso." />
+        <EmptyState title={t("Sin entrevistas")} description={t("Agenda la próxima cita del proceso.")} />
       ) : (
         <SectionCard bodyClassName="p-0">
           <ul className="divide-y divide-border">
             {mine.map((event) => (
               <li key={event.id} className="flex items-center gap-4 px-5 py-3.5">
-                <Pill tone={EVENT_KIND_TONE[event.kind]}>{EVENT_KIND_LABEL[event.kind]}</Pill>
+                <Pill tone={EVENT_KIND_TONE[event.kind]}>{t(EVENT_KIND_LABEL[event.kind])}</Pill>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{event.title}</p>
                   <p className="text-xs text-muted-foreground">{fmtDateTime(event.starts_at)}</p>
                 </div>
                 <button
                   onClick={() => deleteEvent.mutate(event.id)}
-                  aria-label="Eliminar evento"
+                  aria-label={t("Eliminar evento")}
                   className="text-muted-foreground hover:text-danger"
                 >
                   <Trash2 className="size-3.5" />

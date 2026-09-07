@@ -11,7 +11,9 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { STAGE_META } from "@/lib/domain";
+import { useT } from "@/lib/i18n/provider";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,40 +37,61 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const FEATURES = [
-  {
-    icon: KanbanSquare,
-    title: "Pipeline visual",
-    body: "Mueve cada candidatura entre etapas y ve de un vistazo dónde está atascado el proceso.",
-  },
-  {
-    icon: CalendarDays,
-    title: "Calendario propio",
-    body: "Entrevistas, pruebas técnicas y fechas límite en una vista mensual clara.",
-  },
-  {
-    icon: FileText,
-    title: "CV Vault",
-    body: "Guarda versiones de tu CV y cartas, y marca la que usas por defecto.",
-  },
-  {
-    icon: StickyNote,
-    title: "Notas con contexto",
-    body: "Feedback, preguntas y aprendizajes vinculados a la candidatura correcta.",
-  },
-  {
-    icon: CheckSquare,
-    title: "Tareas con fecha",
-    body: "Divide la preparación en pasos concretos y no dejes nada colgando.",
-  },
-  {
-    icon: BarChart3,
-    title: "Analytics honestos",
-    body: "Tasa de respuesta, conversión a entrevista y actividad semanal real.",
-  },
-];
+function useFeatures() {
+  const t = useT();
+  return [
+    {
+      icon: KanbanSquare,
+      title: t("Pipeline visual"),
+      body: t("Mueve cada candidatura entre etapas y ve de un vistazo dónde está atascado el proceso."),
+    },
+    {
+      icon: CalendarDays,
+      title: t("Calendario propio"),
+      body: t("Entrevistas, pruebas técnicas y fechas límite en una vista mensual clara."),
+    },
+    {
+      icon: FileText,
+      title: t("CV Vault"),
+      body: t("Guarda versiones de tu CV y cartas, y marca la que usas por defecto."),
+    },
+    {
+      icon: StickyNote,
+      title: t("Notas con contexto"),
+      body: t("Feedback, preguntas y aprendizajes vinculados a la candidatura correcta."),
+    },
+    {
+      icon: CheckSquare,
+      title: t("Tareas con fecha"),
+      body: t("Divide la preparación en pasos concretos y no dejes nada colgando."),
+    },
+    {
+      icon: BarChart3,
+      title: t("Analytics honestos"),
+      body: t("Tasa de respuesta, conversión a entrevista y actividad semanal real."),
+    },
+  ];
+}
 
 function Landing() {
+  const t = useT();
+  const FEATURES = useFeatures();
+
+  const pipelineStages = [
+    ["saved", t("Guardadas"), 4],
+    ["applied", t("Enviadas"), 9],
+    ["screening", t("Screening"), 3],
+    ["interview", t("Entrevista"), 2],
+    ["technical", t("Técnica"), 1],
+    ["offer", t("Oferta"), 1],
+  ] as const;
+
+  const steps = [
+    ["1", t("Registra"), t("Añade la candidatura con puesto, empresa, salario y origen.")],
+    ["2", t("Sigue"), t("Mueve la etapa, agenda entrevistas y apunta tu próxima acción.")],
+    ["3", t("Aprende"), t("Revisa tus métricas y ajusta dónde inviertes el esfuerzo.")],
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur">
@@ -80,12 +103,13 @@ function Landing() {
             <span className="font-display text-sm font-semibold">NextRound</span>
           </div>
           <div className="flex items-center gap-2">
+            <LanguageSwitcher />
             <Button asChild variant="ghost" size="sm">
-              <Link to="/auth">Entrar</Link>
+              <Link to="/auth">{t("Entrar")}</Link>
             </Button>
             <Button asChild size="sm" className="gap-1.5">
               <Link to="/auth">
-                Empezar gratis <ArrowRight className="size-3.5" />
+                {t("Empezar gratis")} <ArrowRight className="size-3.5" />
               </Link>
             </Button>
           </div>
@@ -97,41 +121,33 @@ function Landing() {
           <div className="grid-paper pointer-events-none absolute inset-0 opacity-[0.35]" />
           <div className="relative mx-auto max-w-6xl px-5 py-20 md:px-8 md:py-28">
             <span className="inline-flex items-center gap-2 rounded-full border border-gold/35 bg-gold/12 px-3 py-1 text-xs font-medium text-gold-foreground">
-              <ShieldCheck className="size-3.5" /> Solo tú gestionas tu futuro
+              <ShieldCheck className="size-3.5" /> {t("Solo tú gestionas tu futuro")}
             </span>
             <h1 className="mt-6 max-w-3xl font-display text-4xl font-semibold leading-[1.08] tracking-tight md:text-6xl">
-              Tu búsqueda de empleo, por fin en un solo sitio.
+              {t("Tu búsqueda de empleo, por fin en un solo sitio.")}
             </h1>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
-              NextRound reúne candidaturas, entrevistas, versiones de tu CV, notas y tareas en un
-              panel que sí entiende cómo se busca trabajo de verdad.
+              {t(
+                "NextRound reúne candidaturas, entrevistas, versiones de tu CV, notas y tareas en un panel que sí entiende cómo se busca trabajo de verdad.",
+              )}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button asChild size="lg" className="gap-2">
                 <Link to="/auth">
-                  Crear mi cuenta <ArrowRight className="size-4" />
+                  {t("Crear mi cuenta")} <ArrowRight className="size-4" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link to="/auth">Ya tengo cuenta</Link>
+                <Link to="/auth">{t("Ya tengo cuenta")}</Link>
               </Button>
             </div>
 
             <div className="mt-14 rounded-2xl border border-border bg-surface p-4 shadow-lift md:p-6">
               <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Tu pipeline
+                {t("Tu pipeline")}
               </p>
               <div className="scrollbar-slim mt-4 flex gap-3 overflow-x-auto pb-2">
-                {(
-                  [
-                    ["saved", "Guardadas", 4],
-                    ["applied", "Enviadas", 9],
-                    ["screening", "Screening", 3],
-                    ["interview", "Entrevista", 2],
-                    ["technical", "Técnica", 1],
-                    ["offer", "Oferta", 1],
-                  ] as const
-                ).map(([stage, label, count]) => (
+                {pipelineStages.map(([stage, label, count]) => (
                   <div
                     key={stage}
                     className="w-40 shrink-0 rounded-xl border border-border bg-surface-2 p-3"
@@ -163,11 +179,12 @@ function Landing() {
 
         <section className="mx-auto max-w-6xl px-5 py-20 md:px-8">
           <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">
-            Todo lo que la hoja de cálculo no hace
+            {t("Todo lo que la hoja de cálculo no hace")}
           </h2>
           <p className="mt-3 max-w-xl text-sm text-muted-foreground md:text-base">
-            Seis piezas que trabajan juntas para que no pierdas ninguna oportunidad por falta de
-            seguimiento.
+            {t(
+              "Seis piezas que trabajan juntas para que no pierdas ninguna oportunidad por falta de seguimiento.",
+            )}
           </p>
           <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((feature) => {
@@ -192,11 +209,7 @@ function Landing() {
 
         <section className="border-y border-border bg-surface-2/60">
           <div className="mx-auto grid max-w-6xl gap-8 px-5 py-16 md:grid-cols-3 md:px-8">
-            {[
-              ["1", "Registra", "Añade la candidatura con puesto, empresa, salario y origen."],
-              ["2", "Sigue", "Mueve la etapa, agenda entrevistas y apunta tu próxima acción."],
-              ["3", "Aprende", "Revisa tus métricas y ajusta dónde inviertes el esfuerzo."],
-            ].map(([step, title, body]) => (
+            {steps.map(([step, title, body]) => (
               <div key={step}>
                 <span className="font-display text-4xl font-semibold text-gold">{step}</span>
                 <h3 className="mt-2 font-display text-lg font-semibold">{title}</h3>
@@ -208,14 +221,14 @@ function Landing() {
 
         <section className="mx-auto max-w-6xl px-5 py-20 text-center md:px-8">
           <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">
-            La próxima ronda empieza mejor organizada
+            {t("La próxima ronda empieza mejor organizada")}
           </h2>
           <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground md:text-base">
-            Crea tu cuenta con email y empieza a seguir tus procesos en minutos.
+            {t("Crea tu cuenta con email y empieza a seguir tus procesos en minutos.")}
           </p>
           <Button asChild size="lg" className="mt-7 gap-2">
             <Link to="/auth">
-              Empezar ahora <ArrowRight className="size-4" />
+              {t("Empezar ahora")} <ArrowRight className="size-4" />
             </Link>
           </Button>
         </section>
@@ -223,9 +236,9 @@ function Landing() {
 
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-8 text-xs text-muted-foreground md:flex-row md:px-8">
-          <p>NextRound · Tu centro de mando para la búsqueda de empleo.</p>
+          <p>{t("NextRound · Tu centro de mando para la búsqueda de empleo.")}</p>
           <Link to="/auth" className="hover:text-foreground">
-            Entrar
+            {t("Entrar")}
           </Link>
         </div>
       </footer>

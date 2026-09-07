@@ -54,6 +54,7 @@ import {
   type TimelineRow,
 } from "@/lib/domain";
 import { fmtDate, fmtDateTime } from "@/lib/format";
+import { useT } from "@/lib/i18n/provider";
 
 const selectClass =
   "mt-1.5 h-10 w-full rounded-lg border border-input bg-surface px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40";
@@ -86,6 +87,7 @@ function toLocalInput(value: string | null | undefined): string {
 /* ---------------------------- Job Description ---------------------------- */
 
 export function JobDescriptionTab({ application }: { application: ApplicationWithCompany }) {
+  const t = useT();
   const save = useSaveApplication();
   const [form, setForm] = useState({
     description: application.description ?? "",
@@ -104,34 +106,34 @@ export function JobDescriptionTab({ application }: { application: ApplicationWit
   return (
     <div className="space-y-5">
       <SectionCard
-        title="Descripción de la oferta"
+        title={t("Descripción de la oferta")}
         subtitle={
           application.jd_saved_at
-            ? `Guardada el ${fmtDate(application.jd_saved_at)}`
-            : "Aún no has guardado la oferta"
+            ? t("Guardada el {date}", { date: fmtDate(application.jd_saved_at) })
+            : t("Aún no has guardado la oferta")
         }
         action={
           application.job_url ? (
             <Button asChild variant="outline" size="sm" className="gap-1.5">
               <a href={application.job_url} target="_blank" rel="noreferrer">
-                Oferta original <ExternalLink className="size-3.5" />
+                {t("Oferta original")} <ExternalLink className="size-3.5" />
               </a>
             </Button>
           ) : undefined
         }
       >
         <div className="grid gap-4">
-          <Field label="Descripción">
+          <Field label={t("Descripción")}>
             <Textarea
               rows={5}
               value={form.description}
               onChange={(event) => set("description")(event.target.value)}
               className="mt-1.5"
-              placeholder="Pega aquí la oferta completa para conservarla aunque desaparezca."
+              placeholder={t("Pega aquí la oferta completa para conservarla aunque desaparezca.")}
             />
           </Field>
           <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Responsabilidades">
+            <Field label={t("Responsabilidades")}>
               <Textarea
                 rows={5}
                 value={form.jd_responsibilities}
@@ -139,7 +141,7 @@ export function JobDescriptionTab({ application }: { application: ApplicationWit
                 className="mt-1.5"
               />
             </Field>
-            <Field label="Requisitos">
+            <Field label={t("Requisitos")}>
               <Textarea
                 rows={5}
                 value={form.jd_requirements}
@@ -147,7 +149,7 @@ export function JobDescriptionTab({ application }: { application: ApplicationWit
                 className="mt-1.5"
               />
             </Field>
-            <Field label="Cualificaciones preferidas">
+            <Field label={t("Cualificaciones preferidas")}>
               <Textarea
                 rows={4}
                 value={form.jd_preferred}
@@ -155,7 +157,7 @@ export function JobDescriptionTab({ application }: { application: ApplicationWit
                 className="mt-1.5"
               />
             </Field>
-            <Field label="Beneficios">
+            <Field label={t("Beneficios")}>
               <Textarea
                 rows={4}
                 value={form.jd_benefits}
@@ -163,7 +165,7 @@ export function JobDescriptionTab({ application }: { application: ApplicationWit
                 className="mt-1.5"
               />
             </Field>
-            <Field label="Habilidades (separadas por comas)">
+            <Field label={t("Habilidades (separadas por comas)")}>
               <Input
                 value={form.jd_skills}
                 onChange={(event) => set("jd_skills")(event.target.value)}
@@ -171,7 +173,7 @@ export function JobDescriptionTab({ application }: { application: ApplicationWit
                 placeholder="Figma, Design Systems, Research"
               />
             </Field>
-            <Field label="Salario indicado en la oferta">
+            <Field label={t("Salario indicado en la oferta")}>
               <Input
                 value={form.jd_salary_text}
                 onChange={(event) => set("jd_salary_text")(event.target.value)}
@@ -179,7 +181,7 @@ export function JobDescriptionTab({ application }: { application: ApplicationWit
                 placeholder="55.000 – 65.000 EUR brutos/año"
               />
             </Field>
-            <Field label="URL de la oferta original">
+            <Field label={t("URL de la oferta original")}>
               <Input
                 value={form.job_url}
                 onChange={(event) => set("job_url")(event.target.value)}
@@ -209,15 +211,15 @@ export function JobDescriptionTab({ application }: { application: ApplicationWit
                 jd_saved_at: new Date().toISOString(),
               },
             });
-            toast.success("Oferta guardada");
+            toast.success(t("Oferta guardada"));
           }}
         >
-          <Save className="size-4" /> Guardar oferta
+          <Save className="size-4" /> {t("Guardar oferta")}
         </Button>
       </SectionCard>
 
       {(application.jd_skills ?? []).length > 0 && (
-        <SectionCard title="Habilidades pedidas">
+        <SectionCard title={t("Habilidades pedidas")}>
           <div className="flex flex-wrap gap-1.5">
             {(application.jd_skills ?? []).map((skill) => (
               <Pill key={skill}>{skill}</Pill>
@@ -232,6 +234,7 @@ export function JobDescriptionTab({ application }: { application: ApplicationWit
 /* ------------------------------ Application ------------------------------ */
 
 export function ApplicationInfoTab({ application }: { application: ApplicationWithCompany }) {
+  const t = useT();
   const save = useSaveApplication();
   const { data: links = [] } = useApplicationDocuments(application.id);
   const cvLink = links.find((link) => link.role === "cv" || link.documents?.kind === "cv");
@@ -255,9 +258,9 @@ export function ApplicationInfoTab({ application }: { application: ApplicationWi
 
   return (
     <div className="space-y-5">
-      <SectionCard title="Application Information" subtitle="Datos del envío de la candidatura">
+      <SectionCard title="Application Information" subtitle={t("Datos del envío de la candidatura")}>
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Fecha de envío">
+          <Field label={t("Fecha de envío")}>
             <Input
               type="date"
               value={form.applied_at}
@@ -265,13 +268,13 @@ export function ApplicationInfoTab({ application }: { application: ApplicationWi
               className="mt-1.5"
             />
           </Field>
-          <Field label="Tipo de candidatura">
+          <Field label={t("Tipo de candidatura")}>
             <select
               value={form.application_type}
               onChange={(event) => set("application_type")(event.target.value)}
               className={selectClass}
             >
-              <option value="">Sin definir</option>
+              <option value="">{t("Sin definir")}</option>
               {APPLICATION_TYPES.map((type) => (
                 <option key={type} value={type}>
                   {type}
@@ -279,13 +282,13 @@ export function ApplicationInfoTab({ application }: { application: ApplicationWi
               ))}
             </select>
           </Field>
-          <Field label="Tipo de empleo">
+          <Field label={t("Tipo de empleo")}>
             <select
               value={form.employment_type}
               onChange={(event) => set("employment_type")(event.target.value)}
               className={selectClass}
             >
-              <option value="">Sin definir</option>
+              <option value="">{t("Sin definir")}</option>
               {EMPLOYMENT_TYPES.map((type) => (
                 <option key={type} value={type}>
                   {type}
@@ -293,38 +296,38 @@ export function ApplicationInfoTab({ application }: { application: ApplicationWi
               ))}
             </select>
           </Field>
-          <Field label="Origen">
+          <Field label={t("Origen")}>
             <Input
               value={form.source}
               onChange={(event) => set("source")(event.target.value)}
               className="mt-1.5"
-              placeholder="LinkedIn, web de la empresa…"
+              placeholder={t("LinkedIn, web de la empresa…")}
             />
           </Field>
-          <Field label="Persona que te refirió">
+          <Field label={t("Persona que te refirió")}>
             <Input
               value={form.referral_name}
               onChange={(event) => set("referral_name")(event.target.value)}
               className="mt-1.5"
             />
           </Field>
-          <Field label="CV enviado">
+          <Field label={t("CV enviado")}>
             <p className="mt-2.5 text-sm">
               {cvLink?.documents
                 ? `${cvLink.documents.name}${
                     cvLink.documents.version ? ` · ${cvLink.documents.version}` : ""
                   }`
-                : "Sin CV vinculado"}
+                : t("Sin CV vinculado")}
             </p>
           </Field>
-          <Field label="Próximo paso">
+          <Field label={t("Próximo paso")}>
             <Input
               value={form.next_action}
               onChange={(event) => set("next_action")(event.target.value)}
               className="mt-1.5"
             />
           </Field>
-          <Field label="Fecha límite del próximo paso">
+          <Field label={t("Fecha límite del próximo paso")}>
             <Input
               type="date"
               value={form.next_action_at}
@@ -335,9 +338,9 @@ export function ApplicationInfoTab({ application }: { application: ApplicationWi
         </div>
       </SectionCard>
 
-      <SectionCard title="Links">
+      <SectionCard title={t("Links")}>
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Oferta de empleo">
+          <Field label={t("Oferta de empleo")}>
             <Input
               value={form.job_url}
               onChange={(event) => set("job_url")(event.target.value)}
@@ -345,7 +348,7 @@ export function ApplicationInfoTab({ application }: { application: ApplicationWi
               placeholder="https://…"
             />
           </Field>
-          <Field label="Portal del candidato">
+          <Field label={t("Portal del candidato")}>
             <Input
               value={form.candidate_portal_url}
               onChange={(event) => set("candidate_portal_url")(event.target.value)}
@@ -358,25 +361,25 @@ export function ApplicationInfoTab({ application }: { application: ApplicationWi
 
       <SectionCard
         title="Portal Access"
-        subtitle="Nunca guardamos contraseñas: usa una referencia a tu gestor de contraseñas."
+        subtitle={t("Nunca guardamos contraseñas: usa una referencia a tu gestor de contraseñas.")}
       >
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Proveedor del portal">
+          <Field label={t("Proveedor del portal")}>
             <Input
               value={form.portal_provider}
               onChange={(event) => set("portal_provider")(event.target.value)}
               className="mt-1.5"
-              placeholder="Workday, Greenhouse, Lever…"
+              placeholder={t("Workday, Greenhouse, Lever…")}
             />
           </Field>
-          <Field label="Email o usuario">
+          <Field label={t("Email o usuario")}>
             <Input
               value={form.portal_username}
               onChange={(event) => set("portal_username")(event.target.value)}
               className="mt-1.5"
             />
           </Field>
-          <Field label="Referencia en tu gestor de contraseñas">
+          <Field label={t("Referencia en tu gestor de contraseñas")}>
             <Input
               value={form.portal_password_ref}
               onChange={(event) => set("portal_password_ref")(event.target.value)}
@@ -384,7 +387,7 @@ export function ApplicationInfoTab({ application }: { application: ApplicationWi
               placeholder="1Password › Workday Nexora"
             />
           </Field>
-          <Field label="Notas del portal">
+          <Field label={t("Notas del portal")}>
             <Textarea
               rows={3}
               value={form.portal_notes}
@@ -416,10 +419,10 @@ export function ApplicationInfoTab({ application }: { application: ApplicationWi
               portal_notes: form.portal_notes || null,
             },
           });
-          toast.success("Candidatura actualizada");
+          toast.success(t("Candidatura actualizada"));
         }}
       >
-        <Save className="size-4" /> Guardar cambios
+        <Save className="size-4" /> {t("Guardar cambios")}
       </Button>
     </div>
   );
@@ -428,6 +431,7 @@ export function ApplicationInfoTab({ application }: { application: ApplicationWi
 /* -------------------------------- Documents ------------------------------- */
 
 export function DocumentsTab({ application }: { application: ApplicationWithCompany }) {
+  const t = useT();
   const { data: vault = [] } = useDocuments();
   const { data: links = [] } = useApplicationDocuments(application.id);
   const link = useLinkDocument();
@@ -441,7 +445,7 @@ export function DocumentsTab({ application }: { application: ApplicationWithComp
 
   const open = async (path: string | null) => {
     if (!path) {
-      toast.error("Este documento no tiene archivo.");
+      toast.error(t("Este documento no tiene archivo."));
       return;
     }
     const url = await documentUrl(path);
@@ -450,15 +454,15 @@ export function DocumentsTab({ application }: { application: ApplicationWithComp
 
   return (
     <div className="space-y-5">
-      <SectionCard title="Vincular documento del CV Vault">
+      <SectionCard title={t("Vincular documento del CV Vault")}>
         <div className="grid gap-3 sm:grid-cols-[1fr_180px_auto]">
           <select
             value={documentId}
             onChange={(event) => setDocumentId(event.target.value)}
-            aria-label="Documento"
+            aria-label={t("Documento")}
             className={selectClass}
           >
-            <option value="">Elige un documento…</option>
+            <option value="">{t("Elige un documento…")}</option>
             {available.map((doc) => (
               <option key={doc.id} value={doc.id}>
                 {doc.name}
@@ -469,34 +473,34 @@ export function DocumentsTab({ application }: { application: ApplicationWithComp
           <select
             value={role}
             onChange={(event) => setRole(event.target.value)}
-            aria-label="Papel del documento"
+            aria-label={t("Papel del documento")}
             className={selectClass}
           >
-            <option value="cv">CV enviado</option>
-            <option value="cover_letter">Carta de presentación</option>
-            <option value="other">Otro adjunto</option>
+            <option value="cv">{t("CV enviado")}</option>
+            <option value="cover_letter">{t("Carta de presentación")}</option>
+            <option value="other">{t("Otro adjunto")}</option>
           </select>
           <Button
             className="mt-1.5 gap-1.5"
             onClick={async () => {
               if (!documentId) {
-                toast.error("Elige un documento del vault.");
+                toast.error(t("Elige un documento del vault."));
                 return;
               }
               await link.mutateAsync({ application, documentId, role });
               setDocumentId("");
-              toast.success("Documento vinculado");
+              toast.success(t("Documento vinculado"));
             }}
           >
-            <Link2 className="size-4" /> Vincular
+            <Link2 className="size-4" /> {t("Vincular")}
           </Button>
         </div>
       </SectionCard>
 
       {links.length === 0 ? (
         <EmptyState
-          title="Sin documentos vinculados"
-          description="Vincula el CV y la carta que enviaste para saber siempre qué versión usaste."
+          title={t("Sin documentos vinculados")}
+          description={t("Vincula el CV y la carta que enviaste para saber siempre qué versión usaste.")}
           icon={<FileText className="size-6" />}
         />
       ) : (
@@ -510,10 +514,10 @@ export function DocumentsTab({ application }: { application: ApplicationWithComp
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="truncate font-display text-sm font-semibold">
-                      {doc?.name ?? "Documento"}
+                      {doc?.name ?? t("Documento")}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {doc?.version ? `Versión ${doc.version} · ` : ""}
+                      {doc?.version ? t("Versión {version}", { version: doc.version }) + " · " : ""}
                       {doc ? DOC_KIND_LABEL[doc.kind] : "—"}
                     </p>
                   </div>
@@ -521,20 +525,20 @@ export function DocumentsTab({ application }: { application: ApplicationWithComp
                     onClick={() =>
                       unlink.mutate({ applicationId: application.id, documentId: item.document_id })
                     }
-                    aria-label="Desvincular documento"
+                    aria-label={t("Desvincular documento")}
                     className="text-muted-foreground hover:text-danger"
                   >
                     <Trash2 className="size-3.5" />
                   </button>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                  {isCv && <Pill tone="bg-primary/10 text-primary border-primary/25">CV</Pill>}
+                  {isCv && <Pill tone="bg-primary/10 text-primary border-primary/25">{t("CV")}</Pill>}
                   {isLetter && (
-                    <Pill tone="bg-violet/10 text-violet border-violet/25">Carta</Pill>
+                    <Pill tone="bg-violet/10 text-violet border-violet/25">{t("Carta")}</Pill>
                   )}
                   {item.submitted && (
                     <Pill tone="bg-success/15 text-success border-success/30">
-                      <BadgeCheck className="size-3" /> Enviado con esta candidatura
+                      <BadgeCheck className="size-3" /> {t("Enviado con esta candidatura")}
                     </Pill>
                   )}
                 </div>
@@ -546,7 +550,7 @@ export function DocumentsTab({ application }: { application: ApplicationWithComp
                     className="gap-1.5"
                     onClick={() => open(doc?.storage_path ?? null)}
                   >
-                    Abrir <ExternalLink className="size-3.5" />
+                    {t("Abrir")} <ExternalLink className="size-3.5" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -559,7 +563,7 @@ export function DocumentsTab({ application }: { application: ApplicationWithComp
                       })
                     }
                   >
-                    {item.submitted ? "Marcar como no enviado" : "Marcar como enviado"}
+                    {item.submitted ? t("Marcar como no enviado") : t("Marcar como enviado")}
                   </Button>
                 </div>
               </SectionCard>
@@ -615,6 +619,7 @@ function rowToForm(row: TimelineRow): ProcessForm {
 }
 
 export function ProcessTab({ application }: { application: ApplicationWithCompany }) {
+  const t = useT();
   const { data: timeline = [] } = useTimeline(application.id);
   const saveEvent = useSaveTimelineEvent();
   const deleteEvent = useDeleteTimelineEvent();
@@ -636,7 +641,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
 
   const submit = async (id?: string) => {
     if (!form.title.trim()) {
-      toast.error("Pon un título a la etapa.");
+      toast.error(t("Pon un título a la etapa."));
       return;
     }
     const scheduled = form.scheduled_at ? new Date(form.scheduled_at).toISOString() : null;
@@ -665,7 +670,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
     setForm(emptyProcessForm);
     setAdding(false);
     setEditingId(null);
-    toast.success(id ? "Etapa actualizada" : "Etapa añadida");
+    toast.success(id ? t("Etapa actualizada") : t("Etapa añadida"));
   };
 
   const move = (index: number, direction: -1 | 1) => {
@@ -679,23 +684,23 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
   };
 
   const formCard = (id?: string) => (
-    <SectionCard title={id ? "Editar etapa" : "Nueva etapa del proceso"}>
+    <SectionCard title={id ? t("Editar etapa") : t("Nueva etapa del proceso")}>
       <div className="grid gap-4 md:grid-cols-2">
-        <Field label="Título">
+        <Field label={t("Título")}>
           <Input
             value={form.title}
             onChange={(event) => setForm({ ...form, title: event.target.value })}
             className="mt-1.5"
-            placeholder="Entrevista con hiring manager"
+            placeholder={t("Entrevista con hiring manager")}
           />
         </Field>
-        <Field label="Etapa">
+        <Field label={t("Etapa")}>
           <select
             value={form.stage}
             onChange={(event) => setForm({ ...form, stage: event.target.value })}
             className={selectClass}
           >
-            <option value="">Sin etapa</option>
+            <option value="">{t("Sin etapa")}</option>
             {STAGES.map((stage) => (
               <option key={stage} value={stage}>
                 {STAGE_META[stage].label}
@@ -703,7 +708,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
             ))}
           </select>
         </Field>
-        <Field label="Tipo">
+        <Field label={t("Tipo")}>
           <select
             value={form.kind}
             onChange={(event) => setForm({ ...form, kind: event.target.value })}
@@ -716,7 +721,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
             ))}
           </select>
         </Field>
-        <Field label="Estado">
+        <Field label={t("Estado")}>
           <select
             value={form.status}
             onChange={(event) => setForm({ ...form, status: event.target.value })}
@@ -729,7 +734,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
             ))}
           </select>
         </Field>
-        <Field label="Fecha y hora">
+        <Field label={t("Fecha y hora")}>
           <Input
             type="datetime-local"
             value={form.scheduled_at}
@@ -737,7 +742,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
             className="mt-1.5"
           />
         </Field>
-        <Field label="Fecha límite">
+        <Field label={t("Fecha límite")}>
           <Input
             type="datetime-local"
             value={form.deadline_at}
@@ -745,22 +750,22 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
             className="mt-1.5"
           />
         </Field>
-        <Field label="Entrevistador">
+        <Field label={t("Entrevistador")}>
           <Input
             value={form.interviewer}
             onChange={(event) => setForm({ ...form, interviewer: event.target.value })}
             className="mt-1.5"
           />
         </Field>
-        <Field label="Resultado">
+        <Field label={t("Resultado")}>
           <Input
             value={form.outcome}
             onChange={(event) => setForm({ ...form, outcome: event.target.value })}
             className="mt-1.5"
-            placeholder="Pasas a la siguiente ronda"
+            placeholder={t("Pasas a la siguiente ronda")}
           />
         </Field>
-        <Field label="Notas">
+        <Field label={t("Notas")}>
           <Textarea
             rows={3}
             value={form.detail}
@@ -768,7 +773,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
             className="mt-1.5"
           />
         </Field>
-        <Field label="Adjuntos (nombres separados por comas)">
+        <Field label={t("Adjuntos (nombres separados por comas)")}>
           <Input
             value={form.attachments}
             onChange={(event) => setForm({ ...form, attachments: event.target.value })}
@@ -779,7 +784,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
       </div>
       <div className="mt-4 flex items-center gap-2">
         <Button className="gap-1.5" onClick={() => submit(id)}>
-          <Save className="size-4" /> Guardar
+          <Save className="size-4" /> {t("Guardar")}
         </Button>
         <Button
           variant="ghost"
@@ -790,7 +795,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
             setForm(emptyProcessForm);
           }}
         >
-          <X className="size-4" /> Cancelar
+          <X className="size-4" /> {t("Cancelar")}
         </Button>
       </div>
     </SectionCard>
@@ -809,14 +814,14 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
             setAdding(true);
           }}
         >
-          <Plus className="size-4" /> Añadir etapa
+          <Plus className="size-4" /> {t("Añadir etapa")}
         </Button>
       )}
 
       {ordered.length === 0 ? (
         <EmptyState
-          title="Proceso sin etapas"
-          description="Registra cada entrevista, prueba y respuesta para ver el recorrido completo."
+          title={t("Proceso sin etapas")}
+          description={t("Registra cada entrevista, prueba y respuesta para ver el recorrido completo.")}
         />
       ) : (
         <ol className="relative space-y-4 pl-6">
@@ -839,20 +844,20 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
                       <p className="font-display text-sm font-semibold">{row.title}</p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         {fmtDateTime(row.scheduled_at ?? row.occurred_at)}
-                        {row.deadline_at ? ` · límite ${fmtDateTime(row.deadline_at)}` : ""}
+                        {row.deadline_at ? ` · ${t("límite {date}", { date: fmtDateTime(row.deadline_at) })}` : ""}
                       </p>
                     </div>
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => move(index, -1)}
-                        aria-label="Subir etapa"
+                        aria-label={t("Subir etapa")}
                         className="text-muted-foreground hover:text-foreground"
                       >
                         <ArrowUp className="size-3.5" />
                       </button>
                       <button
                         onClick={() => move(index, 1)}
-                        aria-label="Bajar etapa"
+                        aria-label={t("Bajar etapa")}
                         className="text-muted-foreground hover:text-foreground"
                       >
                         <ArrowDown className="size-3.5" />
@@ -863,7 +868,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
                           setAdding(false);
                           setEditingId(row.id);
                         }}
-                        aria-label="Editar etapa"
+                        aria-label={t("Editar etapa")}
                         className="text-muted-foreground hover:text-foreground"
                       >
                         <Pencil className="size-3.5" />
@@ -872,7 +877,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
                         onClick={() =>
                           deleteEvent.mutate({ id: row.id, applicationId: application.id })
                         }
-                        aria-label="Eliminar etapa"
+                        aria-label={t("Eliminar etapa")}
                         className="text-muted-foreground hover:text-danger"
                       >
                         <Trash2 className="size-3.5" />
@@ -885,14 +890,14 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
                     <Pill tone={processStatusTone(row.status ?? "done")}>
                       {PROCESS_STATUS_LABEL[row.status ?? "done"] ?? row.status}
                     </Pill>
-                    {row.interviewer && <Pill>Con {row.interviewer}</Pill>}
+                    {row.interviewer && <Pill>{t("Con {name}", { name: row.interviewer })}</Pill>}
                   </div>
                   {row.detail && (
                     <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed">{row.detail}</p>
                   )}
                   {row.outcome && (
                     <p className="mt-2 text-sm">
-                      <span className="text-muted-foreground">Resultado: </span>
+                      <span className="text-muted-foreground">{t("Resultado: ")}</span>
                       {row.outcome}
                     </p>
                   )}
@@ -918,6 +923,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
 /* -------------------------------- Contacts -------------------------------- */
 
 export function ContactsTab({ application }: { application: ApplicationWithCompany }) {
+  const t = useT();
   const { data: contacts = [] } = useContacts();
   const saveContact = useSaveContact();
   const deleteContact = useDeleteContact();
@@ -938,44 +944,44 @@ export function ContactsTab({ application }: { application: ApplicationWithCompa
 
   return (
     <div className="space-y-5">
-      <SectionCard title="Nuevo contacto de este proceso">
+      <SectionCard title={t("Nuevo contacto de este proceso")}>
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Nombre">
+          <Field label={t("Nombre")}>
             <Input
               value={form.name}
               onChange={(event) => setForm({ ...form, name: event.target.value })}
               className="mt-1.5"
             />
           </Field>
-          <Field label="Puesto">
+          <Field label={t("Puesto")}>
             <Input
               value={form.role_title}
               onChange={(event) => setForm({ ...form, role_title: event.target.value })}
               className="mt-1.5"
             />
           </Field>
-          <Field label="Email">
+          <Field label={t("Email")}>
             <Input
               value={form.email}
               onChange={(event) => setForm({ ...form, email: event.target.value })}
               className="mt-1.5"
             />
           </Field>
-          <Field label="Teléfono">
+          <Field label={t("Teléfono")}>
             <Input
               value={form.phone}
               onChange={(event) => setForm({ ...form, phone: event.target.value })}
               className="mt-1.5"
             />
           </Field>
-          <Field label="LinkedIn">
+          <Field label={t("LinkedIn")}>
             <Input
               value={form.linkedin}
               onChange={(event) => setForm({ ...form, linkedin: event.target.value })}
               className="mt-1.5"
             />
           </Field>
-          <Field label="Notas">
+          <Field label={t("Notas")}>
             <Textarea
               rows={3}
               value={form.notes}
@@ -988,7 +994,7 @@ export function ContactsTab({ application }: { application: ApplicationWithCompa
           className="mt-4 gap-1.5"
           onClick={async () => {
             if (!form.name.trim()) {
-              toast.error("Añade el nombre del contacto.");
+              toast.error(t("Añade el nombre del contacto."));
               return;
             }
             await saveContact.mutateAsync({
@@ -1004,17 +1010,17 @@ export function ContactsTab({ application }: { application: ApplicationWithCompa
               },
             });
             setForm({ name: "", role_title: "", email: "", phone: "", linkedin: "", notes: "" });
-            toast.success("Contacto guardado");
+            toast.success(t("Contacto guardado"));
           }}
         >
-          <Plus className="size-4" /> Guardar contacto
+          <Plus className="size-4" /> {t("Guardar contacto")}
         </Button>
       </SectionCard>
 
       {mine.length === 0 ? (
         <EmptyState
-          title="Sin contactos"
-          description="Guarda a quien te entrevista o te refiere para tener su ficha a mano."
+          title={t("Sin contactos")}
+          description={t("Guarda a quien te entrevista o te refiere para tener su ficha a mano.")}
           icon={<Building2 className="size-6" />}
         />
       ) : (
@@ -1033,16 +1039,17 @@ export function ContactsTab({ application }: { application: ApplicationWithCompa
 }
 
 function ContactCard({ contact, onDelete }: { contact: ContactRow; onDelete: () => void }) {
+  const t = useT();
   return (
     <SectionCard>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate font-display text-sm font-semibold">{contact.name}</p>
-          <p className="text-xs text-muted-foreground">{contact.role_title ?? "Sin puesto"}</p>
+          <p className="text-xs text-muted-foreground">{contact.role_title ?? t("Sin puesto")}</p>
         </div>
         <button
           onClick={onDelete}
-          aria-label="Eliminar contacto"
+          aria-label={t("Eliminar contacto")}
           className="text-muted-foreground hover:text-danger"
         >
           <Trash2 className="size-3.5" />

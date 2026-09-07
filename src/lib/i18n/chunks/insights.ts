@@ -1,0 +1,58 @@
+// Cada entrada: clave en español -> [inglés, francés, alemán]
+export const chunk: Record<string, [string, string, string]> = {
+  "Analytics": ["Analytics", "Analyses", "Analysen"],
+  "Métricas de tu búsqueda de empleo.": [
+    "Metrics for your job search.",
+    "Indicateurs de votre recherche d'emploi.",
+    "Kennzahlen deiner Jobsuche.",
+  ],
+  "Qué está funcionando y dónde se atascan tus procesos.": [
+    "What's working and where your processes stall.",
+    "Ce qui fonctionne et où vos processus bloquent.",
+    "Was funktioniert und wo deine Prozesse stocken.",
+  ],
+  "Aún no hay datos": ["No data yet", "Pas encore de données", "Noch keine Daten"],
+  "Registra candidaturas para ver tus métricas de conversión.": [
+    "Log applications to see your conversion metrics.",
+    "Enregistrez des candidatures pour voir vos indicateurs de conversion.",
+    "Erfasse Bewerbungen, um deine Conversion-Kennzahlen zu sehen.",
+  ],
+  "Enviadas": ["Sent", "Envoyées", "Gesendet"],
+  "Con respuesta": ["Responded", "Avec réponse", "Mit Antwort"],
+  "En entrevistas": ["In interviews", "En entretien", "Im Interview"],
+  "Ofertas": ["Offers", "Offres", "Angebote"],
+  "Tasa de respuesta": ["Response rate", "Taux de réponse", "Antwortquote"],
+  "{responded} de {sent}": ["{responded} of {sent}", "{responded} sur {sent}", "{responded} von {sent}"],
+  "Llegan a entrevista": ["Reach interview", "Atteignent l'entretien", "Erreichen Interview"],
+  "{interviews} procesos": ["{interviews} processes", "{interviews} processus", "{interviews} Prozesse"],
+  "{offers} ofertas": ["{offers} offers", "{offers} offres", "{offers} Angebote"],
+  "Cerradas": ["Closed", "Clôturées", "Abgeschlossen"],
+  "{rejected} rechazos": ["{rejected} rejections", "{rejected} refus", "{rejected} Absagen"],
+  "Embudo": ["Funnel", "Entonnoir", "Trichter"],
+  "De candidatura enviada a oferta": [
+    "From application sent to offer",
+    "De la candidature envoyée à l'offre",
+    "Von gesendeter Bewerbung bis Angebot",
+  ],
+  "Actividad": ["Activity", "Activité", "Aktivität"],
+  "Candidaturas enviadas por semana": [
+    "Applications sent per week",
+    "Candidatures envoyées par semaine",
+    "Bewerbungen pro Woche gesendet",
+  ],
+  "Por etapa": ["By stage", "Par étape", "Nach Phase"],
+  "Dónde está tu pipeline": ["Where your pipeline stands", "Où en est votre pipeline", "Wo dein Pipeline steht"],
+  "Origen y modalidad": ["Source and work mode", "Origine et modalité", "Herkunft und Arbeitsmodus"],
+  "De dónde salen tus oportunidades": [
+    "Where your opportunities come from",
+    "D'où viennent vos opportunités",
+    "Woher deine Chancen kommen",
+  ],
+  "Sin origen": ["No source", "Sans origine", "Ohne Quelle"],
+  "{n} entrevistas confirmadas por delante.": [
+    "{n} confirmed interviews ahead.",
+    "{n} entretiens confirmés à venir.",
+    "{n} bestätigte Vorstellungsgespräche stehen an.",
+  ],
+  "Esta sem.": ["This wk.", "Cette sem.", "Diese Wo."],
+};
