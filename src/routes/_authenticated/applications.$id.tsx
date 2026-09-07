@@ -45,7 +45,9 @@ import {
   WORK_MODE_LABEL,
   formatSalary,
   priorityTone,
+  type ApplicationWithCompany,
   type EventKind,
+
   type Stage,
 } from "@/lib/domain";
 import { fmtDate, fmtDateTime, relativeDay } from "@/lib/format";
