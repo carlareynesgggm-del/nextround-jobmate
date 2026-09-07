@@ -59,12 +59,15 @@ export const STAGES: Stage[] = [
   "saved",
   "applied",
   "screening",
+  "assessment",
   "interview",
   "technical",
   "final",
   "offer",
+  "accepted",
   "rejected",
   "withdrawn",
+  "ghosted",
 ];
 
 /** Stages that represent a live process. */
@@ -72,13 +75,164 @@ export const PIPELINE_STAGES: Stage[] = [
   "saved",
   "applied",
   "screening",
+  "assessment",
   "interview",
   "technical",
   "final",
   "offer",
 ];
 
-export const CLOSED_STAGES: Stage[] = ["rejected", "withdrawn"];
+/** Columns shown on the kanban board. */
+export const KANBAN_STAGES: Stage[] = [
+  "saved",
+  "applied",
+  "screening",
+  "assessment",
+  "interview",
+  "final",
+  "offer",
+];
+
+export const CLOSED_STAGES: Stage[] = ["rejected", "withdrawn", "ghosted"];
+
+/** Quick filters on the applications page. */
+export const QUICK_FILTERS = [
+  { id: "all", label: "Todas" },
+  { id: "active", label: "Activas" },
+  { id: "waiting", label: "Esperando" },
+  { id: "interview", label: "Entrevista" },
+  { id: "offer", label: "Oferta" },
+  { id: "closed", label: "Cerradas" },
+] as const;
+
+export type QuickFilter = (typeof QUICK_FILTERS)[number]["id"];
+
+export function matchesQuickFilter(stage: Stage, filter: QuickFilter): boolean {
+  switch (filter) {
+    case "active":
+      return isActive(stage) && stage !== "saved";
+    case "waiting":
+      return stage === "applied" || stage === "screening";
+    case "interview":
+      return stage === "interview" || stage === "technical" || stage === "final" || stage === "assessment";
+    case "offer":
+      return stage === "offer" || stage === "accepted";
+    case "closed":
+      return CLOSED_STAGES.includes(stage);
+    default:
+      return true;
+  }
+}
+
+/** Types of opportunity a student can apply to. */
+export const APPLICATION_TYPE_OPTIONS = [
+  "Prácticas",
+  "Prácticas de verano",
+  "Prácticas fuera de ciclo",
+  "Spring Week",
+  "Programa de graduados",
+  "Jornada completa",
+  "Media jornada",
+  "Año de prácticas",
+  "Formación dual",
+  "Estudiante en prácticas",
+  "Freelance",
+  "Otro",
+] as const;
+
+/** Where the application was submitted from. */
+export const SOURCE_OPTIONS = [
+  "LinkedIn",
+  "Web de la empresa",
+  "Referido",
+  "Portal universitario",
+  "Recruiter",
+  "Portal de empleo",
+  "Email directo",
+  "Otro",
+] as const;
+
+export const SALARY_PERIODS = ["Anual", "Mensual", "Semanal", "Diario", "Por hora"] as const;
+
+/** Stage types available inside the process timeline. */
+export const STAGE_TYPES = [
+  "Candidatura",
+  "Screening",
+  "Prueba online",
+  "Test numérico",
+  "Test lógico",
+  "Test psicométrico",
+  "HireVue",
+  "Prueba de código",
+  "Caso práctico",
+  "Entrevista RRHH",
+  "Llamada con recruiter",
+  "Entrevista técnica",
+  "Entrevista con hiring manager",
+  "Entrevista de panel",
+  "Assessment centre",
+  "Entrevista final",
+  "Referencias",
+  "Verificación de antecedentes",
+  "Oferta",
+  "Otro",
+] as const;
+
+export const INTERVIEW_STAGE_TYPES: string[] = [
+  "Entrevista RRHH",
+  "Llamada con recruiter",
+  "Entrevista técnica",
+  "Entrevista con hiring manager",
+  "Entrevista de panel",
+  "Entrevista final",
+  "Assessment centre",
+];
+
+export const ASSESSMENT_STAGE_TYPES: string[] = [
+  "Prueba online",
+  "Test numérico",
+  "Test lógico",
+  "Test psicométrico",
+  "HireVue",
+  "Prueba de código",
+  "Caso práctico",
+];
+
+export const ASSESSMENT_PROVIDERS = [
+  "HireVue",
+  "SHL",
+  "Pymetrics",
+  "Arctic Shores",
+  "Codility",
+  "HackerRank",
+  "Test numérico",
+  "Test lógico",
+  "Test psicométrico",
+  "Prueba de Excel",
+  "Caso práctico",
+  "Prueba técnica",
+  "Otro",
+] as const;
+
+export const CONTACT_TYPES = [
+  "Recruiter",
+  "Talent Acquisition",
+  "Hiring manager",
+  "Entrevistador",
+  "Empleado",
+  "Referido",
+  "RRHH",
+  "Otro",
+] as const;
+
+export const OFFER_DECISIONS = [
+  { id: "pending", label: "Aún decidiendo" },
+  { id: "accepted", label: "Aceptada" },
+  { id: "declined", label: "Rechazada" },
+] as const;
+
+/** Fallback text for unknown data. */
+export const UNKNOWN = "Sin especificar";
 
 type StageMeta = { label: string; short: string; tone: string; dot: string };
 
@@ -100,6 +254,12 @@ export const STAGE_META: Record<Stage, StageMeta> = {
     short: "Screening",
     tone: "bg-violet/10 text-violet border-violet/25",
     dot: "bg-violet",
+  },
+  assessment: {
+    label: "Prueba",
+    short: "Prueba",
+    tone: "bg-warning/15 text-gold-foreground border-warning/35",
+    dot: "bg-warning",
   },
   interview: {
     label: "Entrevista",
@@ -134,6 +294,18 @@ export const STAGE_META: Record<Stage, StageMeta> = {
   withdrawn: {
     label: "Retirada",
     short: "Retirada",
+    tone: "bg-muted text-muted-foreground border-border",
+    dot: "bg-muted-foreground",
+  },
+  accepted: {
+    label: "Aceptada",
+    short: "Aceptada",
+    tone: "bg-success/20 text-success border-success/35",
+    dot: "bg-success",
+  },
+  ghosted: {
+    label: "Sin respuesta",
+    short: "Sin resp.",
     tone: "bg-muted text-muted-foreground border-border",
     dot: "bg-muted-foreground",
   },

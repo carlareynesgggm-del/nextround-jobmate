@@ -5,6 +5,7 @@ import {
   Briefcase,
   CalendarDays,
   FileText,
+  HelpCircle,
   Home,
   LogOut,
   Menu,
@@ -95,6 +96,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="space-y-1 p-3">
         <LanguageSwitcher variant="sidebar" />
+        {navLink({ to: "/help", label: t("Ayuda"), icon: HelpCircle })}
         {navLink({ to: "/settings", label: t("Ajustes"), icon: Settings })}
         <div className="flex items-center gap-3 rounded-xl px-3 py-2">
           <span className="flex size-8 items-center justify-center rounded-full bg-sidebar-accent text-xs font-semibold text-sidebar-accent-foreground">

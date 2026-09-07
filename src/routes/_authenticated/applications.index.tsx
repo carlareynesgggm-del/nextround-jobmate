@@ -1,28 +1,45 @@
 import { useMemo, useState } from "react";
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { Briefcase, LayoutGrid, List, Plus, Search } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Briefcase, LayoutGrid, Plus, Table as TableIcon } from "lucide-react";
 
 import { ApplicationDialog } from "@/components/application-dialog";
+import { AppsFilters } from "@/components/applications/apps-filters";
+import { AppsKanban } from "@/components/applications/apps-kanban";
+import { AppsTable } from "@/components/applications/apps-table";
+import type { AppsSearch, SortKey } from "@/components/applications/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { CompanyMark, EmptyState, PageHeader, Pill, SectionCard, StageBadge } from "@/components/ui-bits";
-import { useApplications, useMoveStage } from "@/lib/api";
+import { EmptyState, PageHeader } from "@/components/ui-bits";
+import { useAllApplicationDocuments, useApplications, useCalendar } from "@/lib/api";
 import {
-  PIPELINE_STAGES,
-  PRIORITY_LABEL,
-  STAGES,
-  STAGE_META,
-  WORK_MODE_LABEL,
-  formatSalary,
-  priorityTone,
+  CLOSED_STAGES,
+  matchesQuickFilter,
   type ApplicationWithCompany,
-  type Stage,
+  type QuickFilter,
 } from "@/lib/domain";
-import { daysSinceApplied } from "@/lib/alerts";
-import { fmtDate, relativeDay } from "@/lib/format";
 import { useT } from "@/lib/i18n/provider";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/applications/")({
+  validateSearch: (search: Record<string, unknown>): AppsSearch => ({
+    view: search.view === "kanban" ? "kanban" : "table",
+    q: typeof search.q === "string" ? search.q : undefined,
+    quick: typeof search.quick === "string" ? (search.quick as QuickFilter) : undefined,
+    sort: typeof search.sort === "string" ? (search.sort as SortKey) : undefined,
+    stage: typeof search.stage === "string" ? (search.stage as AppsSearch["stage"]) : undefined,
+    company: typeof search.company === "string" ? search.company : undefined,
+    location: typeof search.location === "string" ? search.location : undefined,
+    country: typeof search.country === "string" ? search.country : undefined,
+    industry: typeof search.industry === "string" ? search.industry : undefined,
+    type: typeof search.type === "string" ? search.type : undefined,
+    mode: typeof search.mode === "string" ? (search.mode as AppsSearch["mode"]) : undefined,
+    cv: typeof search.cv === "string" ? search.cv : undefined,
+    source: typeof search.source === "string" ? search.source : undefined,
+    priority: typeof search.priority === "string" ? search.priority : undefined,
+    appliedFrom: typeof search.appliedFrom === "string" ? search.appliedFrom : undefined,
+    appliedTo: typeof search.appliedTo === "string" ? search.appliedTo : undefined,
+    deadlineFrom: typeof search.deadlineFrom === "string" ? search.deadlineFrom : undefined,
+    deadlineTo: typeof search.deadlineTo === "string" ? search.deadlineTo : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Candidaturas — NextRound" },
@@ -43,251 +60,148 @@ export const Route = createFileRoute("/_authenticated/applications/")({
   component: ApplicationsPage,
 });
 
+function daysWaiting(app: ApplicationWithCompany): number {
+  if (!app.applied_at) return -1;
+  const date = new Date(app.applied_at);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0);
+  return Math.max(0, Math.round((today.getTime() - date.getTime()) / 86_400_000));
+}
+
+const PRIORITY_RANK: Record<string, number> = { high: 0, medium: 1, low: 2 };
+
 function ApplicationsPage() {
   const t = useT();
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
   const { data: applications = [], isLoading } = useApplications();
-  const moveStage = useMoveStage();
-  const [view, setView] = useState<"board" | "list">("board");
-  const [query, setQuery] = useState("");
-  const [stageFilter, setStageFilter] = useState<Stage | "all">("all");
+  const { data: documents = [] } = useAllApplicationDocuments();
+  const { data: events = [] } = useCalendar();
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  const patchSearch = (patch: Partial<AppsSearch>) => {
+    navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
+  };
+
+  const active = useMemo(() => applications.filter((app) => !app.archived), [applications]);
+
   const filtered = useMemo(() => {
-    const term = query.trim().toLowerCase();
-    return applications.filter((app) => {
-      if (app.archived) return false;
-      if (stageFilter !== "all" && app.stage !== stageFilter) return false;
-      if (!term) return true;
-      return (
-        app.role_title.toLowerCase().includes(term) ||
-        (app.companies?.name ?? "").toLowerCase().includes(term) ||
-        (app.location ?? "").toLowerCase().includes(term)
-      );
+    const term = (search.q ?? "").trim().toLowerCase();
+    const quick: QuickFilter = search.quick ?? "all";
+    return active.filter((app) => {
+      if (!matchesQuickFilter(app.stage, quick)) return false;
+      if (quick !== "closed" && CLOSED_STAGES.includes(app.stage)) return false;
+      if (term) {
+        const hay = `${app.role_title} ${app.companies?.name ?? ""} ${app.location ?? ""}`.toLowerCase();
+        if (!hay.includes(term)) return false;
+      }
+      if (search.stage && app.stage !== search.stage) return false;
+      if (search.company && app.companies?.name !== search.company) return false;
+      if (search.location && app.location !== search.location) return false;
+      if (search.country && app.country !== search.country) return false;
+      if (search.industry && app.companies?.industry !== search.industry) return false;
+      if (search.type && app.application_type !== search.type) return false;
+      if (search.mode && app.work_mode !== search.mode) return false;
+      if (search.source && app.source !== search.source) return false;
+      if (search.priority && (app.priority ?? "medium") !== search.priority) return false;
+      if (search.appliedFrom && (!app.applied_at || app.applied_at < search.appliedFrom)) return false;
+      if (search.appliedTo && (!app.applied_at || app.applied_at > search.appliedTo)) return false;
+      if (search.deadlineFrom && (!app.deadline_at || app.deadline_at < search.deadlineFrom)) return false;
+      if (search.deadlineTo && (!app.deadline_at || app.deadline_at > search.deadlineTo)) return false;
+      return true;
     });
-  }, [applications, query, stageFilter]);
+  }, [active, search]);
+
+  const sorted = useMemo(() => {
+    const sort = search.sort ?? "applied_at";
+    const rows = [...filtered];
+    rows.sort((a, b) => {
+      switch (sort) {
+        case "waiting":
+          return daysWaiting(b) - daysWaiting(a);
+        case "priority":
+          return (PRIORITY_RANK[a.priority ?? "medium"] ?? 1) - (PRIORITY_RANK[b.priority ?? "medium"] ?? 1);
+        case "deadline":
+          return (a.deadline_at ?? "9999").localeCompare(b.deadline_at ?? "9999");
+        case "company":
+          return (a.companies?.name ?? "").localeCompare(b.companies?.name ?? "");
+        case "applied_at":
+        default:
+          return (b.applied_at ?? "").localeCompare(a.applied_at ?? "");
+      }
+    });
+    return rows;
+  }, [filtered, search.sort]);
+
+  const view = search.view ?? "table";
 
   return (
     <div className="space-y-6">
       <PageHeader
         title={t("Candidaturas")}
-        description={t("{n} procesos visibles de {total} registrados.", { n: filtered.length, total: applications.length })}
+        description={t("{n} de {total} procesos", { n: sorted.length, total: active.length })}
         actions={
           <>
             <div className="flex rounded-lg border border-border bg-surface p-0.5">
               <button
-                onClick={() => setView("board")}
-                className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                  view === "board" ? "bg-secondary text-secondary-foreground" : "text-muted-foreground"
-                }`}
+                onClick={() => patchSearch({ view: "table" })}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
+                  view === "table" ? "bg-secondary text-secondary-foreground" : "text-muted-foreground",
+                )}
               >
-                <LayoutGrid className="size-3.5" /> {t("Tablero")}
+                <TableIcon className="size-3.5" /> {t("Tabla")}
               </button>
               <button
-                onClick={() => setView("list")}
-                className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                  view === "list" ? "bg-secondary text-secondary-foreground" : "text-muted-foreground"
-                }`}
+                onClick={() => patchSearch({ view: "kanban" })}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
+                  view === "kanban" ? "bg-secondary text-secondary-foreground" : "text-muted-foreground",
+                )}
               >
-                <List className="size-3.5" /> {t("Lista")}
+                <LayoutGrid className="size-3.5" /> {t("Kanban")}
               </button>
             </div>
             <Button className="gap-1.5" onClick={() => setDialogOpen(true)}>
-              <Plus className="size-4" /> {t("Nueva")}
+              <Plus className="size-4" /> {t("Nueva candidatura")}
             </Button>
           </>
         }
       />
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative min-w-[220px] flex-1">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder={t("Buscar por puesto, empresa o ciudad…")}
-            className="pl-9"
-          />
-        </div>
-        <select
-          value={stageFilter}
-          onChange={(event) => setStageFilter(event.target.value as Stage | "all")}
-          className="h-10 rounded-lg border border-input bg-surface px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-        >
-          <option value="all">{t("Todas las etapas")}</option>
-          {STAGES.map((stage) => (
-            <option key={stage} value={stage}>
-              {STAGE_META[stage].label}
-            </option>
-          ))}
-        </select>
-      </div>
+      <AppsFilters search={search} onChange={patchSearch} applications={active} />
 
       {isLoading ? (
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-3">
           {[0, 1, 2].map((index) => (
-            <div key={index} className="h-40 animate-pulse rounded-2xl bg-surface-2" />
+            <div key={index} className="h-32 animate-pulse rounded-2xl bg-surface-2" />
           ))}
         </div>
-      ) : filtered.length === 0 ? (
+      ) : active.length === 0 ? (
         <EmptyState
-          title={t("Sin candidaturas")}
-          description={t("Crea la primera y empieza a seguir su recorrido.")}
+          title={t("Aquí empieza tu próxima oportunidad")}
+          description={t("Añade tu primera candidatura y empieza a construir tu pipeline.")}
           icon={<Briefcase className="size-6" />}
           action={
             <Button className="gap-1.5" onClick={() => setDialogOpen(true)}>
-              <Plus className="size-4" /> {t("Nueva candidatura")}
+              <Plus className="size-4" /> {t("Añadir candidatura")}
             </Button>
           }
         />
-      ) : view === "board" ? (
-        <div className="scrollbar-slim -mx-1 flex gap-4 overflow-x-auto px-1 pb-4">
-          {PIPELINE_STAGES.map((stage) => {
-            const items = filtered.filter((app) => app.stage === stage);
-            return (
-              <div key={stage} className="w-[280px] shrink-0">
-                <div className="mb-2.5 flex items-center justify-between px-1">
-                  <StageBadge stage={stage} />
-                  <span className="text-xs tabular-nums text-muted-foreground">{items.length}</span>
-                </div>
-                <div className="space-y-2.5 rounded-2xl bg-surface-2/60 p-2.5">
-                  {items.length === 0 && (
-                    <p className="px-2 py-6 text-center text-xs text-muted-foreground">
-                      {t("Nada en esta etapa")}
-                    </p>
-                  )}
-                  {items.map((app) => (
-                    <BoardCard
-                      key={app.id}
-                      app={app}
-                      onMove={(to) => moveStage.mutate({ application: app, to })}
-                    />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      ) : sorted.length === 0 ? (
+        <EmptyState
+          title={t("Sin candidaturas que coincidan")}
+          description={t("Prueba a ajustar los filtros o la búsqueda.")}
+          icon={<Briefcase className="size-6" />}
+        />
+      ) : view === "kanban" ? (
+        <AppsKanban applications={sorted} events={events} />
       ) : (
-        <SectionCard bodyClassName="p-0">
-          <div className="scrollbar-slim overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
-                  <th className="px-5 py-3 font-medium">{t("Puesto")}</th>
-                  <th className="px-5 py-3 font-medium">{t("Etapa")}</th>
-                  <th className="px-5 py-3 font-medium">{t("Ubicación")}</th>
-                  <th className="px-5 py-3 font-medium">{t("Salario")}</th>
-                  <th className="px-5 py-3 font-medium">{t("Enviada")}</th>
-                  <th className="px-5 py-3 font-medium">{t("Próxima acción")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filtered.map((app) => (
-                  <tr key={app.id} className="transition-colors hover:bg-accent/40">
-                    <td className="px-5 py-3">
-                      <Link
-                        to="/applications/$id"
-                        params={{ id: app.id }}
-                        className="flex items-center gap-3"
-                      >
-                        <CompanyMark name={app.companies?.name ?? app.role_title} size="sm" />
-                        <span>
-                          <span className="block font-medium">{app.role_title}</span>
-                          <span className="block text-xs text-muted-foreground">
-                            {app.companies?.name ?? t("Sin empresa")}
-                          </span>
-                        </span>
-                      </Link>
-                    </td>
-                    <td className="px-5 py-3">
-                      <StageBadge stage={app.stage} />
-                    </td>
-                    <td className="px-5 py-3 text-muted-foreground">
-                      {app.location ?? "—"}
-                      {app.work_mode && (
-                        <span className="ml-1.5 text-xs">· {WORK_MODE_LABEL[app.work_mode]}</span>
-                      )}
-                    </td>
-                    <td className="px-5 py-3 text-muted-foreground">
-                      {formatSalary(app.salary_min, app.salary_max, app.currency ?? "EUR")}
-                    </td>
-                    <td className="px-5 py-3 text-muted-foreground">
-                      {fmtDate(app.applied_at)}
-                      {daysSinceApplied(app) !== null && (
-                        <span className="block text-xs">{daysSinceApplied(app)} {t("días")}</span>
-                      )}
-                    </td>
-
-                    <td className="px-5 py-3">
-                      {app.next_action ? (
-                        <span>
-                          <span className="block">{app.next_action}</span>
-                          <span className="block text-xs text-muted-foreground">
-                            {relativeDay(app.next_action_at)}
-                          </span>
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </SectionCard>
+        <AppsTable applications={sorted} documents={documents} events={events} />
       )}
 
       <ApplicationDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
-  );
-}
-
-function BoardCard({
-  app,
-  onMove,
-}: {
-  app: ApplicationWithCompany;
-  onMove: (to: Stage) => void;
-}) {
-  const t = useT();
-  return (
-    <article className="rounded-xl border border-border bg-surface p-3 shadow-soft transition-shadow hover:shadow-lift">
-      <Link to="/applications/$id" params={{ id: app.id }} className="block">
-        <div className="flex items-start gap-2.5">
-          <CompanyMark name={app.companies?.name ?? app.role_title} size="sm" />
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium leading-tight">{app.role_title}</p>
-            <p className="truncate text-xs text-muted-foreground">
-              {app.companies?.name ?? t("Sin empresa")}
-            </p>
-          </div>
-        </div>
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
-          {app.location && <Pill>{app.location}</Pill>}
-          {app.work_mode && <Pill>{WORK_MODE_LABEL[app.work_mode]}</Pill>}
-          <Pill tone={priorityTone(app.priority ?? "medium")}>
-            {PRIORITY_LABEL[app.priority ?? "medium"]}
-          </Pill>
-        </div>
-        {app.next_action && (
-          <p className="mt-2.5 truncate text-xs text-muted-foreground">
-            → {app.next_action} · {relativeDay(app.next_action_at)}
-          </p>
-        )}
-      </Link>
-      <select
-        value={app.stage}
-        onChange={(event) => onMove(event.target.value as Stage)}
-        aria-label={t("Mover de etapa")}
-        className="mt-3 h-8 w-full rounded-lg border border-input bg-surface-2 px-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-      >
-        {STAGES.map((stage) => (
-          <option key={stage} value={stage}>
-            {STAGE_META[stage].label}
-          </option>
-        ))}
-      </select>
-    </article>
   );
 }

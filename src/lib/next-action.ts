@@ -3,7 +3,18 @@ import { CLOSED_STAGES } from "@/lib/domain";
 import { daysSinceApplied } from "@/lib/alerts";
 import { fmtDate, relativeDay, toDate } from "@/lib/format";
 
-export type NextActionKind = "assessment" | "interview" | "followup" | "cv" | "notes" | "custom" | "review";
+export type NextActionKind =
+  | "assessment"
+  | "interview"
+  | "followup"
+  | "offer"
+  | "ghosted"
+  | "cv"
+  | "jd"
+  | "portal"
+  | "notes"
+  | "custom"
+  | "review";
 
 export type NextAction = {
   kind: NextActionKind;
@@ -33,13 +44,16 @@ type Ctx = {
   events?: CalendarRow[];
   timeline?: TimelineRow[];
   links?: AppDocumentWithDoc[];
+  /** Umbral de días sin respuesta configurado en el perfil (por defecto 14). */
+  followUpDays?: number;
 };
 
-/** Calcula la mejor siguiente acción de una candidatura activa. */
+/** Calcula la mejor siguiente acción de una candidatura. */
 export function nextBestAction(app: ApplicationWithCompany, ctx: Ctx = {}): NextAction | null {
-  if (CLOSED_STAGES.includes(app.stage)) return null;
+  if (CLOSED_STAGES.includes(app.stage) && app.stage !== "ghosted") return null;
 
   const now = Date.now();
+  const followUpDays = ctx.followUpDays && ctx.followUpDays > 0 ? ctx.followUpDays : 14;
   const events = (ctx.events ?? []).filter((event) => event.application_id === app.id);
   const timeline = (ctx.timeline ?? []).filter((row) => row.application_id === app.id);
   const links = (ctx.links ?? []).filter((link) => link.application_id === app.id);
@@ -60,7 +74,7 @@ export function nextBestAction(app: ApplicationWithCompany, ctx: Ctx = {}): Next
       }`,
       urgency: hours <= 48 ? 0 : 3,
       tone: hours <= 48 ? "red" : "amber",
-      ctaLabel: app.candidate_portal_url ? "Abrir portal" : "Preparar",
+      ctaLabel: app.candidate_portal_url ? "Abrir portal" : "Preparar con IA",
       href: app.candidate_portal_url,
     };
   }
@@ -72,21 +86,49 @@ export function nextBestAction(app: ApplicationWithCompany, ctx: Ctx = {}): Next
       kind: "interview",
       label: "Prepara la entrevista",
       detail: `${interview.event.title} · ${relativeDay(interview.event.starts_at)}`,
-      urgency: hours <= 48 ? 1 : 4,
+      urgency: hours <= 24 ? 0 : hours <= 48 ? 1 : 4,
       tone: "violet",
       ctaLabel: "Preparar con IA",
     };
   }
 
+  // Oferta recibida pendiente de decisión.
+  if (app.stage === "offer" && (!app.offer_decision || app.offer_decision === "pending")) {
+    const deadlineHours = (toDate(app.offer_deadline_at)?.getTime() ?? 0) - now;
+    const urgent = app.offer_deadline_at && deadlineHours > 0 && deadlineHours <= 72 * 3_600_000;
+    return {
+      kind: "offer",
+      label: "Tienes una oferta pendiente de decisión",
+      detail: app.offer_deadline_at
+        ? `Responde antes del ${fmtDate(app.offer_deadline_at)}`
+        : "Decide si aceptarla, negociarla o rechazarla",
+      urgency: urgent ? 1 : 4,
+      tone: urgent ? "red" : "violet",
+      ctaLabel: "Ver oferta",
+    };
+  }
+
   const days = daysSinceApplied(app);
-  if (days !== null && days >= 14 && ["applied", "screening"].includes(app.stage)) {
+  if (days !== null && days >= followUpDays && ["applied", "screening"].includes(app.stage)) {
     return {
       kind: "followup",
       label: `Haz seguimiento — ${days} días sin respuesta`,
       detail: "Un email breve al recruiter reactiva el proceso",
-      urgency: 2,
+      urgency: days >= followUpDays + 7 ? 2 : 3,
       tone: "amber",
-      ctaLabel: "Hacer seguimiento",
+      ctaLabel: "Redactar seguimiento",
+    };
+  }
+
+  // Proceso sin respuesta marcado como ghosted: sugiere cerrar o reactivar.
+  if (app.stage === "ghosted") {
+    return {
+      kind: "ghosted",
+      label: "Este proceso lleva tiempo sin novedades",
+      detail: "Puedes intentar un último contacto o marcarlo como cerrado",
+      urgency: 5,
+      tone: "neutral",
+      ctaLabel: "Redactar seguimiento",
     };
   }
 
@@ -98,6 +140,28 @@ export function nextBestAction(app: ApplicationWithCompany, ctx: Ctx = {}): Next
       urgency: 6,
       tone: "neutral",
       ctaLabel: "Vincular CV",
+    };
+  }
+
+  if (!app.description && !app.jd_responsibilities && !app.jd_skills?.length) {
+    return {
+      kind: "jd",
+      label: "Guarda la descripción de la oferta",
+      detail: "Te ayudará a prepararte mejor para cada etapa",
+      urgency: 7,
+      tone: "neutral",
+      ctaLabel: "Añadir descripción",
+    };
+  }
+
+  if (app.stage === "assessment" && !app.candidate_portal_url) {
+    return {
+      kind: "portal",
+      label: "Guarda el portal del candidato",
+      detail: "Así lo encuentras rápido cuando toque completar la prueba",
+      urgency: 7,
+      tone: "neutral",
+      ctaLabel: "Añadir portal",
     };
   }
 
@@ -148,7 +212,7 @@ export function attentionFeed(
   limit = 4,
 ): AttentionItem[] {
   return applications
-    .filter((app) => !app.archived && !CLOSED_STAGES.includes(app.stage))
+    .filter((app) => !app.archived && (!CLOSED_STAGES.includes(app.stage) || app.stage === "ghosted"))
     .map((app) => ({ app, action: nextBestAction(app, ctx) }))
     .filter((item): item is AttentionItem => !!item.action && item.action.urgency <= 6)
     .sort((a, b) => a.action.urgency - b.action.urgency)
