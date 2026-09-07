@@ -16,6 +16,7 @@ import {
 } from "@/lib/api";
 import { DOC_KIND_LABEL, type DocKind, type DocumentRow } from "@/lib/domain";
 import { fmtDate } from "@/lib/format";
+import { useT } from "@/lib/i18n/provider";
 
 export const Route = createFileRoute("/_authenticated/vault")({
   head: () => ({
@@ -39,6 +40,7 @@ export const Route = createFileRoute("/_authenticated/vault")({
 });
 
 function VaultPage() {
+  const t = useT();
   const { data: documents = [] } = useDocuments();
   const upload = useUploadDocument();
   const remove = useDeleteDocument();
@@ -51,25 +53,25 @@ function VaultPage() {
 
   async function openDocument(doc: DocumentRow) {
     if (!doc.storage_path) {
-      toast.error("Este documento no tiene archivo adjunto.");
+      toast.error(t("Este documento no tiene archivo adjunto."));
       return;
     }
     const url = await documentUrl(doc.storage_path);
     if (url) window.open(url, "_blank", "noopener");
-    else toast.error("No se pudo abrir el documento.");
+    else toast.error(t("No se pudo abrir el documento."));
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="CV Vault"
-        description="Versiones de tu CV, cartas de presentación y portfolio, siempre a mano."
+        title={t("CV Vault")}
+        description={t("Versiones de tu CV, cartas de presentación y portfolio, siempre a mano.")}
       />
 
-      <SectionCard title="Subir documento" subtitle="PDF, DOCX o imagen (máx. 20 MB)">
+      <SectionCard title={t("Subir documento")} subtitle={t("PDF, DOCX o imagen (máx. 20 MB)")}>
         <div className="grid gap-3 md:grid-cols-4">
           <div className="md:col-span-2">
-            <Label htmlFor="d-file">Archivo</Label>
+            <Label htmlFor="d-file">{t("Archivo")}</Label>
             <Input
               id="d-file"
               type="file"
@@ -82,17 +84,17 @@ function VaultPage() {
             />
           </div>
           <div>
-            <Label htmlFor="d-name">Nombre</Label>
+            <Label htmlFor="d-name">{t("Nombre")}</Label>
             <Input
               id="d-name"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="CV Producto 2026"
+              placeholder={t("CV Producto 2026")}
               className="mt-1.5"
             />
           </div>
           <div>
-            <Label htmlFor="d-kind">Tipo</Label>
+            <Label htmlFor="d-kind">{t("Tipo")}</Label>
             <select
               id="d-kind"
               value={kind}
@@ -101,13 +103,13 @@ function VaultPage() {
             >
               {(Object.keys(DOC_KIND_LABEL) as DocKind[]).map((value) => (
                 <option key={value} value={value}>
-                  {DOC_KIND_LABEL[value]}
+                  {t(DOC_KIND_LABEL[value])}
                 </option>
               ))}
             </select>
           </div>
           <div>
-            <Label htmlFor="d-version">Versión</Label>
+            <Label htmlFor="d-version">{t("Versión")}</Label>
             <Input
               id="d-version"
               value={version}
@@ -122,7 +124,7 @@ function VaultPage() {
           disabled={upload.isPending}
           onClick={async () => {
             if (!file) {
-              toast.error("Selecciona un archivo.");
+              toast.error(t("Selecciona un archivo."));
               return;
             }
             try {
@@ -132,23 +134,23 @@ function VaultPage() {
                 kind,
                 version: version.trim(),
               });
-              toast.success("Documento subido");
+              toast.success(t("Documento subido"));
               setFile(null);
               setName("");
               setVersion("");
             } catch (error) {
-              toast.error(error instanceof Error ? error.message : "No se pudo subir");
+              toast.error(error instanceof Error ? error.message : t("No se pudo subir"));
             }
           }}
         >
-          <Upload className="size-4" /> {upload.isPending ? "Subiendo…" : "Subir"}
+          <Upload className="size-4" /> {upload.isPending ? t("Subiendo…") : t("Subir")}
         </Button>
       </SectionCard>
 
       {documents.length === 0 ? (
         <EmptyState
-          title="Vault vacío"
-          description="Sube tu CV para tenerlo listo en cada candidatura."
+          title={t("Vault vacío")}
+          description={t("Sube tu CV para tenerlo listo en cada candidatura.")}
           icon={<FileText className="size-6" />}
         />
       ) : (
@@ -157,9 +159,9 @@ function VaultPage() {
             <section key={group.key}>
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="font-display text-lg font-semibold tracking-tight">{group.title}</h2>
-                <Pill>{DOC_KIND_LABEL[group.kind]}</Pill>
+                <Pill>{t(DOC_KIND_LABEL[group.kind])}</Pill>
                 <Pill>
-                  {group.docs.length} {group.docs.length === 1 ? "versión" : "versiones"}
+                  {group.docs.length} {t(group.docs.length === 1 ? "versión" : "versiones")}
                 </Pill>
                 <Button
                   variant="ghost"
@@ -172,7 +174,7 @@ function VaultPage() {
                     document.getElementById("d-file")?.scrollIntoView({ behavior: "smooth" });
                   }}
                 >
-                  <Upload className="size-3.5" /> Nueva versión
+                  <Upload className="size-3.5" /> {t("Nueva versión")}
                 </Button>
               </div>
 
@@ -184,10 +186,10 @@ function VaultPage() {
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">
-                        {doc.version || "Versión inicial"}
+                        {doc.version || t("Versión inicial")}
                         {doc.is_default && (
                           <span className="ml-2 rounded-full border border-violet/30 bg-violet/10 px-1.5 py-0.5 text-[10px] font-medium text-violet">
-                            En uso
+                            {t("En uso")}
                           </span>
                         )}
                       </p>
@@ -202,7 +204,7 @@ function VaultPage() {
                       className="gap-1.5 rounded-xl"
                       onClick={() => openDocument(doc)}
                     >
-                      <Download className="size-3.5" /> Abrir
+                      <Download className="size-3.5" /> {t("Abrir")}
                     </Button>
                     {!doc.is_default && (
                       <Button
@@ -211,12 +213,12 @@ function VaultPage() {
                         className="gap-1.5"
                         onClick={() => setDefault.mutate(doc)}
                       >
-                        <Star className="size-3.5" /> Usar por defecto
+                        <Star className="size-3.5" /> {t("Usar por defecto")}
                       </Button>
                     )}
                     <button
                       onClick={() => remove.mutate(doc)}
-                      aria-label="Eliminar documento"
+                      aria-label={t("Eliminar documento")}
                       className="text-muted-foreground transition-colors hover:text-danger"
                     >
                       <Trash2 className="size-3.5" />

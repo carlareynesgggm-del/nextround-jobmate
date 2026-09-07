@@ -18,6 +18,7 @@ import {
 import { CompanyMark, EmptyState, PageHeader, Pill, SectionCard } from "@/components/ui-bits";
 import { useApplications, useCompanies, useContacts, useSaveCompany } from "@/lib/api";
 import { STAGE_META, type CompanyRow } from "@/lib/domain";
+import { useT } from "@/lib/i18n/provider";
 
 export const Route = createFileRoute("/_authenticated/companies")({
   head: () => ({
@@ -41,6 +42,7 @@ export const Route = createFileRoute("/_authenticated/companies")({
 });
 
 function CompaniesPage() {
+  const t = useT();
   const { data: companies = [], isLoading } = useCompanies();
   const { data: applications = [] } = useApplications();
   const { data: contacts = [] } = useContacts();
@@ -50,8 +52,8 @@ function CompaniesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Empresas"
-        description={`${companies.length} empresas en tu radar.`}
+        title={t("Empresas")}
+        description={t("{n} empresas en tu radar.", { n: companies.length })}
         actions={
           <Button
             className="gap-1.5"
@@ -60,7 +62,7 @@ function CompaniesPage() {
               setOpen(true);
             }}
           >
-            <Plus className="size-4" /> Nueva empresa
+            <Plus className="size-4" /> {t("Nueva empresa")}
           </Button>
         }
       />
@@ -73,12 +75,12 @@ function CompaniesPage() {
         </div>
       ) : companies.length === 0 ? (
         <EmptyState
-          title="Sin empresas"
-          description="Añade las empresas que te interesan para agrupar candidaturas y contactos."
+          title={t("Sin empresas")}
+          description={t("Añade las empresas que te interesan para agrupar candidaturas y contactos.")}
           icon={<Building2 className="size-6" />}
           action={
             <Button className="gap-1.5" onClick={() => setOpen(true)}>
-              <Plus className="size-4" /> Nueva empresa
+              <Plus className="size-4" /> {t("Nueva empresa")}
             </Button>
           }
         />
@@ -96,15 +98,15 @@ function CompaniesPage() {
                       {company.name}
                     </h3>
                     <p className="truncate text-xs text-muted-foreground">
-                      {company.industry ?? "Sector sin definir"}
+                      {company.industry ?? t("Sector sin definir")}
                       {company.location ? ` · ${company.location}` : ""}
                     </p>
                   </div>
                 </div>
 
                 <div className="mt-3 flex flex-wrap gap-1.5">
-                  <Pill>{apps.length} candidaturas</Pill>
-                  <Pill>{people.length} contactos</Pill>
+                  <Pill>{apps.length} {t("candidaturas")}</Pill>
+                  <Pill>{people.length} {t("contactos")}</Pill>
                   {company.size && <Pill>{company.size}</Pill>}
                 </div>
 
@@ -130,12 +132,12 @@ function CompaniesPage() {
                       setOpen(true);
                     }}
                   >
-                    Editar
+                    {t("Editar")}
                   </Button>
                   {company.website && (
                     <Button asChild variant="ghost" size="sm" className="gap-1.5">
                       <a href={company.website} target="_blank" rel="noreferrer">
-                        Web <ExternalLink className="size-3.5" />
+                        {t("Web")} <ExternalLink className="size-3.5" />
                       </a>
                     </Button>
                   )}
@@ -160,6 +162,7 @@ function CompanyDialog({
   onOpenChange: (open: boolean) => void;
   company: CompanyRow | null;
 }) {
+  const t = useT();
   const saveCompany = useSaveCompany();
   const [name, setName] = useState("");
   const [industry, setIndustry] = useState("");
@@ -188,16 +191,16 @@ function CompanyDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-display">
-            {company ? "Editar empresa" : "Nueva empresa"}
+            {company ? t("Editar empresa") : t("Nueva empresa")}
           </DialogTitle>
           <DialogDescription>
-            Guarda el contexto de la empresa para tenerlo a mano en cada proceso.
+            {t("Guarda el contexto de la empresa para tenerlo a mano en cada proceso.")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 py-1 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <Label htmlFor="c-name">Nombre</Label>
+            <Label htmlFor="c-name">{t("Nombre")}</Label>
             <Input
               id="c-name"
               value={name}
@@ -206,7 +209,7 @@ function CompanyDialog({
             />
           </div>
           <div>
-            <Label htmlFor="c-industry">Sector</Label>
+            <Label htmlFor="c-industry">{t("Sector")}</Label>
             <Input
               id="c-industry"
               value={industry}
@@ -215,7 +218,7 @@ function CompanyDialog({
             />
           </div>
           <div>
-            <Label htmlFor="c-location">Ubicación</Label>
+            <Label htmlFor="c-location">{t("Ubicación")}</Label>
             <Input
               id="c-location"
               value={location}
@@ -224,7 +227,7 @@ function CompanyDialog({
             />
           </div>
           <div>
-            <Label htmlFor="c-size">Tamaño</Label>
+            <Label htmlFor="c-size">{t("Tamaño")}</Label>
             <Input
               id="c-size"
               value={size}
@@ -234,7 +237,7 @@ function CompanyDialog({
             />
           </div>
           <div>
-            <Label htmlFor="c-web">Web</Label>
+            <Label htmlFor="c-web">{t("Web")}</Label>
             <Input
               id="c-web"
               value={website}
@@ -244,7 +247,7 @@ function CompanyDialog({
             />
           </div>
           <div className="sm:col-span-2">
-            <Label htmlFor="c-notes">Notas</Label>
+            <Label htmlFor="c-notes">{t("Notas")}</Label>
             <Textarea
               id="c-notes"
               value={notes}
@@ -257,12 +260,12 @@ function CompanyDialog({
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Cancelar
+            {t("Cancelar")}
           </Button>
           <Button
             onClick={async () => {
               if (!name.trim()) {
-                toast.error("La empresa necesita un nombre.");
+                toast.error(t("La empresa necesita un nombre."));
                 return;
               }
               await saveCompany.mutateAsync({
@@ -276,11 +279,11 @@ function CompanyDialog({
                   notes: notes.trim() || null,
                 },
               });
-              toast.success("Empresa guardada");
+              toast.success(t("Empresa guardada"));
               onOpenChange(false);
             }}
           >
-            Guardar
+            {t("Guardar")}
           </Button>
         </DialogFooter>
       </DialogContent>

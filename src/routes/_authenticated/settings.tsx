@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageHeader, SectionCard } from "@/components/ui-bits";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { useT } from "@/lib/i18n/provider";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
 import { qk, useProfile } from "@/lib/api";
@@ -34,6 +36,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
 });
 
 function SettingsPage() {
+  const t = useT();
   const { user } = useSession();
   const { data: profile } = useProfile();
   const queryClient = useQueryClient();
@@ -81,18 +84,18 @@ function SettingsPage() {
       return;
     }
     queryClient.invalidateQueries({ queryKey: qk.profile });
-    toast.success("Perfil actualizado");
+    toast.success(t("Perfil actualizado"));
   }
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Ajustes" description="Tu perfil y tus objetivos de búsqueda." />
+      <PageHeader title={t("Ajustes")} description={t("Tu perfil y tus objetivos de búsqueda.")} />
 
       <div className="grid gap-5 lg:grid-cols-3">
-        <SectionCard title="Perfil" className="lg:col-span-2">
+        <SectionCard title={t("Perfil")} className="lg:col-span-2">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="s-name">Nombre</Label>
+              <Label htmlFor="s-name">{t("Nombre")}</Label>
               <Input
                 id="s-name"
                 value={fullName}
@@ -101,17 +104,17 @@ function SettingsPage() {
               />
             </div>
             <div>
-              <Label htmlFor="s-headline">Titular profesional</Label>
+              <Label htmlFor="s-headline">{t("Titular profesional")}</Label>
               <Input
                 id="s-headline"
                 value={headline}
                 onChange={(event) => setHeadline(event.target.value)}
-                placeholder="Product Designer · Sistemas de diseño"
+                placeholder={t("Product Designer · Sistemas de diseño")}
                 className="mt-1.5"
               />
             </div>
             <div>
-              <Label htmlFor="s-location">Ubicación</Label>
+              <Label htmlFor="s-location">{t("Ubicación")}</Label>
               <Input
                 id="s-location"
                 value={location}
@@ -120,7 +123,7 @@ function SettingsPage() {
               />
             </div>
             <div>
-              <Label htmlFor="s-target">Puesto objetivo</Label>
+              <Label htmlFor="s-target">{t("Puesto objetivo")}</Label>
               <Input
                 id="s-target"
                 value={targetRole}
@@ -129,7 +132,7 @@ function SettingsPage() {
               />
             </div>
             <div>
-              <Label htmlFor="s-goal">Objetivo semanal de candidaturas</Label>
+              <Label htmlFor="s-goal">{t("Objetivo semanal de candidaturas")}</Label>
               <Input
                 id="s-goal"
                 inputMode="numeric"
@@ -140,15 +143,15 @@ function SettingsPage() {
             </div>
           </div>
           <Button className="mt-4 gap-1.5" onClick={save} disabled={saving}>
-            <Save className="size-4" /> {saving ? "Guardando…" : "Guardar cambios"}
+            <Save className="size-4" /> {saving ? t("Guardando…") : t("Guardar cambios")}
           </Button>
         </SectionCard>
 
-        <SectionCard title="Cuenta">
-          <p className="text-sm text-muted-foreground">Sesión iniciada como</p>
+        <SectionCard title={t("Cuenta")}>
+          <p className="text-sm text-muted-foreground">{t("Sesión iniciada como")}</p>
           <p className="mt-1 truncate text-sm font-medium">{user?.email}</p>
           <p className="mt-4 text-xs text-muted-foreground">
-            Tus candidaturas, notas y documentos son privados: nadie más puede verlos.
+            {t("Tus candidaturas, notas y documentos son privados: nadie más puede verlos.")}
           </p>
           <Button
             variant="outline"
@@ -158,8 +161,17 @@ function SettingsPage() {
               navigate({ to: "/" });
             }}
           >
-            <LogOut className="size-4" /> Cerrar sesión
+            <LogOut className="size-4" /> {t("Cerrar sesión")}
           </Button>
+        </SectionCard>
+
+        <SectionCard title={t("Idioma")}>
+          <p className="text-sm text-muted-foreground">
+            {t("Elige el idioma de la aplicación. Se aplicará a toda la interfaz de inmediato.")}
+          </p>
+          <div className="mt-4">
+            <LanguageSwitcher variant="sidebar" className="border border-border" />
+          </div>
         </SectionCard>
       </div>
     </div>

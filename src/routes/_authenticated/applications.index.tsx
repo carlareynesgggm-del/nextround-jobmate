@@ -20,6 +20,7 @@ import {
 } from "@/lib/domain";
 import { daysSinceApplied } from "@/lib/alerts";
 import { fmtDate, relativeDay } from "@/lib/format";
+import { useT } from "@/lib/i18n/provider";
 
 export const Route = createFileRoute("/_authenticated/applications/")({
   head: () => ({
@@ -43,6 +44,7 @@ export const Route = createFileRoute("/_authenticated/applications/")({
 });
 
 function ApplicationsPage() {
+  const t = useT();
   const { data: applications = [], isLoading } = useApplications();
   const moveStage = useMoveStage();
   const [view, setView] = useState<"board" | "list">("board");
@@ -67,8 +69,8 @@ function ApplicationsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Candidaturas"
-        description={`${filtered.length} procesos visibles de ${applications.length} registrados.`}
+        title={t("Candidaturas")}
+        description={t("{n} procesos visibles de {total} registrados.", { n: filtered.length, total: applications.length })}
         actions={
           <>
             <div className="flex rounded-lg border border-border bg-surface p-0.5">
@@ -78,7 +80,7 @@ function ApplicationsPage() {
                   view === "board" ? "bg-secondary text-secondary-foreground" : "text-muted-foreground"
                 }`}
               >
-                <LayoutGrid className="size-3.5" /> Tablero
+                <LayoutGrid className="size-3.5" /> {t("Tablero")}
               </button>
               <button
                 onClick={() => setView("list")}
@@ -86,11 +88,11 @@ function ApplicationsPage() {
                   view === "list" ? "bg-secondary text-secondary-foreground" : "text-muted-foreground"
                 }`}
               >
-                <List className="size-3.5" /> Lista
+                <List className="size-3.5" /> {t("Lista")}
               </button>
             </div>
             <Button className="gap-1.5" onClick={() => setDialogOpen(true)}>
-              <Plus className="size-4" /> Nueva
+              <Plus className="size-4" /> {t("Nueva")}
             </Button>
           </>
         }
@@ -102,7 +104,7 @@ function ApplicationsPage() {
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Buscar por puesto, empresa o ciudad…"
+            placeholder={t("Buscar por puesto, empresa o ciudad…")}
             className="pl-9"
           />
         </div>
@@ -111,7 +113,7 @@ function ApplicationsPage() {
           onChange={(event) => setStageFilter(event.target.value as Stage | "all")}
           className="h-10 rounded-lg border border-input bg-surface px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
         >
-          <option value="all">Todas las etapas</option>
+          <option value="all">{t("Todas las etapas")}</option>
           {STAGES.map((stage) => (
             <option key={stage} value={stage}>
               {STAGE_META[stage].label}
@@ -128,12 +130,12 @@ function ApplicationsPage() {
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          title="Sin candidaturas"
-          description="Crea la primera y empieza a seguir su recorrido."
+          title={t("Sin candidaturas")}
+          description={t("Crea la primera y empieza a seguir su recorrido.")}
           icon={<Briefcase className="size-6" />}
           action={
             <Button className="gap-1.5" onClick={() => setDialogOpen(true)}>
-              <Plus className="size-4" /> Nueva candidatura
+              <Plus className="size-4" /> {t("Nueva candidatura")}
             </Button>
           }
         />
@@ -150,7 +152,7 @@ function ApplicationsPage() {
                 <div className="space-y-2.5 rounded-2xl bg-surface-2/60 p-2.5">
                   {items.length === 0 && (
                     <p className="px-2 py-6 text-center text-xs text-muted-foreground">
-                      Nada en esta etapa
+                      {t("Nada en esta etapa")}
                     </p>
                   )}
                   {items.map((app) => (
@@ -171,12 +173,12 @@ function ApplicationsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
-                  <th className="px-5 py-3 font-medium">Puesto</th>
-                  <th className="px-5 py-3 font-medium">Etapa</th>
-                  <th className="px-5 py-3 font-medium">Ubicación</th>
-                  <th className="px-5 py-3 font-medium">Salario</th>
-                  <th className="px-5 py-3 font-medium">Enviada</th>
-                  <th className="px-5 py-3 font-medium">Próxima acción</th>
+                  <th className="px-5 py-3 font-medium">{t("Puesto")}</th>
+                  <th className="px-5 py-3 font-medium">{t("Etapa")}</th>
+                  <th className="px-5 py-3 font-medium">{t("Ubicación")}</th>
+                  <th className="px-5 py-3 font-medium">{t("Salario")}</th>
+                  <th className="px-5 py-3 font-medium">{t("Enviada")}</th>
+                  <th className="px-5 py-3 font-medium">{t("Próxima acción")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -192,7 +194,7 @@ function ApplicationsPage() {
                         <span>
                           <span className="block font-medium">{app.role_title}</span>
                           <span className="block text-xs text-muted-foreground">
-                            {app.companies?.name ?? "Sin empresa"}
+                            {app.companies?.name ?? t("Sin empresa")}
                           </span>
                         </span>
                       </Link>
@@ -212,7 +214,7 @@ function ApplicationsPage() {
                     <td className="px-5 py-3 text-muted-foreground">
                       {fmtDate(app.applied_at)}
                       {daysSinceApplied(app) !== null && (
-                        <span className="block text-xs">{daysSinceApplied(app)} días</span>
+                        <span className="block text-xs">{daysSinceApplied(app)} {t("días")}</span>
                       )}
                     </td>
 
@@ -248,6 +250,7 @@ function BoardCard({
   app: ApplicationWithCompany;
   onMove: (to: Stage) => void;
 }) {
+  const t = useT();
   return (
     <article className="rounded-xl border border-border bg-surface p-3 shadow-soft transition-shadow hover:shadow-lift">
       <Link to="/applications/$id" params={{ id: app.id }} className="block">
@@ -256,7 +259,7 @@ function BoardCard({
           <div className="min-w-0">
             <p className="truncate text-sm font-medium leading-tight">{app.role_title}</p>
             <p className="truncate text-xs text-muted-foreground">
-              {app.companies?.name ?? "Sin empresa"}
+              {app.companies?.name ?? t("Sin empresa")}
             </p>
           </div>
         </div>
@@ -276,7 +279,7 @@ function BoardCard({
       <select
         value={app.stage}
         onChange={(event) => onMove(event.target.value as Stage)}
-        aria-label="Mover de etapa"
+        aria-label={t("Mover de etapa")}
         className="mt-3 h-8 w-full rounded-lg border border-input bg-surface-2 px-2 text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
       >
         {STAGES.map((stage) => (

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
+import { useT } from "@/lib/i18n/provider";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -31,6 +32,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
+  const t = useT();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -60,12 +62,12 @@ function AuthPage() {
         if (!data.session) {
           const retry = await supabase.auth.signInWithPassword({ email, password });
           if (retry.error) {
-            toast.success("Cuenta creada. Confirma tu email para entrar.");
+            toast.success(t("Cuenta creada. Confirma tu email para entrar."));
             setMode("signin");
             return;
           }
         }
-        toast.success("Cuenta creada. Ya puedes entrar.");
+        toast.success(t("Cuenta creada. Ya puedes entrar."));
         navigate({ to: "/dashboard", replace: true });
       } else {
 
@@ -74,7 +76,7 @@ function AuthPage() {
         navigate({ to: "/dashboard", replace: true });
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "No se pudo completar");
+      toast.error(error instanceof Error ? error.message : t("No se pudo completar"));
     } finally {
       setBusy(false);
     }
@@ -93,18 +95,19 @@ function AuthPage() {
 
         <div className="relative max-w-md">
           <h2 className="font-display text-4xl font-semibold leading-tight">
-            Cada ronda, bajo control.
+            {t("Cada ronda, bajo control.")}
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-sidebar-foreground/70">
-            Candidaturas, entrevistas, versiones de tu CV, notas y tareas en un único espacio
-            privado. Sin hojas de cálculo, sin recordatorios olvidados.
+            {t(
+              "Candidaturas, entrevistas, versiones de tu CV, notas y tareas en un único espacio privado. Sin hojas de cálculo, sin recordatorios olvidados.",
+            )}
           </p>
           <ul className="mt-8 space-y-3 text-sm text-sidebar-foreground/80">
             {[
-              "Pipeline visual por etapas",
-              "Calendario de entrevistas y deadlines",
-              "CV Vault con versiones y documento por defecto",
-              "Analytics de respuesta y conversión",
+              t("Pipeline visual por etapas"),
+              t("Calendario de entrevistas y deadlines"),
+              t("CV Vault con versiones y documento por defecto"),
+              t("Analytics de respuesta y conversión"),
             ].map((item) => (
               <li key={item} className="flex items-center gap-2.5">
                 <span className="size-1.5 rounded-full bg-sidebar-primary" />
@@ -115,7 +118,7 @@ function AuthPage() {
         </div>
 
         <p className="relative text-xs text-sidebar-foreground/50">
-          Tus datos son privados y solo tú puedes verlos.
+          {t("Tus datos son privados y solo tú puedes verlos.")}
         </p>
       </div>
 
@@ -129,18 +132,18 @@ function AuthPage() {
           </Link>
 
           <h1 className="font-display text-2xl font-semibold tracking-tight">
-            {mode === "signin" ? "Bienvenida de nuevo" : "Crea tu cuenta"}
+            {mode === "signin" ? t("Bienvenida de nuevo") : t("Crea tu cuenta")}
           </h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
             {mode === "signin"
-              ? "Entra con tu email para volver a tu panel."
-              : "Solo necesitas un email y una contraseña."}
+              ? t("Entra con tu email para volver a tu panel.")
+              : t("Solo necesitas un email y una contraseña.")}
           </p>
 
           <form onSubmit={submit} className="mt-7 space-y-4">
             {mode === "signup" && (
               <div>
-                <Label htmlFor="name">Nombre</Label>
+                <Label htmlFor="name">{t("Nombre")}</Label>
                 <Input
                   id="name"
                   value={fullName}
@@ -165,7 +168,7 @@ function AuthPage() {
               />
             </div>
             <div>
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="password">{t("Contraseña")}</Label>
               <Input
                 id="password"
                 type="password"
@@ -181,19 +184,19 @@ function AuthPage() {
 
             <Button type="submit" className="w-full gap-2" disabled={busy}>
               {busy ? <Loader2 className="size-4 animate-spin" /> : null}
-              {mode === "signin" ? "Entrar" : "Crear cuenta"}
+              {mode === "signin" ? t("Entrar") : t("Crear cuenta")}
               {!busy && <ArrowRight className="size-4" />}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            {mode === "signin" ? "¿Aún no tienes cuenta?" : "¿Ya tienes cuenta?"}{" "}
+            {mode === "signin" ? t("¿Aún no tienes cuenta?") : t("¿Ya tienes cuenta?")}{" "}
             <button
               type="button"
               onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
-              {mode === "signin" ? "Regístrate" : "Inicia sesión"}
+              {mode === "signin" ? t("Regístrate") : t("Inicia sesión")}
             </button>
           </p>
         </div>

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { BarChart3, Percent, Timer, Trophy } from "lucide-react";
 
 import { EmptyState, KpiCard, PageHeader, SectionCard } from "@/components/ui-bits";
+import { useT } from "@/lib/i18n/provider";
 import { useApplications, useCalendar } from "@/lib/api";
 import {
   CLOSED_STAGES,
@@ -34,16 +35,17 @@ export const Route = createFileRoute("/_authenticated/analytics")({
 });
 
 function AnalyticsPage() {
+  const t = useT();
   const { data: applications = [] } = useApplications();
   const { data: events = [] } = useCalendar();
 
   if (applications.length === 0) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Analytics" description="Métricas de tu búsqueda de empleo." />
+        <PageHeader title={t("Analytics")} description={t("Métricas de tu búsqueda de empleo.")} />
         <EmptyState
-          title="Aún no hay datos"
-          description="Registra candidaturas para ver tus métricas de conversión."
+          title={t("Aún no hay datos")}
+          description={t("Registra candidaturas para ver tus métricas de conversión.")}
           icon={<BarChart3 className="size-6" />}
         />
       </div>
@@ -66,10 +68,10 @@ function AnalyticsPage() {
   const offerRate = sent ? Math.round((offers / sent) * 100) : 0;
 
   const funnel = [
-    { label: "Enviadas", count: sent },
-    { label: "Con respuesta", count: responded },
-    { label: "En entrevistas", count: interviews },
-    { label: "Ofertas", count: offers },
+    { label: t("Enviadas"), count: sent },
+    { label: t("Con respuesta"), count: responded },
+    { label: t("En entrevistas"), count: interviews },
+    { label: t("Ofertas"), count: offers },
   ];
 
   const byStage = PIPELINE_STAGES.map((stage) => ({
@@ -80,7 +82,7 @@ function AnalyticsPage() {
 
   const sources = Object.entries(
     applications.reduce<Record<string, number>>((acc, app) => {
-      const key = app.source?.trim() || "Sin origen";
+      const key = app.source?.trim() || t("Sin origen");
       acc[key] = (acc[key] ?? 0) + 1;
       return acc;
     }, {}),
@@ -100,7 +102,7 @@ function AnalyticsPage() {
       const weeks = Math.floor(Math.abs(diff) / 7);
       return diff <= 0 && weeks === weeksAgo;
     }).length;
-    return { label: weeksAgo === 0 ? "Esta sem." : `-${weeksAgo}`, count };
+    return { label: weeksAgo === 0 ? t("Esta sem.") : `-${weeksAgo}`, count };
   });
   const maxWeekly = Math.max(1, ...weekly.map((entry) => entry.count));
 
@@ -112,39 +114,39 @@ function AnalyticsPage() {
   return (
     <div className="space-y-7">
       <PageHeader
-        title="Analytics"
-        description="Qué está funcionando y dónde se atascan tus procesos."
+        title={t("Analytics")}
+        description={t("Qué está funcionando y dónde se atascan tus procesos.")}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
-          label="Tasa de respuesta"
+          label={t("Tasa de respuesta")}
           value={`${responseRate}%`}
-          hint={`${responded} de ${sent}`}
+          hint={t("{responded} de {sent}", { responded, sent })}
           icon={<Percent className="size-4" />}
         />
         <KpiCard
-          label="Llegan a entrevista"
+          label={t("Llegan a entrevista")}
           value={`${interviewRate}%`}
-          hint={`${interviews} procesos`}
+          hint={t("{interviews} procesos", { interviews })}
           icon={<Timer className="size-4" />}
         />
         <KpiCard
-          label="Ofertas"
+          label={t("Ofertas")}
           value={`${offerRate}%`}
-          hint={`${offers} ofertas`}
+          hint={t("{offers} ofertas", { offers })}
           icon={<Trophy className="size-4" />}
         />
         <KpiCard
-          label="Cerradas"
+          label={t("Cerradas")}
           value={closed}
-          hint={`${rejected} rechazos`}
+          hint={t("{rejected} rechazos", { rejected })}
           icon={<BarChart3 className="size-4" />}
         />
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
-        <SectionCard title="Embudo" subtitle="De candidatura enviada a oferta">
+        <SectionCard title={t("Embudo")} subtitle={t("De candidatura enviada a oferta")}>
           <ul className="space-y-4">
             {funnel.map((step) => (
               <li key={step.label}>
@@ -166,7 +168,7 @@ function AnalyticsPage() {
           </ul>
         </SectionCard>
 
-        <SectionCard title="Actividad" subtitle="Candidaturas enviadas por semana">
+        <SectionCard title={t("Actividad")} subtitle={t("Candidaturas enviadas por semana")}>
           <div className="flex h-44 items-end gap-3">
             {weekly.map((entry) => (
               <div key={entry.label} className="flex flex-1 flex-col items-center gap-2">
@@ -185,7 +187,7 @@ function AnalyticsPage() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Por etapa" subtitle="Dónde está tu pipeline">
+        <SectionCard title={t("Por etapa")} subtitle={t("Dónde está tu pipeline")}>
           <ul className="space-y-3">
             {byStage.map(({ stage, count }) => (
               <li key={stage}>
@@ -204,7 +206,7 @@ function AnalyticsPage() {
           </ul>
         </SectionCard>
 
-        <SectionCard title="Origen y modalidad" subtitle="De dónde salen tus oportunidades">
+        <SectionCard title={t("Origen y modalidad")} subtitle={t("De dónde salen tus oportunidades")}>
           <ul className="space-y-3">
             {sources.slice(0, 5).map(([source, count]) => (
               <li key={source}>
@@ -230,7 +232,7 @@ function AnalyticsPage() {
             ))}
           </div>
           <p className="mt-4 text-xs text-muted-foreground">
-            {upcomingInterviews} entrevistas confirmadas por delante.
+            {t("{n} entrevistas confirmadas por delante.", { n: upcomingInterviews })}
           </p>
         </SectionCard>
       </div>

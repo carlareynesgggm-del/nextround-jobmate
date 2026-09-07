@@ -30,6 +30,7 @@ import {
   type Stage,
   type WorkMode,
 } from "@/lib/domain";
+import { useT } from "@/lib/i18n/provider";
 
 type Props = {
   open: boolean;
@@ -40,7 +41,7 @@ type Props = {
 const NEW_COMPANY = "__new__";
 
 /** Adivina empresa y origen a partir del dominio del enlace pegado. */
-function readJobUrl(url: string): { company: string; source: string } | null {
+function readJobUrl(url: string, t: (text: string) => string): { company: string; source: string } | null {
   try {
     const { hostname, pathname } = new URL(url);
     const host = hostname.replace(/^www\./, "");
@@ -59,7 +60,7 @@ function readJobUrl(url: string): { company: string; source: string } | null {
     const slug = pathname.split("/").filter(Boolean).slice(-1)[0] ?? "";
     return {
       company: portal ? "" : base.charAt(0).toUpperCase() + base.slice(1),
-      source: portal ? (known[portal] as string) : slug ? "Web de la empresa" : "Web de la empresa",
+      source: portal ? (known[portal] as string) : t("Web de la empresa"),
     };
   } catch {
     return null;
@@ -67,6 +68,7 @@ function readJobUrl(url: string): { company: string; source: string } | null {
 }
 
 export function ApplicationDialog({ open, onOpenChange, application }: Props) {
+  const t = useT();
   const { data: companies = [] } = useCompanies();
   const { data: documents = [] } = useDocuments();
   const saveApplication = useSaveApplication();
@@ -124,9 +126,9 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
   }, [open, application]);
 
   function importJob() {
-    const parsed = readJobUrl(importUrl.trim());
+    const parsed = readJobUrl(importUrl.trim(), t);
     if (!parsed) {
-      toast.error("Ese enlace no parece válido.");
+      toast.error(t("Ese enlace no parece válido."));
       return;
     }
     setJobUrl(importUrl.trim());
@@ -142,19 +144,19 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
       }
     }
     setManual(true);
-    toast.success("Oferta importada. Revisa y completa los datos.");
+    toast.success(t("Oferta importada. Revisa y completa los datos."));
   }
 
   async function submit() {
     if (!roleTitle.trim()) {
-      toast.error("Escribe el nombre del puesto.");
+      toast.error(t("Escribe el nombre del puesto."));
       return;
     }
     try {
       let finalCompanyId: string | null = companyId || null;
       if (companyId === NEW_COMPANY) {
         if (!newCompany.trim()) {
-          toast.error("Escribe el nombre de la empresa.");
+          toast.error(t("Escribe el nombre de la empresa."));
           return;
         }
         const created = await saveCompany.mutateAsync({ values: { name: newCompany.trim() } });
@@ -183,7 +185,7 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
             : {}),
         },
       });
-      toast.success(application ? "Candidatura actualizada" : "Candidatura creada");
+      toast.success(application ? t("Candidatura actualizada") : t("Candidatura creada"));
       if (application) {
         onOpenChange(false);
         return;
@@ -192,7 +194,7 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
       if (newId && cvs.length > 0) setCreatedId(newId);
       else onOpenChange(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "No se pudo guardar");
+      toast.error(error instanceof Error ? error.message : t("No se pudo guardar"));
     }
   }
 
@@ -204,13 +206,13 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-display">¿Qué CV usaste?</DialogTitle>
+            <DialogTitle className="font-display">{t("¿Qué CV usaste?")}</DialogTitle>
             <DialogDescription>
-              Vincúlalo y podré comparar qué versión consigue más respuestas.
+              {t("Vincúlalo y podré comparar qué versión consigue más respuestas.")}
             </DialogDescription>
           </DialogHeader>
           <select value={cvId} onChange={(event) => setCvId(event.target.value)} className={fieldClass}>
-            <option value="">Decidirlo más tarde</option>
+            <option value="">{t("Decidirlo más tarde")}</option>
             {cvs.map((doc) => (
               <option key={doc.id} value={doc.id}>
                 {doc.name}
@@ -220,7 +222,7 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
           </select>
           <DialogFooter>
             <Button variant="ghost" onClick={() => onOpenChange(false)}>
-              Ahora no
+              {t("Ahora no")}
             </Button>
             <Button
               onClick={async () => {
@@ -231,12 +233,12 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
                     role: "cv",
                     submitted: true,
                   });
-                  toast.success("CV vinculado");
+                  toast.success(t("CV vinculado"));
                 }
                 onOpenChange(false);
               }}
             >
-              Guardar
+              {t("Guardar")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -249,19 +251,19 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="font-display">
-            {application ? "Editar candidatura" : "Nueva candidatura"}
+            {application ? t("Editar candidatura") : t("Nueva candidatura")}
           </DialogTitle>
           <DialogDescription>
             {application
-              ? "Actualiza los datos del proceso."
-              : "Pega el enlace de la oferta y rellenamos lo que podamos."}
+              ? t("Actualiza los datos del proceso.")
+              : t("Pega el enlace de la oferta y rellenamos lo que podamos.")}
           </DialogDescription>
         </DialogHeader>
 
         {!application && (
           <div className="rounded-2xl bg-surface-2 p-4">
             <Label htmlFor="import-url" className="flex items-center gap-1.5">
-              <Link2 className="size-3.5" /> Pega el enlace de la oferta
+              <Link2 className="size-3.5" /> {t("Pega el enlace de la oferta")}
             </Label>
             <div className="mt-2 flex flex-col gap-2 sm:flex-row">
               <Input
@@ -271,7 +273,7 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
                 placeholder="https://…"
               />
               <Button onClick={importJob} className="gap-1.5 rounded-xl">
-                <Sparkles className="size-4" /> Importar oferta
+                <Sparkles className="size-4" /> {t("Importar oferta")}
               </Button>
             </div>
             {!manual && (
@@ -279,7 +281,7 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
                 onClick={() => setManual(true)}
                 className="mt-3 text-xs text-muted-foreground underline-offset-2 hover:underline"
               >
-                O rellenar los datos a mano
+                {t("O rellenar los datos a mano")}
               </button>
             )}
           </div>
@@ -288,7 +290,7 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
         {(manual || application) && (
           <div className="grid gap-4 py-2 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <Label htmlFor="role">Puesto</Label>
+              <Label htmlFor="role">{t("Puesto")}</Label>
               <Input
                 id="role"
                 value={roleTitle}
@@ -299,33 +301,33 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
             </div>
 
             <div>
-              <Label htmlFor="company">Empresa</Label>
+              <Label htmlFor="company">{t("Empresa")}</Label>
               <select
                 id="company"
                 value={companyId}
                 onChange={(event) => setCompanyId(event.target.value)}
                 className={`mt-1.5 ${fieldClass}`}
               >
-                <option value="">Sin empresa</option>
+                <option value="">{t("Sin empresa")}</option>
                 {companies.map((company) => (
                   <option key={company.id} value={company.id}>
                     {company.name}
                   </option>
                 ))}
-                <option value={NEW_COMPANY}>+ Nueva empresa…</option>
+                <option value={NEW_COMPANY}>{t("+ Nueva empresa…")}</option>
               </select>
               {companyId === NEW_COMPANY && (
                 <Input
                   value={newCompany}
                   onChange={(event) => setNewCompany(event.target.value)}
-                  placeholder="Nombre de la empresa"
+                  placeholder={t("Nombre de la empresa")}
                   className="mt-2"
                 />
               )}
             </div>
 
             <div>
-              <Label htmlFor="stage">Etapa</Label>
+              <Label htmlFor="stage">{t("Etapa")}</Label>
               <select
                 id="stage"
                 value={stage}
@@ -341,7 +343,7 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
             </div>
 
             <div>
-              <Label htmlFor="location">Ubicación</Label>
+              <Label htmlFor="location">{t("Ubicación")}</Label>
               <Input
                 id="location"
                 value={location}
@@ -352,14 +354,14 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
             </div>
 
             <div>
-              <Label htmlFor="mode">Modalidad</Label>
+              <Label htmlFor="mode">{t("Modalidad")}</Label>
               <select
                 id="mode"
                 value={workMode}
                 onChange={(event) => setWorkMode(event.target.value as WorkMode | "")}
                 className={`mt-1.5 ${fieldClass}`}
               >
-                <option value="">Sin definir</option>
+                <option value="">{t("Sin definir")}</option>
                 {(Object.keys(WORK_MODE_LABEL) as WorkMode[]).map((mode) => (
                   <option key={mode} value={mode}>
                     {WORK_MODE_LABEL[mode]}
@@ -369,7 +371,7 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
             </div>
 
             <div>
-              <Label htmlFor="salary-min">Salario mínimo (€)</Label>
+              <Label htmlFor="salary-min">{t("Salario mínimo (€)")}</Label>
               <Input
                 id="salary-min"
                 inputMode="numeric"
@@ -381,7 +383,7 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
             </div>
 
             <div>
-              <Label htmlFor="salary-max">Salario máximo (€)</Label>
+              <Label htmlFor="salary-max">{t("Salario máximo (€)")}</Label>
               <Input
                 id="salary-max"
                 inputMode="numeric"
@@ -393,32 +395,32 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
             </div>
 
             <div>
-              <Label htmlFor="source">Origen</Label>
+              <Label htmlFor="source">{t("Origen")}</Label>
               <Input
                 id="source"
                 value={source}
                 onChange={(event) => setSource(event.target.value)}
-                placeholder="LinkedIn, referido…"
+                placeholder={t("LinkedIn, referido…")}
                 className="mt-1.5"
               />
             </div>
 
             <div>
-              <Label htmlFor="priority">Prioridad</Label>
+              <Label htmlFor="priority">{t("Prioridad")}</Label>
               <select
                 id="priority"
                 value={priority}
                 onChange={(event) => setPriority(event.target.value)}
                 className={`mt-1.5 ${fieldClass}`}
               >
-                <option value="high">Alta</option>
-                <option value="medium">Media</option>
-                <option value="low">Baja</option>
+                <option value="high">{t("Alta")}</option>
+                <option value="medium">{t("Media")}</option>
+                <option value="low">{t("Baja")}</option>
               </select>
             </div>
 
             <div className="sm:col-span-2">
-              <Label htmlFor="url">Enlace a la oferta</Label>
+              <Label htmlFor="url">{t("Enlace a la oferta")}</Label>
               <Input
                 id="url"
                 value={jobUrl}
@@ -429,18 +431,18 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
             </div>
 
             <div>
-              <Label htmlFor="next-action">Próxima acción</Label>
+              <Label htmlFor="next-action">{t("Próxima acción")}</Label>
               <Input
                 id="next-action"
                 value={nextAction}
                 onChange={(event) => setNextAction(event.target.value)}
-                placeholder="Enviar email de seguimiento"
+                placeholder={t("Enviar email de seguimiento")}
                 className="mt-1.5"
               />
             </div>
 
             <div>
-              <Label htmlFor="next-date">Fecha de la próxima acción</Label>
+              <Label htmlFor="next-date">{t("Fecha de la próxima acción")}</Label>
               <Input
                 id="next-date"
                 type="date"
@@ -451,14 +453,14 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
             </div>
 
             <div className="sm:col-span-2">
-              <Label>Interés</Label>
+              <Label>{t("Interés")}</Label>
               <div className="mt-2 flex gap-1.5">
                 {[1, 2, 3, 4, 5].map((value) => (
                   <button
                     key={value}
                     type="button"
                     onClick={() => setExcitement(value)}
-                    aria-label={`Interés ${value} de 5`}
+                    aria-label={t("Interés {n} de 5", { n: value })}
                     className={`h-8 flex-1 rounded-xl border text-xs font-medium transition-colors ${
                       excitement >= value
                         ? "border-violet/35 bg-violet/12 text-violet"
@@ -472,14 +474,14 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
             </div>
 
             <div className="sm:col-span-2">
-              <Label htmlFor="description">Descripción / detalles</Label>
+              <Label htmlFor="description">{t("Descripción / detalles")}</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 rows={3}
                 className="mt-1.5"
-                placeholder="Equipo, producto, requisitos clave…"
+                placeholder={t("Equipo, producto, requisitos clave…")}
               />
             </div>
           </div>
@@ -487,10 +489,10 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Cancelar
+            {t("Cancelar")}
           </Button>
           <Button onClick={submit} disabled={saveApplication.isPending || (!manual && !application)}>
-            {application ? "Guardar cambios" : "Crear candidatura"}
+            {application ? t("Guardar cambios") : t("Crear candidatura")}
           </Button>
         </DialogFooter>
       </DialogContent>

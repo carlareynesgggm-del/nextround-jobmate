@@ -2,8 +2,10 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 import { STAGE_META, companyTint, initials, type Stage } from "@/lib/domain";
+import { useT } from "@/lib/i18n/provider";
 
 export function StageBadge({ stage, className }: { stage: Stage; className?: string }) {
+  const t = useT();
   const meta = STAGE_META[stage];
   return (
     <span
@@ -14,7 +16,7 @@ export function StageBadge({ stage, className }: { stage: Stage; className?: str
       )}
     >
       <span className={cn("size-1.5 rounded-full", meta.dot)} />
-      {meta.label}
+      {t(meta.label)}
     </span>
   );
 }

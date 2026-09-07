@@ -1,0 +1,35 @@
+// Cada entrada: clave en español -> [inglés, francés, alemán]
+export const chunk: Record<string, [string, string, string]> = {
+  "Candidaturas": ["Applications", "Candidatures", "Bewerbungen"],
+  "{n} procesos visibles de {total} registrados.": [
+    "{n} processes visible out of {total} recorded.",
+    "{n} processus visibles sur {total} enregistrés.",
+    "{n} sichtbare Prozesse von {total} erfassten.",
+  ],
+  "Tablero": ["Board", "Tableau", "Board"],
+  "Lista": ["List", "Liste", "Liste"],
+  "Nueva": ["New", "Nouvelle", "Neu"],
+  "Buscar por puesto, empresa o ciudad…": [
+    "Search by role, company or city…",
+    "Rechercher par poste, entreprise ou ville…",
+    "Suche nach Position, Unternehmen oder Stadt…",
+  ],
+  "Todas las etapas": ["All stages", "Toutes les étapes", "Alle Phasen"],
+  "Sin candidaturas": ["No applications", "Aucune candidature", "Keine Bewerbungen"],
+  "Crea la primera y empieza a seguir su recorrido.": [
+    "Create your first one and start tracking its progress.",
+    "Créez la première et commencez à suivre son parcours.",
+    "Erstelle die erste und verfolge ihren Verlauf.",
+  ],
+  "Nueva candidatura": ["New application", "Nouvelle candidature", "Neue Bewerbung"],
+  "Nada en esta etapa": ["Nothing in this stage", "Rien à cette étape", "Nichts in dieser Phase"],
+  "Puesto": ["Role", "Poste", "Position"],
+  "Etapa": ["Stage", "Étape", "Phase"],
+  "Ubicación": ["Location", "Lieu", "Standort"],
+  "Salario": ["Salary", "Salaire", "Gehalt"],
+  "Enviada": ["Submitted", "Envoyée", "Gesendet"],
+  "Próxima acción": ["Next action", "Prochaine action", "Nächste Aktion"],
+  "Sin empresa": ["No company", "Sans entreprise", "Kein Unternehmen"],
+  "días": ["days", "jours", "Tage"],
+  "Mover de etapa": ["Move stage", "Changer d'étape", "Phase ändern"],
+};

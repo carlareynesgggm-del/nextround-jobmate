@@ -8,6 +8,7 @@ import { EmptyState, PageHeader, Pill, SectionCard } from "@/components/ui-bits"
 import { useApplications, useDeleteTask, useSaveTask, useTasks } from "@/lib/api";
 import { PRIORITY_LABEL, priorityTone, type TaskRow } from "@/lib/domain";
 import { daysFromToday, relativeDay } from "@/lib/format";
+import { useT } from "@/lib/i18n/provider";
 
 export const Route = createFileRoute("/_authenticated/tasks")({
   head: () => ({
@@ -31,6 +32,7 @@ export const Route = createFileRoute("/_authenticated/tasks")({
 });
 
 function TasksPage() {
+  const t = useT();
   const { data: tasks = [] } = useTasks();
   const { data: applications = [] } = useApplications();
   const saveTask = useSaveTask();
@@ -45,19 +47,19 @@ function TasksPage() {
 
   const groups: { label: string; items: TaskRow[] }[] = [
     {
-      label: "Vencidas",
+      label: t("Vencidas"),
       items: open.filter((task) => (daysFromToday(task.due_date) ?? 99) < 0),
     },
-    { label: "Hoy", items: open.filter((task) => daysFromToday(task.due_date) === 0) },
+    { label: t("Hoy"), items: open.filter((task) => daysFromToday(task.due_date) === 0) },
     {
-      label: "Próximos 7 días",
+      label: t("Próximos 7 días"),
       items: open.filter((task) => {
         const diff = daysFromToday(task.due_date);
         return diff !== null && diff > 0 && diff <= 7;
       }),
     },
     {
-      label: "Más adelante",
+      label: t("Más adelante"),
       items: open.filter((task) => {
         const diff = daysFromToday(task.due_date);
         return diff === null || diff > 7;
@@ -71,7 +73,7 @@ function TasksPage() {
       <li key={task.id} className="flex items-center gap-3 px-5 py-3">
         <button
           onClick={() => saveTask.mutate({ id: task.id, values: { done: !task.done } })}
-          aria-label="Cambiar estado"
+          aria-label={t("Cambiar estado")}
           className={task.done ? "text-success" : "text-muted-foreground hover:text-success"}
         >
           {task.done ? <CheckCircle2 className="size-4" /> : <Circle className="size-4" />}
@@ -82,7 +84,7 @@ function TasksPage() {
           </p>
           {app && (
             <p className="truncate text-xs text-muted-foreground">
-              {app.companies?.name ?? "Sin empresa"} · {app.role_title}
+              {app.companies?.name ?? t("Sin empresa")} · {app.role_title}
             </p>
           )}
         </div>
@@ -94,7 +96,7 @@ function TasksPage() {
         </span>
         <button
           onClick={() => deleteTask.mutate(task.id)}
-          aria-label="Eliminar tarea"
+          aria-label={t("Eliminar tarea")}
           className="text-muted-foreground hover:text-danger"
         >
           <Trash2 className="size-3.5" />
@@ -106,27 +108,27 @@ function TasksPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Tareas"
-        description={`${open.length} pendientes · ${done.length} completadas.`}
+        title={t("Tareas")}
+        description={t("{n} pendientes · {m} completadas.", { n: open.length, m: done.length })}
       />
 
-      <SectionCard title="Añadir tarea">
+      <SectionCard title={t("Añadir tarea")}>
         <div className="grid gap-3 md:grid-cols-[1fr_auto_auto_auto]">
           <Input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
-            placeholder="Preparar preguntas para la entrevista"
+            placeholder={t("Preparar preguntas para la entrevista")}
           />
           <select
             value={applicationId}
             onChange={(event) => setApplicationId(event.target.value)}
             className="h-10 rounded-lg border border-input bg-surface px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-            aria-label="Candidatura"
+            aria-label={t("Candidatura")}
           >
-            <option value="">Sin candidatura</option>
+            <option value="">{t("Sin candidatura")}</option>
             {applications.map((app) => (
               <option key={app.id} value={app.id}>
-                {app.companies?.name ?? "Sin empresa"} · {app.role_title}
+                {app.companies?.name ?? t("Sin empresa")} · {app.role_title}
               </option>
             ))}
           </select>
@@ -134,11 +136,11 @@ function TasksPage() {
             value={priority}
             onChange={(event) => setPriority(event.target.value)}
             className="h-10 rounded-lg border border-input bg-surface px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-            aria-label="Prioridad"
+            aria-label={t("Prioridad")}
           >
-            <option value="high">Alta</option>
-            <option value="medium">Media</option>
-            <option value="low">Baja</option>
+            <option value="high">{t("Alta")}</option>
+            <option value="medium">{t("Media")}</option>
+            <option value="low">{t("Baja")}</option>
           </select>
           <Input
             type="date"
@@ -163,14 +165,14 @@ function TasksPage() {
             setDue("");
           }}
         >
-          <Plus className="size-4" /> Añadir tarea
+          <Plus className="size-4" /> {t("Añadir tarea")}
         </Button>
       </SectionCard>
 
       {open.length === 0 ? (
         <EmptyState
-          title="Sin tareas pendientes"
-          description="Añade lo siguiente que quieras preparar."
+          title={t("Sin tareas pendientes")}
+          description={t("Añade lo siguiente que quieras preparar.")}
           icon={<CheckSquare className="size-6" />}
         />
       ) : (
@@ -181,7 +183,7 @@ function TasksPage() {
               <SectionCard
                 key={group.label}
                 title={group.label}
-                subtitle={`${group.items.length} tareas`}
+                subtitle={t("{n} tareas", { n: group.items.length })}
                 bodyClassName="p-0"
               >
                 <ul className="divide-y divide-border">{group.items.map(row)}</ul>
@@ -191,7 +193,7 @@ function TasksPage() {
       )}
 
       {done.length > 0 && (
-        <SectionCard title="Completadas" subtitle={`${done.length} tareas`} bodyClassName="p-0">
+        <SectionCard title={t("Completadas")} subtitle={t("{n} tareas", { n: done.length })} bodyClassName="p-0">
           <ul className="divide-y divide-border">{done.slice(0, 12).map(row)}</ul>
         </SectionCard>
       )}

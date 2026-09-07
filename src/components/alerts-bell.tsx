@@ -4,10 +4,12 @@ import { Bell } from "lucide-react";
 
 import { useApplications, useCalendar } from "@/lib/api";
 import { attentionFeed, nextActionTone } from "@/lib/next-action";
+import { useT } from "@/lib/i18n/provider";
 import { cn } from "@/lib/utils";
 
 /** Campana de avisos: alertas derivadas de fechas límite, entrevistas y silencios. */
 export function AlertsBell({ className }: { className?: string }) {
+  const t = useT();
   const { data: applications = [] } = useApplications();
   const { data: events = [] } = useCalendar();
   const [open, setOpen] = useState(false);
@@ -18,7 +20,7 @@ export function AlertsBell({ className }: { className?: string }) {
     <div className={cn("relative", className)}>
       <button
         onClick={() => setOpen((value) => !value)}
-        aria-label="Avisos"
+        aria-label={t("Avisos")}
         className="relative inline-flex size-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
       >
         <Bell className="size-4" />
@@ -31,13 +33,13 @@ export function AlertsBell({ className }: { className?: string }) {
 
       {open && (
         <>
-          <button className="fixed inset-0 z-30 cursor-default" aria-label="Cerrar avisos" onClick={() => setOpen(false)} />
+          <button className="fixed inset-0 z-30 cursor-default" aria-label={t("Cerrar avisos")} onClick={() => setOpen(false)} />
           <div className="absolute right-0 z-40 mt-2 w-80 overflow-hidden rounded-2xl border border-border bg-surface shadow-lift">
             <p className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Avisos
+              {t("Avisos")}
             </p>
             {feed.length === 0 ? (
-              <p className="px-4 pb-4 text-sm text-muted-foreground">Nada urgente ahora mismo.</p>
+              <p className="px-4 pb-4 text-sm text-muted-foreground">{t("Nada urgente ahora mismo.")}</p>
             ) : (
               <ul className="divide-y divide-border">
                 {feed.map(({ app, action }) => (
