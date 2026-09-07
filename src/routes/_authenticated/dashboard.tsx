@@ -43,7 +43,7 @@ function HomePage() {
   const { data: events = [] } = useCalendar();
   const { data: profile } = useProfile();
 
-  const firstName = (profile?.full_name ?? "").split(" ")[0] || "de nuevo";
+  const firstName = (((profile as { full_name?: string | null } | null)?.full_name) ?? "").split(" ")[0] || "de nuevo";
   const active = applications.filter((app) => isActive(app.stage) && !app.archived);
   const responded = applications.filter((app) => !["saved", "applied"].includes(app.stage)).length;
   const sent = applications.filter((app) => app.stage !== "saved").length;

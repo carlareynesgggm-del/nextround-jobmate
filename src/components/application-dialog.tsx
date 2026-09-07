@@ -25,6 +25,7 @@ import {
   STAGES,
   STAGE_META,
   WORK_MODE_LABEL,
+  type ApplicationRow,
   type ApplicationWithCompany,
   type Stage,
   type WorkMode,
@@ -225,8 +226,8 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
               onClick={async () => {
                 if (cvId) {
                   await linkDocument.mutateAsync({
-                    application_id: createdId,
-                    document_id: cvId,
+                    application: { id: createdId } as ApplicationRow,
+                    documentId: cvId,
                     role: "cv",
                     submitted: true,
                   });
