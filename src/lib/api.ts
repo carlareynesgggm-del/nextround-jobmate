@@ -34,6 +34,9 @@ export const qk = {
   applications: ["applications"] as const,
   application: (id: string) => ["application", id] as const,
   timeline: (id: string) => ["timeline", id] as const,
+  appDocs: (id: string) => ["appDocs", id] as const,
+  allAppDocs: ["appDocs", "all"] as const,
+
   companies: ["companies"] as const,
   contacts: ["contacts"] as const,
   tasks: ["tasks"] as const,
