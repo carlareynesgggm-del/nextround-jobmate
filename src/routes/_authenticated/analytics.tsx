@@ -137,50 +137,48 @@ function InsightsPage() {
   const insights: Insight[] = [];
 
   const eligibleSources = bySource.filter((s) => s.sent >= MIN_SAMPLE);
-  if (eligibleSources.length >= 2) {
-    const best = [...eligibleSources].sort((a, b) => b.rate - a.rate)[0];
-    const worst = [...eligibleSources].sort((a, b) => a.rate - b.rate)[0];
-    if (best.label !== worst.label && worst.rate > 0 && best.rate > worst.rate) {
-      const factor = Math.round((best.rate / worst.rate) * 10) / 10;
+  const bestSource = [...eligibleSources].sort((a, b) => b.rate - a.rate)[0];
+  const worstSource = [...eligibleSources].sort((a, b) => a.rate - b.rate)[0];
+  if (eligibleSources.length >= 2 && bestSource && worstSource) {
+    if (bestSource.label !== worstSource.label && worstSource.rate > 0 && bestSource.rate > worstSource.rate) {
+      const factor = Math.round((bestSource.rate / worstSource.rate) * 10) / 10;
       insights.push({
         text: t("Las candidaturas por {best} generan {factor}× más entrevistas que {worst}.", {
-          best: best.label,
+          best: bestSource.label,
           factor,
-          worst: worst.label,
+          worst: worstSource.label,
         }),
       });
-    } else if (best.rate > 0) {
+    } else if (bestSource.rate > 0) {
       insights.push({
         text: t("Tu mejor origen es {best}, con una tasa de entrevista del {rate}%.", {
-          best: best.label,
-          rate: best.rate,
+          best: bestSource.label,
+          rate: bestSource.rate,
         }),
       });
     }
   }
 
   const eligibleCv = cvPerformance.filter((c) => c.usedCount >= MIN_SAMPLE);
-  if (eligibleCv.length >= 1) {
-    const best = [...eligibleCv].sort((a, b) => b.rate - a.rate)[0];
+  const bestCv = [...eligibleCv].sort((a, b) => b.rate - a.rate)[0];
+  if (bestCv) {
     insights.push({
-      text: t("Tu CV \"{name}\" tiene la mejor tasa de entrevista: {rate}%.", {
-        name: best.doc.name,
-        rate: best.rate,
+      text: t('Tu CV "{name}" tiene la mejor tasa de entrevista: {rate}%.', {
+        name: bestCv.doc.name,
+        rate: bestCv.rate,
       }),
     });
   }
 
   const eligibleSectors = bySector.filter((s) => s.sent >= MIN_SAMPLE);
-  if (eligibleSectors.length >= 2) {
-    const best = [...eligibleSectors].sort((a, b) => b.rate - a.rate)[0];
-    if (best.rate > 0) {
-      insights.push({
-        text: t("En {sector} obtienes tu mejor tasa de entrevista: {rate}%.", {
-          sector: best.label,
-          rate: best.rate,
-        }),
-      });
-    }
+  const bestSector = [...eligibleSectors].sort((a, b) => b.rate - a.rate)[0];
+  if (eligibleSectors.length >= 2 && bestSector && bestSector.rate > 0) {
+    insights.push({
+      text: t("En {sector} obtienes tu mejor tasa de entrevista: {rate}%.", {
+        sector: bestSector.label,
+        rate: bestSector.rate,
+      }),
+    });
   }
 
   const activeCount = applications.filter((a) => isActive(a.stage)).length;
