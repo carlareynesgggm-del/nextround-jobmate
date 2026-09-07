@@ -17,6 +17,7 @@ import { EmptyState, PageHeader, Pill, SectionCard } from "@/components/ui-bits"
 import { useApplications, useCalendar, useDeleteEvent, useSaveEvent } from "@/lib/api";
 import { EVENT_KIND_LABEL, EVENT_KIND_TONE, type EventKind } from "@/lib/domain";
 import { fmtDateTime, fmtTime, isSameDay, relativeDay } from "@/lib/format";
+import { useLanguage, useT } from "@/lib/i18n/provider";
 
 export const Route = createFileRoute("/_authenticated/calendar")({
   head: () => ({
@@ -39,16 +40,16 @@ export const Route = createFileRoute("/_authenticated/calendar")({
   component: CalendarPage,
 });
 
-const WEEKDAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-
 function CalendarPage() {
+  const t = useT();
+  const { locale } = useLanguage();
   const { data: events = [] } = useCalendar();
   const { data: applications = [] } = useApplications();
   const deleteEvent = useDeleteEvent();
   const [cursor, setCursor] = useState(() => new Date());
   const [open, setOpen] = useState(false);
 
-  const monthLabel = new Intl.DateTimeFormat("es-ES", {
+  const monthLabel = new Intl.DateTimeFormat(locale, {
     month: "long",
     year: "numeric",
   }).format(cursor);
@@ -65,6 +66,16 @@ function CalendarPage() {
     });
   }, [cursor]);
 
+  const weekdays = useMemo(() => {
+    const formatter = new Intl.DateTimeFormat(locale, { weekday: "short" });
+    // Lunes 2024-01-01 como referencia estable
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(2024, 0, 1 + index);
+      const label = formatter.format(date);
+      return label.charAt(0).toUpperCase() + label.slice(1);
+    });
+  }, [locale]);
+
   const upcoming = events
     .filter((event) => new Date(event.starts_at).getTime() >= Date.now() - 3_600_000)
     .slice(0, 8);
@@ -72,11 +83,11 @@ function CalendarPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Calendario"
-        description="Entrevistas, pruebas y fechas límite de todos tus procesos."
+        title={t("Calendario")}
+        description={t("Entrevistas, pruebas y fechas límite de todos tus procesos.")}
         actions={
           <Button className="gap-1.5" onClick={() => setOpen(true)}>
-            <CalendarPlus className="size-4" /> Nuevo evento
+            <CalendarPlus className="size-4" /> {t("Nuevo evento")}
           </Button>
         }
       />
@@ -89,7 +100,7 @@ function CalendarPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                aria-label="Mes anterior"
+                aria-label={t("Mes anterior")}
                 onClick={() =>
                   setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))
                 }
@@ -97,12 +108,12 @@ function CalendarPage() {
                 <ChevronLeft className="size-4" />
               </Button>
               <Button variant="ghost" size="sm" onClick={() => setCursor(new Date())}>
-                Hoy
+                {t("Hoy")}
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                aria-label="Mes siguiente"
+                aria-label={t("Mes siguiente")}
                 onClick={() =>
                   setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))
                 }
@@ -113,7 +124,7 @@ function CalendarPage() {
           </div>
 
           <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-            {WEEKDAYS.map((day) => (
+            {weekdays.map((day) => (
               <div key={day} className="py-1.5">
                 {day}
               </div>
@@ -157,7 +168,7 @@ function CalendarPage() {
                     ))}
                     {dayEvents.length > 2 && (
                       <p className="px-1 text-[10px] text-muted-foreground">
-                        +{dayEvents.length - 2} más
+                        {t("+{n} más", { n: dayEvents.length - 2 })}
                       </p>
                     )}
                   </div>
@@ -167,10 +178,10 @@ function CalendarPage() {
           </div>
         </SectionCard>
 
-        <SectionCard title="Próximos eventos" bodyClassName="p-0">
+        <SectionCard title={t("Próximos eventos")} bodyClassName="p-0">
           {upcoming.length === 0 ? (
             <div className="px-5 py-8">
-              <EmptyState title="Nada agendado" description="Crea tu primer evento." />
+              <EmptyState title={t("Nada agendado")} description={t("Crea tu primer evento.")} />
             </div>
           ) : (
             <ul className="divide-y divide-border">
@@ -186,20 +197,20 @@ function CalendarPage() {
                         </p>
                         {app && (
                           <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                            {app.companies?.name ?? "Sin empresa"} · {app.role_title}
+                            {app.companies?.name ?? t("Sin empresa")} · {app.role_title}
                           </p>
                         )}
                       </div>
                       <button
                         onClick={() => deleteEvent.mutate(event.id)}
-                        aria-label="Eliminar evento"
+                        aria-label={t("Eliminar evento")}
                         className="text-muted-foreground hover:text-danger"
                       >
                         <Trash2 className="size-3.5" />
                       </button>
                     </div>
                     <div className="mt-2">
-                      <Pill tone={EVENT_KIND_TONE[event.kind]}>{EVENT_KIND_LABEL[event.kind]}</Pill>
+                      <Pill tone={EVENT_KIND_TONE[event.kind]}>{t(EVENT_KIND_LABEL[event.kind])}</Pill>
                     </div>
                   </li>
                 );
@@ -221,6 +232,7 @@ function EventDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const t = useT();
   const { data: applications = [] } = useApplications();
   const saveEvent = useSaveEvent();
   const [title, setTitle] = useState("");
@@ -237,12 +249,12 @@ function EventDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-display">Nuevo evento</DialogTitle>
+          <DialogTitle className="font-display">{t("Nuevo evento")}</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <Label htmlFor="e-title">Título</Label>
+            <Label htmlFor="e-title">{t("Título")}</Label>
             <Input
               id="e-title"
               value={title}
@@ -251,7 +263,7 @@ function EventDialog({
             />
           </div>
           <div>
-            <Label htmlFor="e-kind">Tipo</Label>
+            <Label htmlFor="e-kind">{t("Tipo")}</Label>
             <select
               id="e-kind"
               value={kind}
@@ -260,29 +272,29 @@ function EventDialog({
             >
               {(Object.keys(EVENT_KIND_LABEL) as EventKind[]).map((value) => (
                 <option key={value} value={value}>
-                  {EVENT_KIND_LABEL[value]}
+                  {t(EVENT_KIND_LABEL[value])}
                 </option>
               ))}
             </select>
           </div>
           <div>
-            <Label htmlFor="e-app">Candidatura</Label>
+            <Label htmlFor="e-app">{t("Candidatura")}</Label>
             <select
               id="e-app"
               value={applicationId}
               onChange={(event) => setApplicationId(event.target.value)}
               className={fieldClass}
             >
-              <option value="">Sin asociar</option>
+              <option value="">{t("Sin asociar")}</option>
               {applications.map((app) => (
                 <option key={app.id} value={app.id}>
-                  {app.companies?.name ?? "Sin empresa"} · {app.role_title}
+                  {app.companies?.name ?? t("Sin empresa")} · {app.role_title}
                 </option>
               ))}
             </select>
           </div>
           <div>
-            <Label htmlFor="e-start">Fecha y hora</Label>
+            <Label htmlFor="e-start">{t("Fecha y hora")}</Label>
             <Input
               id="e-start"
               type="datetime-local"
@@ -292,7 +304,7 @@ function EventDialog({
             />
           </div>
           <div>
-            <Label htmlFor="e-dur">Duración (min)</Label>
+            <Label htmlFor="e-dur">{t("Duración (min)")}</Label>
             <Input
               id="e-dur"
               inputMode="numeric"
@@ -302,12 +314,12 @@ function EventDialog({
             />
           </div>
           <div className="sm:col-span-2">
-            <Label htmlFor="e-loc">Lugar / enlace</Label>
+            <Label htmlFor="e-loc">{t("Lugar / enlace")}</Label>
             <Input
               id="e-loc"
               value={location}
               onChange={(event) => setLocation(event.target.value)}
-              placeholder="Google Meet, oficina…"
+              placeholder={t("Google Meet, oficina…")}
               className="mt-1.5"
             />
           </div>
@@ -315,12 +327,12 @@ function EventDialog({
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Cancelar
+            {t("Cancelar")}
           </Button>
           <Button
             onClick={async () => {
               if (!title.trim() || !startsAt) {
-                toast.error("Añade título y fecha.");
+                toast.error(t("Añade título y fecha."));
                 return;
               }
               await saveEvent.mutateAsync({
@@ -333,14 +345,14 @@ function EventDialog({
                   application_id: applicationId || null,
                 },
               });
-              toast.success("Evento creado");
+              toast.success(t("Evento creado"));
               setTitle("");
               setStartsAt("");
               setLocation("");
               onOpenChange(false);
             }}
           >
-            Guardar
+            {t("Guardar")}
           </Button>
         </DialogFooter>
       </DialogContent>
