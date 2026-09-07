@@ -84,7 +84,7 @@ export function ApplicationDialog({ open, onOpenChange, application }: Props) {
           return;
         }
         const created = await saveCompany.mutateAsync({ values: { name: newCompany.trim() } });
-        finalCompanyId = (created as { id: string }).id;
+        finalCompanyId = (created as unknown as { id: string }).id;
       }
 
       await saveApplication.mutateAsync({
