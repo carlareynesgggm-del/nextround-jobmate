@@ -177,7 +177,7 @@ function OfferBlock({ application }: { application: ApplicationWithCompany }) {
       values: {
         offer_salary: form.offer_salary ? Number(form.offer_salary) : null,
         offer_currency: form.offer_currency || null,
-        offer_bonus: form.offer_bonus ? Number(form.offer_bonus) : null,
+        offer_bonus: form.offer_bonus || null,
         offer_equity: form.offer_equity || null,
         offer_benefits: form.offer_benefits || null,
         offer_start_date: form.offer_start_date || null,

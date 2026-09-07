@@ -125,159 +125,27 @@ function ApplicationDetail() {
 
   return (
     <div className="space-y-10 py-6">
-      <Link
-        to="/applications"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" /> {t("Candidaturas")}
-      </Link>
+      <ApplicationHeader
+        app={app}
+        days={days}
+        onEdit={() => setEditOpen(true)}
+        onExport={() =>
+          exportApplicationSummary(app, {
+            timeline,
+            events: calendar.filter((event) => event.application_id === app.id),
+            notes: notes
+              .filter((note) => note.application_id === app.id)
+              .map((note) => note.body ?? ""),
+          })
+        }
+        onDelete={async () => {
+          await deleteApplication.mutateAsync(app.id);
+          toast.success(t("Candidatura eliminada"));
+          navigate({ to: "/applications" });
+        }}
+      />
 
-      <header className="space-y-7">
-        <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-          <div className="flex gap-4">
-            <CompanyMark name={app.companies?.name ?? app.role_title} size="lg" />
-            <div>
-              <p className="font-display text-sm font-medium text-muted-foreground">
-                {app.companies?.name ?? t("Sin empresa")}
-              </p>
-              <h1 className="mt-0.5 font-display text-3xl font-semibold leading-tight tracking-tight">
-                {app.role_title}
-              </h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {[
-                  app.location,
-                  app.work_mode ? WORK_MODE_LABEL[app.work_mode] : null,
-                  app.employment_type,
-                  formatSalary(app.salary_min, app.salary_max, app.currency ?? "EUR"),
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t("Enviada el {date}", { date: fmtDate(app.applied_at) })}
-                {days !== null ? t(" · hace {n} días", { n: days }) : ""}
-                {t(" · Etapa actual: ")}
-                <span className="text-foreground">{t(STAGE_META[app.stage].label)}</span>
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <select
-              value={app.stage}
-              onChange={(event) =>
-                moveStage.mutate({ application: app, to: event.target.value as Stage })
-              }
-              aria-label={t("Cambiar etapa")}
-              className="h-9 rounded-xl border border-input bg-surface px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
-            >
-              {STAGES.map((stage) => (
-                <option key={stage} value={stage}>
-                  {t(STAGE_META[stage].label)}
-                </option>
-              ))}
-            </select>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5 rounded-xl"
-              onClick={() =>
-                exportApplicationSummary(app, {
-                  timeline,
-                  events: calendar.filter((event) => event.application_id === app.id),
-                  notes: notes
-                    .filter((note) => note.application_id === app.id)
-                    .map((note) => note.body ?? ""),
-                })
-              }
-            >
-              <Download className="size-3.5" /> {t("Resumen PDF")}
-            </Button>
-            <Button variant="outline" size="sm" className="gap-1.5 rounded-xl" onClick={() => setEditOpen(true)}>
-              <Pencil className="size-3.5" /> {t("Editar")}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 text-danger hover:text-danger"
-              onClick={async () => {
-                await deleteApplication.mutateAsync(app.id);
-                toast.success(t("Candidatura eliminada"));
-                navigate({ to: "/applications" });
-              }}
-            >
-              <Trash2 className="size-3.5" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="max-w-2xl">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{t("Progreso del proceso")}</span>
-            <span className="tabular-nums">{progress}%</span>
-          </div>
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-2">
-            <div className="h-full rounded-full bg-violet transition-all" style={{ width: `${progress}%` }} />
-          </div>
-          <div className="scrollbar-slim mt-3 flex items-center gap-1 overflow-x-auto">
-            {PIPELINE_STAGES.map((stage, index) => (
-              <button
-                key={stage}
-                onClick={() => moveStage.mutate({ application: app, to: stage })}
-                className={cn(
-                  "whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors",
-                  stageIndex >= index
-                    ? "bg-violet/12 text-violet"
-                    : "text-muted-foreground hover:bg-accent",
-                )}
-              >
-                {t(STAGE_META[stage].short)}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {action && (
-          <div className="rounded-2xl bg-surface p-5 shadow-soft">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              {t("Siguiente mejor acción")}
-            </p>
-            <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="font-display text-lg font-semibold tracking-tight">{action.label}</p>
-                <p className="mt-0.5 text-sm text-muted-foreground">{action.detail}</p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={cn(
-                    "rounded-full border px-2 py-0.5 text-[10px] font-medium",
-                    nextActionTone(action.tone),
-                  )}
-                >
-                  {t(STAGE_META[app.stage].label)}
-                </span>
-                <Button size="sm" className="gap-1.5 rounded-xl" onClick={() => setTab("process")}>
-                  <Sparkles className="size-3.5" /> {t("Preparar con IA")}
-                </Button>
-                {app.candidate_portal_url && (
-                  <Button asChild size="sm" variant="outline" className="gap-1.5 rounded-xl">
-                    <a href={app.candidate_portal_url} target="_blank" rel="noreferrer">
-                      <KeyRound className="size-3.5" /> {t("Portal del candidato")}
-                    </a>
-                  </Button>
-                )}
-                {app.job_url && (
-                  <Button asChild size="sm" variant="ghost" className="gap-1.5">
-                    <a href={app.job_url} target="_blank" rel="noreferrer">
-                      {t("Ver oferta")} <ExternalLink className="size-3.5" />
-                    </a>
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </header>
+      <NextBestActionCard app={app} action={action} />
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="scrollbar-slim max-w-full overflow-x-auto">
@@ -288,64 +156,12 @@ function ApplicationDetail() {
           <TabsTrigger value="notes">{t("Notas")}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="mt-7 space-y-8">
-          <dl className="grid gap-x-8 gap-y-6 sm:grid-cols-3">
-            <Detail label={t("Empresa")} value={app.companies?.name ?? "—"} />
-            <Detail label={t("Puesto")} value={app.role_title} />
-            <Detail label={t("Ubicación")} value={app.location ?? "—"} />
-            <Detail
-              label={t("Salario")}
-              value={formatSalary(app.salary_min, app.salary_max, app.currency ?? "EUR")}
-            />
-            <Detail label={t("Tipo de empleo")} value={app.employment_type ?? "—"} />
-            <Detail label={t("Enviada el")} value={fmtDate(app.applied_at)} />
-            <Detail
-              label={t("Días desde el envío")}
-              value={days === null ? t("Sin enviar") : t("{n} días", { n: days })}
-            />
-            <Detail label={t("Etapa actual")} value={t(STAGE_META[app.stage].label)} />
-            <Detail
-              label={t("Próxima acción")}
-              value={
-                app.next_action
-                  ? `${app.next_action}${
-                      app.next_action_at ? ` · ${relativeDay(app.next_action_at)}` : ""
-                    }`
-                  : t("Sin definir")
-              }
-            />
-            <Detail
-              label={t("Portal del candidato")}
-              value={app.candidate_portal_url ?? "—"}
-              href={app.candidate_portal_url}
-            />
-            <Detail label={t("Email de acceso")} value={app.portal_username ?? "—"} />
-            <Detail
-              label={t("CV enviado")}
-              value={
-                cvLink?.documents
-                  ? `${cvLink.documents.name}${
-                      cvLink.documents.version ? ` · ${cvLink.documents.version}` : ""
-                    }`
-                  : t("Sin CV vinculado")
-              }
-            />
-          </dl>
-
-          {app.description && (
-            <div className="max-w-3xl">
-              <h3 className="font-display text-base font-semibold tracking-tight">{t("Contexto")}</h3>
-              <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
-                {app.description}
-              </p>
-            </div>
-          )}
-
-          <ApplicationInfoTab application={app} />
+        <TabsContent value="overview" className="mt-7">
+          <OverviewTab application={app} />
         </TabsContent>
 
         <TabsContent value="job" className="mt-7">
-          <JobDescriptionTab application={app} />
+          <JobTab application={app} />
         </TabsContent>
 
         <TabsContent value="process" className="mt-7 space-y-10">
@@ -369,31 +185,7 @@ function ApplicationDetail() {
   );
 }
 
-function Detail({
-  label,
-  value,
-  href,
-}: {
-  label: string;
-  value: string;
-  href?: string | null;
-}) {
-  const t = useT();
-  return (
-    <div>
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="mt-1 break-words text-sm">
-        {href ? (
-          <a href={href} target="_blank" rel="noreferrer" className="text-violet hover:underline">
-            {t("Abrir portal")}
-          </a>
-        ) : (
-          value
-        )}
-      </dd>
-    </div>
-  );
-}
+
 
 
 function NotesTab({ applicationId }: { applicationId: string }) {
