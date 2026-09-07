@@ -18,12 +18,14 @@ import { toast } from "sonner";
 
 import { ApplicationDialog } from "@/components/application-dialog";
 import {
-  ApplicationInfoTab,
   ContactsTab,
   DocumentsTab,
-  JobDescriptionTab,
   ProcessTab,
 } from "@/components/application-tabs";
+import { ApplicationHeader } from "@/components/detail/application-header";
+import { NextBestActionCard } from "@/components/detail/next-best-action";
+import { OverviewTab } from "@/components/detail/overview-tab";
+import { JobTab } from "@/components/detail/job-tab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
