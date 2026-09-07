@@ -658,7 +658,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
           .split(",")
           .map((item) => item.trim())
           .filter(Boolean),
-        position: id ? undefined : ordered.length,
+        ...(id ? {} : { position: ordered.length }),
       },
     });
     setForm(emptyProcessForm);
