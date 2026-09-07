@@ -1,14 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, CalendarClock, ExternalLink, Sparkles } from "lucide-react";
+import { ArrowRight, CalendarClock, Sparkles } from "lucide-react";
 
-import { CompanyMark, EmptyState, StageBadge } from "@/components/ui-bits";
+import { AttentionCard } from "@/components/home/attention-list";
+import { EmptyState } from "@/components/ui-bits";
 import { useT } from "@/lib/i18n/provider";
 import { Button } from "@/components/ui/button";
-import { useApplications, useCalendar, useProfile } from "@/lib/api";
-import { attentionFeed, nextActionTone } from "@/lib/next-action";
-import { PIPELINE_STAGES, STAGE_META, isActive } from "@/lib/domain";
-import { daysFromToday, fmtDateTime, relativeDay } from "@/lib/format";
-import { cn } from "@/lib/utils";
+import { useAllApplicationDocuments, useApplications, useCalendar, useProfile } from "@/lib/api";
+import { attentionFeed } from "@/lib/next-action";
+import { CLOSED_STAGES, STAGE_META, UNKNOWN, isActive } from "@/lib/domain";
+import { daysSinceApplied } from "@/lib/alerts";
+import { daysFromToday, fmtDateTime, relativeDay, toDate } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: HomePage,
 });
 
-function greeting(t: (text: string, vars?: Record<string, string | number>) => string): string {
+function greeting(t: (text: string) => string): string {
   const hour = new Date().getHours();
   if (hour < 6) return t("Buenas noches");
   if (hour < 13) return t("Buenos días");
@@ -39,79 +40,69 @@ function greeting(t: (text: string, vars?: Record<string, string | number>) => s
   return t("Buenas noches");
 }
 
-function translateAction(
-  t: (text: string, vars?: Record<string, string | number>) => string,
-  action: ReturnType<typeof attentionFeed>[number]["action"],
-) {
-  const labelMap: Record<string, string> = {
-    interview: t("Prepara la entrevista"),
-    cv: t("Sube el CV que usaste"),
-    notes: t("Añade notas de la entrevista"),
-    review: t("Define tu próximo paso"),
-  };
-  const detailMap: Record<string, string> = {
-    cv: t("Así podrás comparar qué versión funciona mejor"),
-    review: t("Esta candidatura no tiene ninguna acción pendiente"),
-  };
-  const ctaMap: Record<string, string> = {
-    interview: t("Preparar con IA"),
-    cv: t("Vincular CV"),
-    notes: t("Escribir notas"),
-    followup: t("Hacer seguimiento"),
-    custom: t("Ver candidatura"),
-    review: t("Ver candidatura"),
-  };
-  return {
-    ...action,
-    label: labelMap[action.kind] ?? action.label,
-    detail: detailMap[action.kind] ?? action.detail,
-    ctaLabel: ctaMap[action.kind] ?? (action.ctaLabel === "Abrir portal" ? t("Abrir portal") : action.ctaLabel === "Preparar" ? t("Preparar") : action.ctaLabel),
-  };
-}
-
 function HomePage() {
   const t = useT();
   const { data: applications = [], isLoading } = useApplications();
   const { data: events = [] } = useCalendar();
+  const { data: links = [] } = useAllApplicationDocuments();
   const { data: profile } = useProfile();
 
-  const firstName = (((profile as { full_name?: string | null } | null)?.full_name) ?? "").split(" ")[0] || t("de nuevo");
-  const active = applications.filter((app) => isActive(app.stage) && !app.archived);
-  const responded = applications.filter((app) => !["saved", "applied"].includes(app.stage)).length;
-  const sent = applications.filter((app) => app.stage !== "saved").length;
-  const responseRate = sent ? Math.round((responded / sent) * 100) : 0;
-  const offers = applications.filter((app) => app.stage === "offer").length;
+  const firstName =
+    (((profile as { full_name?: string | null } | null)?.full_name) ?? "").split(" ")[0] || t("de nuevo");
+  const followUpDays = (profile as { follow_up_days?: number } | null)?.follow_up_days ?? 14;
 
-  const feed = attentionFeed(applications, { events }, 4);
+  const active = applications.filter((app) => isActive(app.stage) && !app.archived);
+  const offers = applications.filter((app) => app.stage === "offer").length;
+  const interviewsThisWeek = events.filter((event) => {
+    const diff = daysFromToday(event.starts_at);
+    return diff !== null && diff >= 0 && diff <= 7 && (event.kind === "interview" || event.kind === "call");
+  }).length;
+
+  const feed = attentionFeed(applications, { events, links, followUpDays }, 4);
+  const feedEvents = new Map(
+    feed.map(({ app }) => {
+      const now = Date.now();
+      const match = events
+        .filter((event) => event.application_id === app.id)
+        .filter((event) => (toDate(event.starts_at)?.getTime() ?? 0) >= now - 3_600_000)
+        .sort((a, b) => a.starts_at.localeCompare(b.starts_at))[0];
+      return [app.id, match] as const;
+    }),
+  );
+
   const upcoming = events
     .filter((event) => new Date(event.starts_at).getTime() >= Date.now() - 3_600_000)
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
-    .slice(0, 4);
-  const interviewsThisWeek = events.filter((event) => {
-    const diff = daysFromToday(event.starts_at);
-    return diff !== null && diff >= 0 && diff <= 7;
-  }).length;
+    .slice(0, 5);
 
-  const counts = PIPELINE_STAGES.map((stage) => ({
-    stage,
-    count: applications.filter((app) => app.stage === stage).length,
-  }));
-  const maxCount = Math.max(1, ...counts.map((entry) => entry.count));
+  const waiting = applications
+    .filter((app) => !app.archived && isActive(app.stage) && app.stage !== "saved")
+    .map((app) => ({ app, days: daysSinceApplied(app) }))
+    .sort((a, b) => (b.days ?? 0) - (a.days ?? 0))
+    .slice(0, 6);
+
+  const recentActivity = applications
+    .filter((app) => !app.archived)
+    .slice()
+    .sort((a, b) => (b.updated_at ?? "").localeCompare(a.updated_at ?? ""))
+    .slice(0, 6);
 
   return (
     <div className="space-y-16 py-8">
       <section className="space-y-8">
         <div>
-          <p className="text-sm text-muted-foreground">{greeting(t)}, {firstName}</p>
+          <p className="text-sm text-muted-foreground">
+            {greeting(t)}, {firstName}
+          </p>
           <h1 className="mt-2 max-w-2xl font-display text-3xl font-semibold leading-tight tracking-tight sm:text-[2.6rem]">
             {isLoading
               ? t("Cargando tu búsqueda…")
               : feed.length === 0
-                ? t("Hoy no tienes nada urgente.")
+                ? t("Todo al día")
                 : t(
                     feed.length === 1
-                      ? "Tienes {n} cosa que necesita atención"
-                      : "Tienes {n} cosas que necesitan atención",
+                      ? "Tienes {n} cosa que necesita tu atención"
+                      : "Tienes {n} cosas que necesitan tu atención",
                     { n: feed.length },
                   )}
           </h1>
@@ -119,7 +110,7 @@ function HomePage() {
 
         {feed.length === 0 ? (
           <EmptyState
-            title={t("Todo al día")}
+            title={t("Nada pendiente por ahora")}
             description={t("Buen momento para añadir candidaturas nuevas o pulir tu CV.")}
             icon={<Sparkles className="size-6" />}
             action={
@@ -129,60 +120,32 @@ function HomePage() {
             }
           />
         ) : (
-          <ul className="grid gap-3 sm:grid-cols-2">
-            {feed.map(({ app, action: rawAction }) => {
-              const action = translateAction(t, rawAction);
-              return (
-              <li
-                key={app.id}
-                className="group rounded-2xl bg-surface p-5 shadow-soft transition-shadow hover:shadow-lift"
-              >
-                <div className="flex items-center gap-3">
-                  <CompanyMark name={app.companies?.name ?? app.role_title} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-display text-base font-semibold tracking-tight">
-                      {app.companies?.name ?? app.role_title}
-                    </p>
-                    <p className="truncate text-xs text-muted-foreground">{app.role_title}</p>
-                  </div>
-                  <span
-                    className={cn(
-                      "rounded-full border px-2 py-0.5 text-[10px] font-medium",
-                      nextActionTone(action.tone),
-                    )}
-                  >
-                    {STAGE_META[app.stage].short}
-                  </span>
-                </div>
-
-                <p className="mt-4 text-sm font-medium leading-snug">{action.label}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">{action.detail}</p>
-
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <Button asChild size="sm" className="rounded-xl">
-                    <Link to="/applications/$id" params={{ id: app.id }}>
-                      {action.ctaLabel}
-                    </Link>
-                  </Button>
-                  {app.candidate_portal_url && (
-                    <Button asChild size="sm" variant="outline" className="gap-1.5 rounded-xl">
-                      <a href={app.candidate_portal_url} target="_blank" rel="noreferrer">
-                        {t("Abrir portal")} <ExternalLink className="size-3.5" />
-                      </a>
-                    </Button>
-                  )}
-                </div>
-              </li>
-              );
-            })}
+          <ul className="grid gap-4 lg:grid-cols-2">
+            {feed.map(({ app, action }) => (
+              <AttentionCard key={app.id} app={app} action={action} event={feedEvents.get(app.id)} />
+            ))}
           </ul>
         )}
+      </section>
+
+      <section>
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-8 border-t border-border pt-6 sm:grid-cols-4">
+          <Metric label={t("Candidaturas totales")} value={applications.length} />
+          <Metric label={t("Procesos activos")} value={active.length} />
+          <Metric label={t("Entrevistas esta semana")} value={interviewsThisWeek} />
+          <Metric label={t("Ofertas")} value={offers} />
+        </dl>
+        <div className="mt-6">
+          <Link to="/analytics" className="inline-flex items-center gap-1.5 text-sm text-violet hover:underline">
+            {t("Ver insights completos")} <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
       </section>
 
       <section className="grid gap-10 lg:grid-cols-2">
         <div>
           <div className="flex items-baseline justify-between">
-            <h2 className="font-display text-lg font-semibold tracking-tight">{t("Próximas citas")}</h2>
+            <h2 className="font-display text-lg font-semibold tracking-tight">{t("Próximamente")}</h2>
             <Link to="/calendar" className="text-xs text-muted-foreground hover:text-foreground">
               {t("Calendario")}
             </Link>
@@ -199,10 +162,17 @@ function HomePage() {
                     <p className="text-xs font-semibold">{relativeDay(event.starts_at)}</p>
                     <p className="text-[11px] text-muted-foreground">{fmtDateTime(event.starts_at)}</p>
                   </div>
-                  <p className="min-w-0 flex-1 truncate text-sm">{event.title}</p>
-                  <span className="text-[11px] text-muted-foreground">
-                    {t("{n} min", { n: event.duration_min ?? 30 })}
-                  </span>
+                  {event.application_id ? (
+                    <Link
+                      to="/applications/$id"
+                      params={{ id: event.application_id }}
+                      className="min-w-0 flex-1 truncate text-sm hover:text-violet"
+                    >
+                      {event.title}
+                    </Link>
+                  ) : (
+                    <p className="min-w-0 flex-1 truncate text-sm">{event.title}</p>
+                  )}
                 </li>
               ))}
             </ul>
@@ -210,58 +180,78 @@ function HomePage() {
         </div>
 
         <div>
-          <h2 className="font-display text-lg font-semibold tracking-tight">{t("Pipeline")}</h2>
-          <ul className="mt-4 space-y-3">
-            {counts.map(({ stage, count }) => (
-              <li key={stage}>
-                <div className="flex items-center justify-between text-xs">
-                  <span>{STAGE_META[stage].label}</span>
-                  <span className="tabular-nums text-muted-foreground">{count}</span>
-                </div>
-                <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-surface-2">
-                  <div
-                    className={cn("h-full rounded-full", STAGE_META[stage].dot)}
-                    style={{ width: `${(count / maxCount) * 100}%` }}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className="flex items-baseline justify-between">
+            <h2 className="font-display text-lg font-semibold tracking-tight">{t("Candidaturas activas")}</h2>
+            <Link to="/applications" className="text-xs text-muted-foreground hover:text-foreground">
+              {t("Ver todas")}
+            </Link>
+          </div>
+          {waiting.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">
+              {t("Aquí empieza tu próxima oportunidad.")}
+            </p>
+          ) : (
+            <ul className="mt-4 divide-y divide-border">
+              {waiting.map(({ app, days }) => (
+                <li key={app.id} className="flex items-center gap-3 py-3.5">
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      to="/applications/$id"
+                      params={{ id: app.id }}
+                      className="truncate text-sm font-medium hover:text-violet"
+                    >
+                      {app.companies?.name ?? UNKNOWN}
+                    </Link>
+                    <p className="truncate text-xs text-muted-foreground">{app.role_title}</p>
+                  </div>
+                  <span className="shrink-0 text-xs text-muted-foreground">{t(STAGE_META[app.stage].short)}</span>
+                  {days !== null && (
+                    <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
+                      {t("{n} días", { n: days })}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
 
       <section>
-        <h2 className="font-display text-lg font-semibold tracking-tight">{t("Tu búsqueda en cifras")}</h2>
-        <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-8 border-t border-border pt-6 sm:grid-cols-4">
-          <Metric label={t("Candidaturas")} value={applications.length} />
-          <Metric label={t("Procesos activos")} value={active.length} />
-          <Metric label={t("Tasa de respuesta")} value={`${responseRate}%`} hint={`${responded}/${sent}`} />
-          <Metric label={t("Ofertas")} value={offers} />
-        </dl>
-        <div className="mt-6">
-          <Link
-            to="/analytics"
-            className="inline-flex items-center gap-1.5 text-sm text-violet hover:underline"
-          >
-            {t("Ver insights completos")} <ArrowRight className="size-3.5" />
-          </Link>
-        </div>
-        <p className="mt-3 text-xs text-muted-foreground">
-          {t("Entrevistas en los próximos 7 días: {n}", { n: interviewsThisWeek })}
-        </p>
+        <h2 className="font-display text-lg font-semibold tracking-tight">{t("Actividad reciente")}</h2>
+        {recentActivity.length === 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">{t("Todavía no hay movimientos.")}</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-border">
+            {recentActivity.map((app) => (
+              <li key={app.id} className="flex items-center gap-4 py-3.5">
+                <span className="w-28 shrink-0 text-xs text-muted-foreground">
+                  {app.updated_at ? relativeDay(app.updated_at) : UNKNOWN}
+                </span>
+                <Link
+                  to="/applications/$id"
+                  params={{ id: app.id }}
+                  className="min-w-0 flex-1 truncate text-sm hover:text-violet"
+                >
+                  {app.companies?.name ?? UNKNOWN} · {app.role_title}
+                </Link>
+                <span className="shrink-0 text-[11px] text-muted-foreground">
+                  {CLOSED_STAGES.includes(app.stage) ? t(STAGE_META[app.stage].label) : t(STAGE_META[app.stage].short)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );
 }
 
-function Metric({ label, value, hint }: { label: string; value: string | number; hint?: string }) {
+function Metric({ label, value }: { label: string; value: string | number }) {
   return (
     <div>
       <dd className="font-display text-3xl font-semibold tabular-nums tracking-tight">{value}</dd>
-      <dt className="mt-1 text-xs text-muted-foreground">
-        {label}
-        {hint ? ` · ${hint}` : ""}
-      </dt>
+      <dt className="mt-1 text-xs text-muted-foreground">{label}</dt>
     </div>
   );
 }
