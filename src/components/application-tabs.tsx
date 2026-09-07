@@ -641,8 +641,9 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
     }
     const scheduled = form.scheduled_at ? new Date(form.scheduled_at).toISOString() : null;
     await saveEvent.mutateAsync({
-      id,
+      ...(id ? { id } : {}),
       application,
+
       values: {
         title: form.title.trim(),
         stage: (form.stage || null) as Stage | null,
