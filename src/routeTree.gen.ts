@@ -21,6 +21,7 @@ import { Route as AuthenticatedNotesRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
 import { Route as AuthenticatedVaultRouteImport } from './routes/_authenticated/vault'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedApplicationsIndexRouteImport } from './routes/_authenticated/applications.index'
 import { Route as AuthenticatedApplicationsIdRouteImport } from './routes/_authenticated/applications.$id'
 
@@ -83,6 +84,11 @@ const AuthenticatedVaultRoute = AuthenticatedVaultRouteImport.update({
   path: '/vault',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedApplicationsIndexRoute =
   AuthenticatedApplicationsIndexRouteImport.update({
     id: '/applications/',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/tasks': typeof AuthenticatedTasksRoute
   '/vault': typeof AuthenticatedVaultRoute
+  '/api/chat': typeof ApiChatRoute
   '/applications/$id': typeof AuthenticatedApplicationsIdRoute
   '/applications/': typeof AuthenticatedApplicationsIndexRoute
 }
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/tasks': typeof AuthenticatedTasksRoute
   '/vault': typeof AuthenticatedVaultRoute
+  '/api/chat': typeof ApiChatRoute
   '/applications/$id': typeof AuthenticatedApplicationsIdRoute
   '/applications': typeof AuthenticatedApplicationsIndexRoute
 }
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
   '/_authenticated/vault': typeof AuthenticatedVaultRoute
+  '/api/chat': typeof ApiChatRoute
   '/_authenticated/applications/$id': typeof AuthenticatedApplicationsIdRoute
   '/_authenticated/applications/': typeof AuthenticatedApplicationsIndexRoute
 }
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/tasks'
     | '/vault'
+    | '/api/chat'
     | '/applications/$id'
     | '/applications/'
   fileRoutesByTo: FileRoutesByTo
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/tasks'
     | '/vault'
+    | '/api/chat'
     | '/applications/$id'
     | '/applications'
   id:
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/tasks'
     | '/_authenticated/vault'
+    | '/api/chat'
     | '/_authenticated/applications/$id'
     | '/_authenticated/applications/'
   fileRoutesById: FileRoutesById
@@ -196,6 +208,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -284,6 +297,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedVaultRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/applications/': {
       id: '/_authenticated/applications/'
       path: '/applications'
@@ -336,6 +356,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
