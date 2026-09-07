@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link, createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
 import {
+  AlarmClock,
   ArrowLeft,
   CalendarPlus,
   Circle,
   CheckCircle2,
   ExternalLink,
+  KeyRound,
   Pencil,
   Plus,
   Trash2,
@@ -13,6 +15,13 @@ import {
 import { toast } from "sonner";
 
 import { ApplicationDialog } from "@/components/application-dialog";
+import {
+  ApplicationInfoTab,
+  ContactsTab,
+  DocumentsTab,
+  JobDescriptionTab,
+  ProcessTab,
+} from "@/components/application-tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +31,7 @@ import { CompanyMark, EmptyState, Pill, SectionCard, StageBadge } from "@/compon
 import {
   useAddTimelineEvent,
   useApplication,
+  useApplicationDocuments,
   useCalendar,
   useDeleteApplication,
   useDeleteEvent,
@@ -35,6 +45,7 @@ import {
   useTasks,
   useTimeline,
 } from "@/lib/api";
+import { ALERT_TONE, applicationAlerts, daysSinceApplied } from "@/lib/alerts";
 import {
   EVENT_KIND_LABEL,
   EVENT_KIND_TONE,
@@ -59,12 +70,12 @@ export const Route = createFileRoute("/_authenticated/applications/$id")({
       {
         name: "description",
         content:
-          "Etapas, historial, notas, tareas y entrevistas de una candidatura concreta en NextRound.",
+          "Workspace completo de una candidatura: oferta guardada, documentos enviados, proceso, contactos y notas.",
       },
       { property: "og:title", content: "Detalle de candidatura — NextRound" },
       {
         property: "og:description",
-        content: "Todo el recorrido de una candidatura: etapas, historial, notas y entrevistas.",
+        content: "Todo el recorrido de una candidatura: etapas, oferta, documentos, contactos y notas.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -77,9 +88,13 @@ function ApplicationDetail() {
   const { id } = useParams({ from: "/_authenticated/applications/$id" });
   const navigate = useNavigate();
   const { data: app, isLoading } = useApplication(id);
+  const { data: calendar = [] } = useCalendar();
+  const { data: timeline = [] } = useTimeline(id);
+  const { data: links = [] } = useApplicationDocuments(id);
   const moveStage = useMoveStage();
   const deleteApplication = useDeleteApplication();
   const [editOpen, setEditOpen] = useState(false);
+  const [tab, setTab] = useState("overview");
 
   if (isLoading) {
     return <div className="h-64 animate-pulse rounded-2xl bg-surface-2" />;
@@ -100,6 +115,10 @@ function ApplicationDetail() {
   }
 
   const stageIndex = PIPELINE_STAGES.indexOf(app.stage);
+  const progress = Math.round(((stageIndex + 1) / PIPELINE_STAGES.length) * 100);
+  const days = daysSinceApplied(app);
+  const alerts = applicationAlerts(app, { events: calendar, timeline });
+  const cvLink = links.find((link) => link.role === "cv" || link.documents?.kind === "cv");
 
   return (
     <div className="space-y-6">
@@ -110,66 +129,132 @@ function ApplicationDetail() {
         <ArrowLeft className="size-4" /> Candidaturas
       </Link>
 
-      <header className="flex flex-col gap-5 rounded-2xl border border-border bg-surface p-6 shadow-soft md:flex-row md:items-start md:justify-between">
-        <div className="flex gap-4">
-          <CompanyMark name={app.companies?.name ?? app.role_title} size="lg" />
-          <div>
-            <h1 className="font-display text-2xl font-semibold tracking-tight">{app.role_title}</h1>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              {app.companies?.name ?? "Sin empresa"}
-              {app.location ? ` · ${app.location}` : ""}
-              {app.work_mode ? ` · ${WORK_MODE_LABEL[app.work_mode]}` : ""}
-            </p>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <StageBadge stage={app.stage} />
-              <Pill tone={priorityTone(app.priority ?? "medium")}>
-                Prioridad {PRIORITY_LABEL[app.priority ?? "medium"]}
-              </Pill>
-              <Pill>{formatSalary(app.salary_min, app.salary_max, app.currency ?? "EUR")}</Pill>
-              <Pill>Interés {app.excitement ?? 3}/5</Pill>
-              {app.source && <Pill>{app.source}</Pill>}
+      <header className="space-y-5 rounded-2xl border border-border bg-surface p-6 shadow-soft">
+        <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+          <div className="flex gap-4">
+            <CompanyMark name={app.companies?.name ?? app.role_title} size="lg" />
+            <div>
+              <h1 className="font-display text-2xl font-semibold tracking-tight">
+                {app.role_title}
+              </h1>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                {app.companies?.name ?? "Sin empresa"}
+                {app.location ? ` · ${app.location}` : ""}
+                {app.work_mode ? ` · ${WORK_MODE_LABEL[app.work_mode]}` : ""}
+                {app.employment_type ? ` · ${app.employment_type}` : ""}
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <StageBadge stage={app.stage} />
+                <Pill tone={priorityTone(app.priority ?? "medium")}>
+                  Prioridad {PRIORITY_LABEL[app.priority ?? "medium"]}
+                </Pill>
+                <Pill>{formatSalary(app.salary_min, app.salary_max, app.currency ?? "EUR")}</Pill>
+                {app.application_type && <Pill>{app.application_type}</Pill>}
+                {days !== null && <Pill>{days} días desde el envío</Pill>}
+              </div>
             </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={app.stage}
+              onChange={(event) =>
+                moveStage.mutate({ application: app, to: event.target.value as Stage })
+              }
+              aria-label="Cambiar etapa"
+              className="h-9 rounded-lg border border-input bg-surface px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+            >
+              {STAGES.map((stage) => (
+                <option key={stage} value={stage}>
+                  {STAGE_META[stage].label}
+                </option>
+              ))}
+            </select>
+            {app.job_url && (
+              <Button asChild variant="outline" size="sm" className="gap-1.5">
+                <a href={app.job_url} target="_blank" rel="noreferrer">
+                  Ver oferta <ExternalLink className="size-3.5" />
+                </a>
+              </Button>
+            )}
+            {app.candidate_portal_url && (
+              <Button asChild variant="outline" size="sm" className="gap-1.5">
+                <a href={app.candidate_portal_url} target="_blank" rel="noreferrer">
+                  <KeyRound className="size-3.5" /> Portal del candidato
+                </a>
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => setTab("events")}
+            >
+              <CalendarPlus className="size-3.5" /> Añadir evento
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => setEditOpen(true)}
+            >
+              <Pencil className="size-3.5" /> Editar candidatura
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-danger hover:text-danger"
+              onClick={async () => {
+                await deleteApplication.mutateAsync(app.id);
+                toast.success("Candidatura eliminada");
+                navigate({ to: "/applications" });
+              }}
+            >
+              <Trash2 className="size-3.5" /> Eliminar
+            </Button>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <select
-            value={app.stage}
-            onChange={(event) =>
-              moveStage.mutate({ application: app, to: event.target.value as Stage })
-            }
-            aria-label="Cambiar etapa"
-            className="h-9 rounded-lg border border-input bg-surface px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-          >
-            {STAGES.map((stage) => (
-              <option key={stage} value={stage}>
-                {STAGE_META[stage].label}
-              </option>
-            ))}
-          </select>
-          {app.job_url && (
-            <Button asChild variant="outline" size="sm" className="gap-1.5">
-              <a href={app.job_url} target="_blank" rel="noreferrer">
-                Oferta <ExternalLink className="size-3.5" />
-              </a>
-            </Button>
-          )}
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setEditOpen(true)}>
-            <Pencil className="size-3.5" /> Editar
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-1.5 text-danger hover:text-danger"
-            onClick={async () => {
-              await deleteApplication.mutateAsync(app.id);
-              toast.success("Candidatura eliminada");
-              navigate({ to: "/applications" });
-            }}
-          >
-            <Trash2 className="size-3.5" /> Eliminar
-          </Button>
+        <div className="grid gap-4 border-t border-border pt-4 md:grid-cols-3">
+          <div className="md:col-span-2">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>
+                Progreso del proceso · {STAGE_META[app.stage].label}
+              </span>
+              <span className="tabular-nums">{progress}%</span>
+            </div>
+            <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-2">
+              <div
+                className="h-full rounded-full bg-primary transition-all"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Próxima acción
+            </p>
+            <p className="mt-1 text-sm">
+              {app.next_action ?? "Sin definir"}
+              {app.next_action_at && (
+                <span className="text-muted-foreground">
+                  {" "}
+                  · {fmtDate(app.next_action_at)} ({relativeDay(app.next_action_at)})
+                </span>
+              )}
+            </p>
+          </div>
         </div>
+
+        {alerts.length > 0 && (
+          <div className="flex flex-wrap gap-2 border-t border-border pt-4">
+            {alerts.map((alert) => (
+              <Pill key={alert.id} tone={ALERT_TONE[alert.tone]}>
+                <AlarmClock className="size-3" /> {alert.label} · {alert.detail}
+              </Pill>
+            ))}
+          </div>
+        )}
       </header>
 
       <div className="scrollbar-slim flex items-center gap-1 overflow-x-auto rounded-2xl border border-border bg-surface px-4 py-3">
@@ -198,10 +283,14 @@ function ApplicationDetail() {
         })}
       </div>
 
-      <Tabs defaultValue="overview">
-        <TabsList>
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList className="scrollbar-slim max-w-full overflow-x-auto">
           <TabsTrigger value="overview">Resumen</TabsTrigger>
-          <TabsTrigger value="activity">Actividad</TabsTrigger>
+          <TabsTrigger value="jd">Oferta</TabsTrigger>
+          <TabsTrigger value="application">Candidatura</TabsTrigger>
+          <TabsTrigger value="documents">Documentos</TabsTrigger>
+          <TabsTrigger value="process">Proceso</TabsTrigger>
+          <TabsTrigger value="contacts">Contactos</TabsTrigger>
           <TabsTrigger value="notes">Notas</TabsTrigger>
           <TabsTrigger value="tasks">Tareas</TabsTrigger>
           <TabsTrigger value="events">Entrevistas</TabsTrigger>
@@ -211,7 +300,16 @@ function ApplicationDetail() {
           <div className="grid gap-5 lg:grid-cols-3">
             <SectionCard title="Detalles" className="lg:col-span-2">
               <dl className="grid gap-4 sm:grid-cols-2">
+                <Detail label="Empresa" value={app.companies?.name ?? "—"} />
+                <Detail label="Puesto" value={app.role_title} />
+                <Detail label="Etapa actual" value={STAGE_META[app.stage].label} />
                 <Detail label="Enviada el" value={fmtDate(app.applied_at)} />
+                <Detail
+                  label="Días desde el envío"
+                  value={days === null ? "Sin enviar" : `${days} días`}
+                />
+                <Detail label="Tipo de candidatura" value={app.application_type ?? "—"} />
+                <Detail label="Tipo de empleo" value={app.employment_type ?? "—"} />
                 <Detail label="Origen" value={app.source ?? "—"} />
                 <Detail label="Ubicación" value={app.location ?? "—"} />
                 <Detail
@@ -222,11 +320,24 @@ function ApplicationDetail() {
                   label="Rango salarial"
                   value={formatSalary(app.salary_min, app.salary_max, app.currency ?? "EUR")}
                 />
+                <Detail label="Interés" value={`${app.excitement ?? 3}/5`} />
                 <Detail
-                  label="Próxima acción"
+                  label="CV enviado"
+                  value={
+                    cvLink?.documents
+                      ? `${cvLink.documents.name}${
+                          cvLink.documents.version ? ` · ${cvLink.documents.version}` : ""
+                        }`
+                      : "Sin CV vinculado"
+                  }
+                />
+                <Detail
+                  label="Próximo paso y fecha límite"
                   value={
                     app.next_action
-                      ? `${app.next_action} · ${relativeDay(app.next_action_at)}`
+                      ? `${app.next_action} · ${
+                          app.next_action_at ? fmtDate(app.next_action_at) : "sin fecha"
+                        }`
                       : "Sin definir"
                   }
                 />
@@ -236,7 +347,7 @@ function ApplicationDetail() {
                   <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     Descripción
                   </p>
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">
+                  <p className="mt-2 line-clamp-6 whitespace-pre-wrap text-sm leading-relaxed">
                     {app.description}
                   </p>
                 </div>
@@ -281,8 +392,20 @@ function ApplicationDetail() {
           </div>
         </TabsContent>
 
-        <TabsContent value="activity" className="mt-5">
-          <ActivityTab application={app} />
+        <TabsContent value="jd" className="mt-5">
+          <JobDescriptionTab application={app} />
+        </TabsContent>
+        <TabsContent value="application" className="mt-5">
+          <ApplicationInfoTab application={app} />
+        </TabsContent>
+        <TabsContent value="documents" className="mt-5">
+          <DocumentsTab application={app} />
+        </TabsContent>
+        <TabsContent value="process" className="mt-5">
+          <ProcessTab application={app} />
+        </TabsContent>
+        <TabsContent value="contacts" className="mt-5">
+          <ContactsTab application={app} />
         </TabsContent>
         <TabsContent value="notes" className="mt-5">
           <NotesTab applicationId={app.id} />
@@ -299,6 +422,7 @@ function ApplicationDetail() {
     </div>
   );
 }
+
 
 function Detail({ label, value }: { label: string; value: string }) {
   return (
