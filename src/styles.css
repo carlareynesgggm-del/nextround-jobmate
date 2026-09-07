@@ -94,9 +94,9 @@
   --accent: oklch(0.955 0.012 285);
   --accent-foreground: oklch(0.3 0.09 285);
 
-  /* Accent (token kept as "gold" for compatibility): electric violet. */
-  --gold: oklch(0.55 0.19 283);
-  --gold-foreground: oklch(0.42 0.17 283);
+  /* Accent: burgundy. */
+  --gold: oklch(0.38 0.16 25);
+  --gold-foreground: oklch(0.97 0.01 25);
 
   --success: oklch(0.6 0.12 158);
   --warning: oklch(0.66 0.13 68);
