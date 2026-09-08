@@ -14,6 +14,120 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_feed: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          detail: string | null
+          email_event_id: string | null
+          id: string
+          kind: string
+          occurred_at: string
+          source: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          detail?: string | null
+          email_event_id?: string | null
+          id?: string
+          kind: string
+          occurred_at?: string
+          source?: string
+          title: string
+          user_id?: string
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          detail?: string | null
+          email_event_id?: string | null
+          id?: string
+          kind?: string
+          occurred_at?: string
+          source?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_feed_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_feed_email_event_id_fkey"
+            columns: ["email_event_id"]
+            isOneToOne: false
+            referencedRelation: "email_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      alerts: {
+        Row: {
+          application_id: string | null
+          category: string
+          created_at: string
+          detail: string | null
+          due_at: string | null
+          email_event_id: string | null
+          id: string
+          priority: string
+          read: boolean
+          resolved: boolean
+          title: string
+          user_id: string
+        }
+        Insert: {
+          application_id?: string | null
+          category: string
+          created_at?: string
+          detail?: string | null
+          due_at?: string | null
+          email_event_id?: string | null
+          id?: string
+          priority?: string
+          read?: boolean
+          resolved?: boolean
+          title: string
+          user_id?: string
+        }
+        Update: {
+          application_id?: string | null
+          category?: string
+          created_at?: string
+          detail?: string | null
+          due_at?: string | null
+          email_event_id?: string | null
+          id?: string
+          priority?: string
+          read?: boolean
+          resolved?: boolean
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alerts_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alerts_email_event_id_fkey"
+            columns: ["email_event_id"]
+            isOneToOne: false
+            referencedRelation: "email_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_documents: {
         Row: {
           application_id: string
@@ -619,6 +733,170 @@ export type Database = {
           version?: string | null
         }
         Relationships: []
+      }
+      email_connections: {
+        Row: {
+          ask_before_update: boolean
+          connection_key_ciphertext: string | null
+          created_at: string
+          email_address: string | null
+          id: string
+          last_sync_at: string | null
+          provider: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ask_before_update?: boolean
+          connection_key_ciphertext?: string | null
+          created_at?: string
+          email_address?: string | null
+          id?: string
+          last_sync_at?: string | null
+          provider: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          ask_before_update?: boolean
+          connection_key_ciphertext?: string | null
+          created_at?: string
+          email_address?: string | null
+          id?: string
+          last_sync_at?: string | null
+          provider?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      email_events: {
+        Row: {
+          application_id: string | null
+          body_text: string | null
+          confidence: number | null
+          created_at: string
+          email_type: string | null
+          extracted: Json
+          from_email: string | null
+          from_name: string | null
+          id: string
+          message_id: string
+          provider: string
+          received_at: string
+          snippet: string | null
+          status: string
+          subject: string | null
+          thread_id: string | null
+          user_id: string
+        }
+        Insert: {
+          application_id?: string | null
+          body_text?: string | null
+          confidence?: number | null
+          created_at?: string
+          email_type?: string | null
+          extracted?: Json
+          from_email?: string | null
+          from_name?: string | null
+          id?: string
+          message_id: string
+          provider?: string
+          received_at?: string
+          snippet?: string | null
+          status?: string
+          subject?: string | null
+          thread_id?: string | null
+          user_id?: string
+        }
+        Update: {
+          application_id?: string | null
+          body_text?: string | null
+          confidence?: number | null
+          created_at?: string
+          email_type?: string | null
+          extracted?: Json
+          from_email?: string | null
+          from_name?: string | null
+          id?: string
+          message_id?: string
+          provider?: string
+          received_at?: string
+          snippet?: string | null
+          status?: string
+          subject?: string | null
+          thread_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_events_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_suggestions: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          detail: string | null
+          email_event_id: string
+          id: string
+          kind: string
+          label: string
+          payload: Json
+          position: number
+          status: string
+          user_id: string
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          detail?: string | null
+          email_event_id: string
+          id?: string
+          kind: string
+          label: string
+          payload?: Json
+          position?: number
+          status?: string
+          user_id?: string
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          detail?: string | null
+          email_event_id?: string
+          id?: string
+          kind?: string
+          label?: string
+          payload?: Json
+          position?: number
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_suggestions_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_suggestions_email_event_id_fkey"
+            columns: ["email_event_id"]
+            isOneToOne: false
+            referencedRelation: "email_events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notes: {
         Row: {
