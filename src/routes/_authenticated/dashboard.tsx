@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, CalendarClock, Sparkles } from "lucide-react";
 
 import { AttentionCard } from "@/components/home/attention-list";
+import { UpdatesPanel } from "@/components/inbox/updates-panel";
 import { EmptyState } from "@/components/ui-bits";
 import { useT } from "@/lib/i18n/provider";
 import { Button } from "@/components/ui/button";
@@ -135,6 +136,8 @@ function HomePage() {
           </ul>
         )}
       </section>
+
+      <UpdatesPanel />
 
       <section>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-8 border-t border-border pt-6 sm:grid-cols-4">

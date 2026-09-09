@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageHeader, SectionCard } from "@/components/ui-bits";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { EmailConnectionCard } from "@/components/inbox/email-connection-card";
 import { useT } from "@/lib/i18n/provider";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
@@ -164,6 +165,8 @@ function SettingsPage() {
             <LogOut className="size-4" /> {t("Cerrar sesión")}
           </Button>
         </SectionCard>
+
+        <EmailConnectionCard />
 
         <SectionCard title={t("Idioma")}>
           <p className="text-sm text-muted-foreground">
