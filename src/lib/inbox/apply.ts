@@ -195,7 +195,7 @@ export function useApplyEmailSuggestions() {
       for (const key of affectedKeys) void qc.invalidateQueries({ queryKey: key });
       void qc.invalidateQueries({ queryKey: inboxKeys.suggestions(vars.event.id) });
       void qc.invalidateQueries({ queryKey: ["activity"] });
-      void qc.invalidateQueries({ queryKey: qk.timeline });
+      void qc.invalidateQueries({ queryKey: ["timeline"] });
     },
   });
 }
