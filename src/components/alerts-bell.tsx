@@ -16,7 +16,11 @@ export function AlertsBell({ className }: { className?: string }) {
   const { data: events = [] } = useCalendar();
   const [open, setOpen] = useState(false);
 
+  const { data: saved = [] } = useAlerts();
+  const resolve = useResolveAlert();
+
   const feed = attentionFeed(applications, { events }, 6).filter((item) => item.action.urgency <= 4);
+  const count = feed.length + saved.length;
 
   return (
     <div className={cn("relative", className)}>
