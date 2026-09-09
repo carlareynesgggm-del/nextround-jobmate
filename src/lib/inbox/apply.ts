@@ -65,13 +65,16 @@ async function applyOne(
     }
     case "link": {
       if (!applicationId) return null;
-      const patch: Payload = {};
       const portal = str(payload, "candidate_portal_url");
       const job = str(payload, "job_url");
-      if (portal) patch["candidate_portal_url"] = portal;
-      if (job) patch["job_url"] = job;
-      if (Object.keys(patch).length === 0) return null;
-      await supabase.from("applications").update(patch).eq("id", applicationId);
+      if (!portal && !job) return null;
+      await supabase
+        .from("applications")
+        .update({
+          ...(portal ? { candidate_portal_url: portal } : {}),
+          ...(job ? { job_url: job } : {}),
+        })
+        .eq("id", applicationId);
       return applicationId;
     }
     case "interview":
