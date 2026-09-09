@@ -30,9 +30,9 @@ export function AlertsBell({ className }: { className?: string }) {
         className="relative inline-flex size-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
       >
         <Bell className="size-4" />
-        {feed.length > 0 && (
+        {count > 0 && (
           <span className="absolute right-1.5 top-1.5 flex size-4 items-center justify-center rounded-full bg-violet text-[10px] font-semibold text-primary-foreground">
-            {feed.length}
+            {count}
           </span>
         )}
       </button>
