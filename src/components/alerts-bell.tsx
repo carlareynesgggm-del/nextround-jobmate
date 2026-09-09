@@ -3,6 +3,8 @@ import { Link } from "@tanstack/react-router";
 import { Bell } from "lucide-react";
 
 import { useApplications, useCalendar } from "@/lib/api";
+import { useAlerts, useResolveAlert } from "@/lib/inbox/api";
+import { ALERT_CATEGORY_LABEL, alertPriorityTone, type AlertCategory } from "@/lib/inbox/domain";
 import { attentionFeed, nextActionTone } from "@/lib/next-action";
 import { useT } from "@/lib/i18n/provider";
 import { cn } from "@/lib/utils";
