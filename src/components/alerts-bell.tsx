@@ -44,7 +44,45 @@ export function AlertsBell({ className }: { className?: string }) {
             <p className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
               {t("Avisos")}
             </p>
-            {feed.length === 0 ? (
+            {saved.length > 0 && (
+              <ul className="divide-y divide-border border-b border-border">
+                {saved.slice(0, 6).map((alert) => (
+                  <li key={alert.id} className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={cn(
+                          "rounded-full border px-2 py-0.5 text-[10px] font-medium",
+                          alertPriorityTone(alert.priority),
+                        )}
+                      >
+                        {t(ALERT_CATEGORY_LABEL[alert.category as AlertCategory] ?? alert.category)}
+                      </span>
+                    </div>
+                    <p className="mt-1.5 text-sm font-medium leading-snug">{alert.title}</p>
+                    {alert.detail && <p className="text-xs text-muted-foreground">{alert.detail}</p>}
+                    <div className="mt-1.5 flex items-center gap-3">
+                      {alert.application_id && (
+                        <Link
+                          to="/applications/$id"
+                          params={{ id: alert.application_id }}
+                          onClick={() => setOpen(false)}
+                          className="text-xs text-violet hover:underline"
+                        >
+                          {t("Ver candidatura")}
+                        </Link>
+                      )}
+                      <button
+                        className="text-xs text-muted-foreground hover:text-foreground"
+                        onClick={() => void resolve.mutateAsync(alert.id)}
+                      >
+                        {t("Marcar como resuelto")}
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {count === 0 ? (
               <p className="px-4 pb-4 text-sm text-muted-foreground">{t("Nada urgente ahora mismo.")}</p>
             ) : (
               <ul className="divide-y divide-border">
