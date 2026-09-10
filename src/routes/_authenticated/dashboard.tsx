@@ -88,6 +88,47 @@ function HomePage() {
     .sort((a, b) => (b.updated_at ?? "").localeCompare(a.updated_at ?? ""))
     .slice(0, 6);
 
+  if (!isLoading && applications.length === 0) {
+    return (
+      <div className="space-y-10 py-12">
+        <div>
+          <p className="text-sm text-muted-foreground">
+            {greeting(t)}, {firstName}
+          </p>
+          <h1 className="mt-2 max-w-2xl font-display text-3xl font-semibold leading-tight tracking-tight sm:text-[2.6rem]">
+            {t("Empecemos por tu primera candidatura")}
+          </h1>
+          <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+            {t(
+              "Aquí verás cada proceso, sus fechas y lo que necesita tu atención. Todavía no hay nada guardado.",
+            )}
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          <FirstStep
+            title={t("Añade tu primera candidatura")}
+            description={t("Guarda el puesto, la empresa y en qué fase estás.")}
+            to="/applications"
+            cta={t("+ Añadir candidatura")}
+          />
+          <FirstStep
+            title={t("Sube un CV")}
+            description={t("Así sabrás qué versión enviaste a cada proceso.")}
+            to="/vault"
+            cta={t("Subir CV")}
+          />
+          <FirstStep
+            title={t("Conecta tu correo")}
+            description={t("NextRound detecta entrevistas y respuestas, y te pregunta antes de cambiar nada.")}
+            to="/settings"
+            cta={t("Conectar correo")}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-16 py-8">
       <section className="space-y-8">
@@ -263,6 +304,28 @@ function Metric({ label, value }: { label: string; value: string | number }) {
     <div>
       <dd className="font-display text-3xl font-semibold tabular-nums tracking-tight">{value}</dd>
       <dt className="mt-1 text-xs text-muted-foreground">{label}</dt>
+    </div>
+  );
+}
+
+function FirstStep({
+  title,
+  description,
+  to,
+  cta,
+}: {
+  title: string;
+  description: string;
+  to: "/applications" | "/vault" | "/settings";
+  cta: string;
+}) {
+  return (
+    <div className="flex flex-col rounded-2xl border border-border bg-surface p-5">
+      <p className="text-sm font-medium">{title}</p>
+      <p className="mt-1.5 flex-1 text-xs text-muted-foreground">{description}</p>
+      <Button asChild variant="outline" size="sm" className="mt-4 w-full">
+        <Link to={to}>{cta}</Link>
+      </Button>
     </div>
   );
 }
