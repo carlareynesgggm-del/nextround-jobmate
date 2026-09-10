@@ -741,8 +741,11 @@ export type Database = {
           created_at: string
           email_address: string | null
           id: string
+          last_error: string | null
           last_sync_at: string | null
           provider: string
+          provider_account_id: string | null
+          scope: string | null
           status: string
           updated_at: string
           user_id: string
@@ -753,8 +756,11 @@ export type Database = {
           created_at?: string
           email_address?: string | null
           id?: string
+          last_error?: string | null
           last_sync_at?: string | null
           provider: string
+          provider_account_id?: string | null
+          scope?: string | null
           status?: string
           updated_at?: string
           user_id?: string
@@ -765,8 +771,11 @@ export type Database = {
           created_at?: string
           email_address?: string | null
           id?: string
+          last_error?: string | null
           last_sync_at?: string | null
           provider?: string
+          provider_account_id?: string | null
+          scope?: string | null
           status?: string
           updated_at?: string
           user_id?: string
