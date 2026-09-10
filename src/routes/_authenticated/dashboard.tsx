@@ -307,3 +307,25 @@ function Metric({ label, value }: { label: string; value: string | number }) {
     </div>
   );
 }
+
+function FirstStep({
+  title,
+  description,
+  to,
+  cta,
+}: {
+  title: string;
+  description: string;
+  to: "/applications" | "/vault" | "/settings";
+  cta: string;
+}) {
+  return (
+    <div className="flex flex-col rounded-2xl border border-border bg-surface p-5">
+      <p className="text-sm font-medium">{title}</p>
+      <p className="mt-1.5 flex-1 text-xs text-muted-foreground">{description}</p>
+      <Button asChild variant="outline" size="sm" className="mt-4 w-full">
+        <Link to={to}>{cta}</Link>
+      </Button>
+    </div>
+  );
+}
