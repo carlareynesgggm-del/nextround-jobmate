@@ -156,8 +156,9 @@ function ApplicationDetail() {
           <TabsTrigger value="notes">{t("Notas")}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="mt-7">
+        <TabsContent value="overview" className="mt-7 space-y-10">
           <OverviewTab application={app} />
+          <ActivityFeed applicationId={app.id} />
         </TabsContent>
 
         <TabsContent value="job" className="mt-7">

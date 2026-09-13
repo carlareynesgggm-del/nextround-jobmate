@@ -177,6 +177,18 @@ export function useApplyEmailSuggestions() {
         const touched = await applyOne(suggestion, event);
         if (touched) applicationId = touched;
         await supabase.from("email_suggestions").update({ status: "applied" }).eq("id", suggestion.id);
+
+        // Cada cambio confirmado queda registrado en el historial.
+        if (touched && suggestion.kind !== "activity") {
+          await supabase.from("activity_feed").insert({
+            application_id: touched,
+            email_event_id: event.id,
+            kind: suggestion.kind,
+            title: suggestion.label,
+            detail: suggestion.detail,
+            source: "email",
+          });
+        }
       }
 
       await supabase.from("activity_feed").insert({
