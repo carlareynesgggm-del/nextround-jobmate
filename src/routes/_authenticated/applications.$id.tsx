@@ -24,6 +24,7 @@ import {
 } from "@/components/application-tabs";
 import { ApplicationHeader } from "@/components/detail/application-header";
 import { NextBestActionCard } from "@/components/detail/next-best-action";
+import { ActivityFeed } from "@/components/detail/activity-feed";
 import { OverviewTab } from "@/components/detail/overview-tab";
 import { JobTab } from "@/components/detail/job-tab";
 import { Button } from "@/components/ui/button";
