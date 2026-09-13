@@ -157,6 +157,39 @@ export async function buildUserContext(accessToken: string, applicationId?: stri
     );
   }
 
+  // Avisos, correos ya confirmados e historial reciente (datos reales del usuario).
+  const [{ data: alerts }, { data: emailEvents }, { data: activity }] = await Promise.all([
+    db.from("alerts").select("*").eq("resolved", false).order("created_at", { ascending: false }).limit(15),
+    db
+      .from("email_events")
+      .select("subject, from_email, email_type, received_at, status")
+      .eq("status", "applied")
+      .order("received_at", { ascending: false })
+      .limit(15),
+    db.from("activity_feed").select("title, detail, source, occurred_at").order("occurred_at", { ascending: false }).limit(20),
+  ]);
+
+  if (alerts && alerts.length > 0) {
+    parts.push(
+      "## Avisos abiertos",
+      ...alerts.map((a) => `· [${a.priority}/${a.category}] ${a.title}${a.due_at ? ` (para ${a.due_at})` : ""}`),
+    );
+  }
+
+  if (emailEvents && emailEvents.length > 0) {
+    parts.push(
+      "## Correos del proceso confirmados por el usuario",
+      ...emailEvents.map((e) => `· ${e.received_at?.slice(0, 10)} — ${e.email_type ?? "correo"}: ${e.subject ?? ""} (${e.from_email ?? ""})`),
+    );
+  }
+
+  if (activity && activity.length > 0) {
+    parts.push(
+      "## Historial reciente",
+      ...activity.map((a) => `· ${a.occurred_at?.slice(0, 10)} — ${a.title}${a.detail ? `: ${a.detail.slice(0, 160)}` : ""}`),
+    );
+  }
+
   const meta = user?.user_metadata as Record<string, unknown> | undefined;
   const fullName = typeof meta?.["full_name"] === "string" ? (meta["full_name"] as string) : undefined;
 
