@@ -24,6 +24,7 @@ import { Route as AuthenticatedVaultRouteImport } from './routes/_authenticated/
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedApplicationsIndexRouteImport } from './routes/_authenticated/applications.index'
 import { Route as AuthenticatedApplicationsIdRouteImport } from './routes/_authenticated/applications.$id'
+import { Route as ApiPublicGmailCallbackRouteImport } from './routes/api/public/gmail/callback'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -101,6 +102,11 @@ const AuthenticatedApplicationsIdRoute =
     path: '/applications/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicGmailCallbackRoute = ApiPublicGmailCallbackRouteImport.update({
+  id: '/api/public/gmail/callback',
+  path: '/api/public/gmail/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/applications/$id': typeof AuthenticatedApplicationsIdRoute
   '/applications/': typeof AuthenticatedApplicationsIndexRoute
+  '/api/public/gmail/callback': typeof ApiPublicGmailCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/applications/$id': typeof AuthenticatedApplicationsIdRoute
   '/applications': typeof AuthenticatedApplicationsIndexRoute
+  '/api/public/gmail/callback': typeof ApiPublicGmailCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/_authenticated/applications/$id': typeof AuthenticatedApplicationsIdRoute
   '/_authenticated/applications/': typeof AuthenticatedApplicationsIndexRoute
+  '/api/public/gmail/callback': typeof ApiPublicGmailCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -169,6 +178,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/applications/$id'
     | '/applications/'
+    | '/api/public/gmail/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -185,6 +195,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/applications/$id'
     | '/applications'
+    | '/api/public/gmail/callback'
   id:
     | '__root__'
     | '/'
@@ -202,6 +213,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/_authenticated/applications/$id'
     | '/_authenticated/applications/'
+    | '/api/public/gmail/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -209,6 +221,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiPublicGmailCallbackRoute: typeof ApiPublicGmailCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -318,6 +331,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedApplicationsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/gmail/callback': {
+      id: '/api/public/gmail/callback'
+      path: '/api/public/gmail/callback'
+      fullPath: '/api/public/gmail/callback'
+      preLoaderRoute: typeof ApiPublicGmailCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -357,6 +377,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiPublicGmailCallbackRoute: ApiPublicGmailCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
