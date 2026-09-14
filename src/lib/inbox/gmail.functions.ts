@@ -74,8 +74,8 @@ export const syncGmail = createServerFn({ method: "POST" })
       if (!classification) continue;
 
       const match = matchApplication(message, classification, targets);
-      const isNewApplication =
-        !match.id && classification.emailType === "application_confirmation";
+      // Sin coincidencia clara y sin candidatas: puede ser una candidatura nueva.
+      const isNewApplication = !match.id && match.candidates.length === 0;
 
       const { data: event, error } = await supabase
         .from("email_events")
@@ -91,12 +91,16 @@ export const syncGmail = createServerFn({ method: "POST" })
           received_at: new Date(Number(message.internalDate)).toISOString(),
           email_type: classification.emailType,
           confidence: classification.confidence,
-          extracted: classification.extracted as never,
+          extracted: {
+            ...classification.extracted,
+            match_candidates: match.candidates,
+          } as never,
           application_id: match.id,
           status: match.id ? "pending" : "needs_match",
         })
         .select("id")
         .single();
+
 
       if (error || !event) continue;
       detected += 1;
