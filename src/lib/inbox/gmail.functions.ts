@@ -54,14 +54,17 @@ export const syncGmail = createServerFn({ method: "POST" })
 
     const { data: apps } = await supabase
       .from("applications")
-      .select("id, role_title, companies(name)")
+      .select("id, role_title, job_url, candidate_portal_url, companies(name)")
       .eq("archived", false);
 
     const targets = (apps ?? []).map((app) => ({
       id: app.id,
       role_title: app.role_title,
+      job_url: app.job_url,
+      candidate_portal_url: app.candidate_portal_url,
       company: (app.companies as { name: string } | null)?.name ?? null,
     }));
+
 
     let detected = 0;
 
