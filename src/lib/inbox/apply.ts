@@ -159,6 +159,35 @@ async function applyOne(
       const roleTitle = str(payload, "role_title");
       if (!roleTitle) return null;
       const companyName = str(payload, "company");
+
+      // Antes de crear nada, se comprueba que no exista ya esa candidatura.
+      const { data: existingApps } = await supabase
+        .from("applications")
+        .select("id, role_title, job_url, candidate_portal_url, companies(name)")
+        .eq("archived", false);
+      const duplicate = findApplicationMatch(
+        {
+          subject: event.subject,
+          snippet: event.snippet,
+          fromEmail: event.from_email,
+          fromName: event.from_name,
+          company: companyName,
+          role: roleTitle,
+          url: str(payload, "candidate_portal_url") ?? str(payload, "job_url"),
+        },
+        (existingApps ?? []).map((app) => ({
+          id: app.id,
+          role_title: app.role_title,
+          job_url: app.job_url,
+          candidate_portal_url: app.candidate_portal_url,
+          company: (app.companies as { name: string } | null)?.name ?? null,
+        })),
+      );
+      if (duplicate.id) {
+        await supabase.from("email_events").update({ application_id: duplicate.id }).eq("id", event.id);
+        return duplicate.id;
+      }
+
       const companyId = companyName ? await ensureCompany(companyName) : null;
       const created = await supabase
         .from("applications")
@@ -175,9 +204,18 @@ async function applyOne(
         .select("id")
         .single();
       const newId = created.data?.id ?? null;
-      if (newId) await supabase.from("email_events").update({ application_id: newId }).eq("id", event.id);
+      if (newId) {
+        await supabase.from("email_events").update({ application_id: newId }).eq("id", event.id);
+        await supabase.from("application_events").insert({
+          application_id: newId,
+          title: "Candidatura creada desde un correo detectado",
+          detail: event.subject,
+          to_stage: (str(payload, "stage") ?? "applied") as never,
+        });
+      }
       return newId;
     }
+
     default:
       return applicationId;
   }
