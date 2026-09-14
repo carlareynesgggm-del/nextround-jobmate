@@ -1,5 +1,7 @@
 import type { GmailMessage } from "@/lib/inbox/gmail.server";
 import type { EmailType, ExtractedEmail, SuggestionKind } from "@/lib/inbox/domain";
+import { companyFromEmail, findApplicationMatch, type MatchTarget } from "@/lib/inbox/match";
+
 
 export type Classification = {
   emailType: EmailType;
