@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { qk } from "@/lib/api";
 import { affectedKeys, inboxKeys } from "@/lib/inbox/api";
 import type { EmailEventRow, EmailSuggestionRow } from "@/lib/inbox/domain";
+import { findApplicationMatch } from "@/lib/inbox/match";
+
 
 type Payload = Record<string, unknown>;
 
