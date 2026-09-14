@@ -147,30 +147,25 @@ function findDate(text: string): string | null {
   return null;
 }
 
-const GENERIC_DOMAINS = new Set([
-  "gmail.com",
-  "googlemail.com",
-  "hotmail.com",
-  "outlook.com",
-  "yahoo.com",
-  "icloud.com",
-  "linkedin.com",
-  "indeed.com",
-  "myworkday.com",
-  "greenhouse.io",
-  "lever.co",
-  "smartrecruiters.com",
-  "successfactors.com",
-]);
-
 export function companyGuess(message: GmailMessage): string | null {
-  const domain = message.fromEmail.split("@")[1] ?? "";
-  const base = domain.split(".").slice(0, -1).pop() ?? "";
-  if (domain && !GENERIC_DOMAINS.has(domain) && base.length > 2) {
-    return base.charAt(0).toUpperCase() + base.slice(1);
-  }
+  const fromDomain = companyFromEmail(message.fromEmail);
+  if (fromDomain) return fromDomain.charAt(0).toUpperCase() + fromDomain.slice(1);
   const named = /\bat\s+([A-Z][\w&.-]+(?:\s[A-Z][\w&.-]+)?)/.exec(message.subject);
   return named?.[1] ?? (message.fromName || null);
+}
+
+/** Puesto mencionado en el asunto, cuando el formato lo deja claro. */
+function roleGuess(subject: string): string | null {
+  const patterns = [
+    /(?:for the|para el puesto de|para la posición de|application (?:for|to)|candidatura (?:a|para))\s+([^–—|,.:]{4,80})/i,
+    /[–—-]\s*([A-Z][^–—|]{6,80}(?:Intern|Internship|Analyst|Engineer|Manager|Graduate|Trainee|Programme|Program)[^–—|]{0,30})/,
+  ];
+  for (const pattern of patterns) {
+    const match = pattern.exec(subject);
+    const value = match?.[1]?.trim();
+    if (value) return value;
+  }
+  return null;
 }
 
 /** Devuelve null cuando el correo no parece del proceso de selección. */
@@ -187,9 +182,11 @@ export function classify(message: GmailMessage): Classification | null {
   const url = firstUrl(`${message.subject} ${message.snippet}`);
   const date = findDate(`${message.subject} ${message.snippet}`);
   const company = companyGuess(message);
+  const role = roleGuess(message.subject);
 
   const extracted: ExtractedEmail = {
     company,
+    ...(role ? { role } : {}),
     recruiter_name: message.fromName || null,
     recruiter_email: message.fromEmail || null,
     ...(url ? { portal_url: url } : {}),
@@ -197,6 +194,7 @@ export function classify(message: GmailMessage): Classification | null {
     ...(STAGE_BY_TYPE[best.type] ? { stage: STAGE_BY_TYPE[best.type] ?? null } : {}),
     notes: message.snippet || null,
   };
+
 
   const suggestions: Classification["suggestions"] = [
     {
