@@ -170,6 +170,9 @@ export type ExtractedEmail = {
   documents_requested?: string | null;
   offer_salary?: string | null;
   notes?: string | null;
+  /** Candidaturas plausibles cuando el correo no se pudo asociar con certeza. */
+  match_candidates?: string[];
+
 };
 
 export function extractedOf(event: EmailEventRow): ExtractedEmail {
