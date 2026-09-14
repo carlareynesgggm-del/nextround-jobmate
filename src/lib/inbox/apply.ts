@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { qk } from "@/lib/api";
 import { affectedKeys, inboxKeys } from "@/lib/inbox/api";
 import type { EmailEventRow, EmailSuggestionRow } from "@/lib/inbox/domain";
+import { findBestApplicationMatch, type MatchTarget } from "@/lib/inbox/matching";
 
 type Payload = Record<string, unknown>;
 
@@ -39,10 +40,14 @@ async function applyOne(
     case "stage": {
       const stage = str(payload, "stage");
       if (!applicationId || !stage) return null;
-      await supabase
-        .from("applications")
-        .update({ stage: stage as never, updated_at: new Date().toISOString() })
-        .eq("id", applicationId);
+      const { error } = await supabase.rpc("apply_email_stage_suggestion", {
+        p_event_id: event.id,
+        p_suggestion_id: suggestion.id,
+        p_application_id: applicationId,
+        p_stage: stage as never,
+        p_automatic: false,
+      });
+      if (error) throw new Error(error.message);
       return applicationId;
     }
     case "deadline": {
@@ -102,15 +107,12 @@ async function applyOne(
     case "calendar": {
       const startsAt = str(payload, "starts_at");
       if (!startsAt) return null;
-      await supabase.from("calendar_events").insert({
-        application_id: applicationId,
-        title: str(payload, "title") ?? suggestion.label,
-        kind: (str(payload, "kind") ?? "interview") as never,
-        starts_at: startsAt,
-        duration_min: num(payload, "duration_min") ?? 45,
-        location: str(payload, "location"),
-        notes: suggestion.detail,
+      const { error } = await supabase.rpc("apply_email_calendar_suggestion", {
+        p_event_id: event.id,
+        p_suggestion_id: suggestion.id,
+        p_application_id: applicationId,
       });
+      if (error) throw new Error(error.message);
       return applicationId;
     }
     case "task": {
@@ -138,6 +140,34 @@ async function applyOne(
       const roleTitle = str(payload, "role_title");
       if (!roleTitle) return null;
       const companyName = str(payload, "company");
+
+      const { data: existingApplications } = await supabase
+        .from("applications")
+        .select("id, role_title, companies(name)")
+        .eq("archived", false);
+      const targets: MatchTarget[] = (existingApplications ?? []).map((item) => ({
+        id: item.id,
+        role_title: item.role_title,
+        job_url: item.job_url,
+        candidate_portal_url: item.candidate_portal_url,
+        company: item.companies?.name ?? null,
+      }));
+      const duplicate = findBestApplicationMatch({
+        company: companyName,
+        roleTitle,
+        jobUrl: str(payload, "job_url"),
+        portalUrl: str(payload, "candidate_portal_url"),
+        targets,
+      });
+
+      if (duplicate.confident && duplicate.id) {
+        await supabase
+          .from("email_events")
+          .update({ application_id: duplicate.id, status: "pending" })
+          .eq("id", event.id);
+        return duplicate.id;
+      }
+
       const companyId = companyName ? await ensureCompany(companyName) : null;
       const created = await supabase
         .from("applications")
@@ -179,7 +209,12 @@ export function useApplyEmailSuggestions() {
         await supabase.from("email_suggestions").update({ status: "applied" }).eq("id", suggestion.id);
 
         // Cada cambio confirmado queda registrado en el historial.
-        if (touched && suggestion.kind !== "activity") {
+        if (
+          touched &&
+          suggestion.kind !== "activity" &&
+          suggestion.kind !== "stage" &&
+          suggestion.kind !== "calendar"
+        ) {
           await supabase.from("activity_feed").insert({
             application_id: touched,
             email_event_id: event.id,

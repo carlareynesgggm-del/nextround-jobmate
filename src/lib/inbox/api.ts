@@ -119,6 +119,68 @@ export function useMatchEmailEvent() {
   });
 }
 
+export function useResolveEmailApplication() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      eventId,
+      suggestionId,
+      applicationId,
+    }: {
+      eventId: string;
+      suggestionId: string;
+      applicationId: string;
+    }) => {
+      const { error } = await supabase.rpc("resolve_email_application", {
+        p_event_id: eventId,
+        p_suggestion_id: suggestionId,
+        p_application_id: applicationId,
+      });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: inboxKeys.events });
+      void qc.invalidateQueries({ queryKey: inboxKeys.suggestions(vars.eventId) });
+      void qc.invalidateQueries({ queryKey: ["activity", vars.applicationId] });
+      void qc.invalidateQueries({ queryKey: ["applications"] });
+    },
+  });
+}
+
+export function useApplyEmailStageSuggestion() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      eventId,
+      suggestionId,
+      applicationId,
+      stage,
+      automatic,
+    }: {
+      eventId: string;
+      suggestionId: string;
+      applicationId: string;
+      stage: string;
+      automatic?: boolean;
+    }) => {
+      const { error } = await supabase.rpc("apply_email_stage_suggestion", {
+        p_event_id: eventId,
+        p_suggestion_id: suggestionId,
+        p_application_id: applicationId,
+        p_stage: stage as never,
+        p_automatic: automatic ?? false,
+      });
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: inboxKeys.events });
+      void qc.invalidateQueries({ queryKey: inboxKeys.suggestions(vars.eventId) });
+      void qc.invalidateQueries({ queryKey: ["applications"] });
+      void qc.invalidateQueries({ queryKey: ["activity", vars.applicationId] });
+    },
+  });
+}
+
 /* ------------------------------ historial y avisos ------------------------ */
 
 export function useActivity(applicationId: string) {

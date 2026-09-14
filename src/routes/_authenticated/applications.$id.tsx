@@ -146,7 +146,11 @@ function ApplicationDetail() {
         }}
       />
 
-      <NextBestActionCard app={app} action={action} />
+      <NextBestActionCard
+        app={app}
+        action={action}
+        onLinkCv={() => setTab("documents")}
+      />
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="scrollbar-slim max-w-full overflow-x-auto">

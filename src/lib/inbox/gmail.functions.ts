@@ -54,12 +54,14 @@ export const syncGmail = createServerFn({ method: "POST" })
 
     const { data: apps } = await supabase
       .from("applications")
-      .select("id, role_title, companies(name)")
+      .select("id, role_title, stage, job_url, candidate_portal_url, companies(name)")
       .eq("archived", false);
 
     const targets = (apps ?? []).map((app) => ({
       id: app.id,
       role_title: app.role_title,
+      job_url: app.job_url,
+      candidate_portal_url: app.candidate_portal_url,
       company: (app.companies as { name: string } | null)?.name ?? null,
     }));
 
@@ -128,7 +130,33 @@ export const syncGmail = createServerFn({ method: "POST" })
         });
       }
 
-      await supabase.from("email_suggestions").insert(suggestions);
+      const { data: insertedSuggestions, error: suggestionsError } = await supabase
+        .from("email_suggestions")
+        .insert(suggestions)
+        .select("id, kind");
+      if (suggestionsError) continue;
+
+      const matchedApp = apps?.find((app) => app.id === match.id);
+      const stageSuggestion = insertedSuggestions?.find((suggestion) => suggestion.kind === "stage");
+      const canAutoApply =
+        !connection.ask_before_update &&
+        match.confident &&
+        Boolean(match.id) &&
+        matchedApp?.stage === "applied" &&
+        classification.confidence >= 0.8 &&
+        suggestions.length === 2 &&
+        Boolean(stageSuggestion) &&
+        Boolean(classification.extracted.stage);
+
+      if (canAutoApply && match.id && stageSuggestion && classification.extracted.stage) {
+        await supabase.rpc("apply_email_stage_suggestion", {
+          p_event_id: event.id,
+          p_suggestion_id: stageSuggestion.id,
+          p_application_id: match.id,
+          p_stage: classification.extracted.stage as never,
+          p_automatic: true,
+        });
+      }
     }
 
     await supabase

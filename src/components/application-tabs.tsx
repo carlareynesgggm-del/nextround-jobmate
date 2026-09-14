@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -440,9 +440,12 @@ export function DocumentsTab({ application }: { application: ApplicationWithComp
   const unlink = useUnlinkDocument();
   const [documentId, setDocumentId] = useState("");
   const [role, setRole] = useState("cv");
+  const cvSelectRef = useRef<HTMLSelectElement>(null);
 
   const linkedIds = new Set(links.map((item) => item.document_id));
   const available = vault.filter((doc) => !linkedIds.has(doc.id));
+  const cvLink = links.find((item) => item.role === "cv" || item.documents?.kind === "cv");
+  const cvDocument = cvLink?.documents;
 
   const open = async (path: string | null) => {
     if (!path) {
@@ -455,9 +458,58 @@ export function DocumentsTab({ application }: { application: ApplicationWithComp
 
   return (
     <div className="space-y-5">
+      {cvLink && cvDocument && (
+        <SectionCard title={t("CV utilizado")}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="truncate font-display text-sm font-semibold">{cvDocument.name}</p>
+              {cvDocument.version && (
+                <p className="text-xs text-muted-foreground">
+                  {t("Versión {version}", { version: cvDocument.version })}
+                </p>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => open(cvDocument.storage_path)}
+              >
+                {t("Ver CV")} <ExternalLink className="size-3.5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setRole("cv");
+                  setDocumentId("");
+                  cvSelectRef.current?.focus();
+                }}
+              >
+                {t("Cambiar CV")}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-danger hover:text-danger"
+                onClick={() =>
+                  unlink.mutate({
+                    applicationId: application.id,
+                    documentId: cvLink.document_id,
+                  })
+                }
+              >
+                {t("Desvincular")}
+              </Button>
+            </div>
+          </div>
+        </SectionCard>
+      )}
+
       <SectionCard title={t("Vincular documento del CV Vault")}>
         <div className="grid gap-3 sm:grid-cols-[1fr_180px_auto]">
           <select
+            ref={cvSelectRef}
             value={documentId}
             onChange={(event) => setDocumentId(event.target.value)}
             aria-label={t("Documento")}
@@ -488,7 +540,15 @@ export function DocumentsTab({ application }: { application: ApplicationWithComp
                 toast.error(t("Elige un documento del vault."));
                 return;
               }
-              await link.mutateAsync({ application, documentId, role });
+              if (role === "cv" && cvLink) {
+                await updateLink.mutateAsync({
+                  applicationId: application.id,
+                  documentId: cvLink.document_id,
+                  values: { document_id: documentId },
+                });
+              } else {
+                await link.mutateAsync({ application, documentId, role });
+              }
               setDocumentId("");
               toast.success(t("Documento vinculado"));
             }}

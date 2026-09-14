@@ -87,29 +87,20 @@ export function AttentionCard({
   const when = whenLabel(event);
   const company = app.companies?.name ?? UNKNOWN;
 
-  const isFollowup = action.kind === "followup" || action.kind === "ghosted";
-  const secondary = app.candidate_portal_url ? (
-    <Button asChild size="sm" variant="outline" className="gap-1.5 rounded-xl">
-      <a href={app.candidate_portal_url} target="_blank" rel="noreferrer">
-        {t("Abrir portal")} <ExternalLink className="size-3.5" />
-      </a>
-    </Button>
-  ) : isFollowup ? (
-    <Button
-      size="sm"
-      variant="outline"
-      className="rounded-xl"
-      onClick={() => openAssistant(app.id, `Redacta un email breve de seguimiento para ${app.role_title} en ${company}.`)}
-    >
-      {t("Redactar seguimiento")}
-    </Button>
-  ) : (
+  const secondary = (
     <Button asChild size="sm" variant="outline" className="rounded-xl">
       <Link to="/applications/$id" params={{ id: app.id }}>
         {t("Ver candidatura")}
       </Link>
     </Button>
   );
+  const portalAction = app.candidate_portal_url ? (
+    <Button asChild size="sm" variant="outline" className="gap-1.5 rounded-xl">
+      <a href={app.candidate_portal_url} target="_blank" rel="noreferrer">
+        {t("Abrir portal")} <ExternalLink className="size-3.5" />
+      </a>
+    </Button>
+  ) : null;
 
   return (
     <li className="rounded-3xl bg-surface p-6 shadow-soft transition-shadow hover:shadow-lift sm:p-7">
@@ -145,6 +136,7 @@ export function AttentionCard({
           <Sparkles className="size-3.5" /> {t("Preparar con IA")}
         </Button>
         {secondary}
+        {portalAction}
       </div>
     </li>
   );

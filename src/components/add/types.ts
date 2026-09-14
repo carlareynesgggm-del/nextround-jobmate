@@ -40,6 +40,20 @@ export type SavedDetails = {
   applicationPlan: string;
 };
 
+export type ApplicationSeed = {
+  company?: string | null;
+  roleTitle?: string | null;
+  stage?: Stage | null;
+  appliedAt?: string | null;
+  jobUrl?: string | null;
+  candidatePortalUrl?: string | null;
+  applicationRef?: string | null;
+  source?: string | null;
+  location?: string | null;
+  country?: string | null;
+  description?: string | null;
+};
+
 export const NEW_COMPANY = "__new__";
 
 export function emptyFlowDetails(): FlowDetails {

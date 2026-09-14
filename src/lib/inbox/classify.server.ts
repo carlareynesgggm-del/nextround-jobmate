@@ -1,5 +1,9 @@
 import type { GmailMessage } from "@/lib/inbox/gmail.server";
 import type { EmailType, ExtractedEmail, SuggestionKind } from "@/lib/inbox/domain";
+import {
+  findBestApplicationMatch,
+  type MatchTarget,
+} from "@/lib/inbox/matching";
 
 export type Classification = {
   emailType: EmailType;
@@ -69,6 +73,31 @@ const RULES: Rule[] = [
     ],
   },
   {
+    type: "case_study",
+    weight: 0.83,
+    words: [
+      "technical interview",
+      "technical assessment",
+      "technical task",
+      "case study",
+      "technical case",
+      "entrevista técnica",
+      "prueba técnica",
+      "caso práctico",
+    ],
+  },
+  {
+    type: "final_round",
+    weight: 0.84,
+    words: [
+      "final interview",
+      "final round",
+      "last stage",
+      "última fase",
+      "entrevista final",
+    ],
+  },
+  {
     type: "document_request",
     weight: 0.75,
     words: [
@@ -123,6 +152,8 @@ const STAGE_BY_TYPE: Partial<Record<EmailType, string>> = {
   application_confirmation: "applied",
   under_review: "screening",
   assessment_invitation: "assessment",
+  case_study: "technical",
+  final_round: "final",
   interview_invitation: "interview",
   next_stage: "interview",
   offer: "offer",
@@ -132,6 +163,25 @@ const STAGE_BY_TYPE: Partial<Record<EmailType, string>> = {
 function firstUrl(text: string): string | null {
   const match = /https?:\/\/[^\s"'<>)]+/.exec(text);
   return match ? match[0] : null;
+}
+
+function roleGuess(subject: string, snippet: string): string | null {
+  const candidates = [subject.trim(), snippet.trim()];
+
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    const cleaned = candidate
+      .replace(/^(re|fw|fwd):\s*/i, "")
+      .replace(
+        /^(thank you for applying|we have received your application|application received|application confirmation|hemos recibido tu candidatura|gracias por tu candidatura)\s*(to|for|[-:])?\s*/i,
+        "",
+      )
+      .trim();
+
+    if (cleaned.length > 4) return cleaned;
+  }
+
+  return null;
 }
 
 /** Fecha explícita en formato ISO o dd/mm/yyyy; si no hay, no se inventa nada. */
@@ -187,9 +237,11 @@ export function classify(message: GmailMessage): Classification | null {
   const url = firstUrl(`${message.subject} ${message.snippet}`);
   const date = findDate(`${message.subject} ${message.snippet}`);
   const company = companyGuess(message);
+  const role = roleGuess(message.subject, message.snippet);
 
   const extracted: ExtractedEmail = {
     company,
+    ...(role ? { role } : {}),
     recruiter_name: message.fromName || null,
     recruiter_email: message.fromEmail || null,
     ...(url ? { portal_url: url } : {}),
@@ -218,6 +270,7 @@ export function classify(message: GmailMessage): Classification | null {
   }
 
   if (best.type === "assessment_invitation" || best.type === "interview_invitation") {
+    const calendarKind = best.type === "assessment_invitation" ? "test" : "interview";
     suggestions.push({
       kind: best.type === "assessment_invitation" ? "assessment" : "interview",
       label:
@@ -232,6 +285,20 @@ export function classify(message: GmailMessage): Classification | null {
         instructions: message.snippet || null,
       },
     });
+    if (date) {
+      suggestions.push({
+        kind: "calendar",
+        label: "Añadir la cita al calendario",
+        detail: message.subject || null,
+        payload: {
+          title: message.subject || "Evento de Gmail",
+          kind: calendarKind,
+          starts_at: date,
+          duration_min: 45,
+          notes: message.snippet || null,
+        },
+      });
+    }
   }
 
   if (date && (best.type === "assessment_invitation" || best.type === "offer" || best.type === "document_request")) {
@@ -240,6 +307,21 @@ export function classify(message: GmailMessage): Classification | null {
       label: "Añadir la fecha límite a la candidatura",
       detail: date.slice(0, 10),
       payload: { deadline_at: date },
+    });
+  }
+
+  if (date && (best.type === "offer" || best.type === "document_request")) {
+    suggestions.push({
+      kind: "calendar",
+      label: "Añadir la fecha límite al calendario",
+      detail: message.subject || null,
+      payload: {
+        title: message.subject || "Fecha límite de Gmail",
+        kind: "deadline",
+        starts_at: date,
+        duration_min: 30,
+        notes: message.snippet || null,
+      },
     });
   }
 
@@ -273,32 +355,33 @@ export function classify(message: GmailMessage): Classification | null {
   return { emailType: best.type, confidence: best.weight, extracted, suggestions };
 }
 
-export type MatchTarget = { id: string; role_title: string; company: string | null };
+function normalizeCompany(value: string | null | undefined): string {
+  return (value ?? "")
+    .toLowerCase()
+    .replace(/^lifeat/, "")
+    .replace(/^careersat/, "")
+    .replace(/^jobsat/, "")
+    .replace(/^join/, "")
+    .replace(/[^a-z0-9]/g, "");
+}
 
-/** Empareja el correo con una candidatura existente sin adivinar de más. */
+function normalizeText(value: string | null | undefined): string {
+  return (value ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/** Adapta un correo clasificado al comparador compartido de candidaturas. */
 export function matchApplication(
   message: GmailMessage,
   classification: Classification,
   apps: MatchTarget[],
 ): { id: string | null; confident: boolean } {
-  const haystack = `${message.subject} ${message.snippet} ${message.fromEmail}`.toLowerCase();
-  const company = (classification.extracted.company ?? "").toLowerCase();
-
-  const byCompany = apps.filter((app) => {
-    const name = (app.company ?? "").toLowerCase();
-    return name.length > 2 && (haystack.includes(name) || (company && company.includes(name)));
+  return findBestApplicationMatch({
+    company: classification.extracted.company,
+    roleTitle: classification.extracted.role,
+    portalUrl: classification.extracted.portal_url,
+    targets: apps,
   });
-
-  if (byCompany.length === 1) return { id: byCompany[0]!.id, confident: true };
-
-  if (byCompany.length > 1) {
-    const byRole = byCompany.filter((app) => haystack.includes(app.role_title.toLowerCase()));
-    if (byRole.length === 1) return { id: byRole[0]!.id, confident: true };
-    return { id: null, confident: false };
-  }
-
-  const byRole = apps.filter((app) => app.role_title.length > 4 && haystack.includes(app.role_title.toLowerCase()));
-  if (byRole.length === 1) return { id: byRole[0]!.id, confident: false };
-
-  return { id: null, confident: false };
 }
