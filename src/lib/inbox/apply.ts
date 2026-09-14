@@ -39,12 +39,33 @@ async function applyOne(
     case "stage": {
       const stage = str(payload, "stage");
       if (!applicationId || !stage) return null;
+      const current = await supabase
+        .from("applications")
+        .select("stage, applied_at")
+        .eq("id", applicationId)
+        .maybeSingle();
+      const from = current.data?.stage ?? null;
       await supabase
         .from("applications")
-        .update({ stage: stage as never, updated_at: new Date().toISOString() })
+        .update({
+          stage: stage as never,
+          updated_at: new Date().toISOString(),
+          ...(stage !== "saved" && !current.data?.applied_at
+            ? { applied_at: new Date().toISOString().slice(0, 10) }
+            : {}),
+        })
         .eq("id", applicationId);
+      // El cambio queda también en el proceso de la candidatura.
+      await supabase.from("application_events").insert({
+        application_id: applicationId,
+        title: "Cambio de fase confirmado desde el correo",
+        detail: event.subject,
+        from_stage: from as never,
+        to_stage: stage as never,
+      });
       return applicationId;
     }
+
     case "deadline": {
       const deadline = str(payload, "deadline_at");
       if (!applicationId || !deadline) return null;
