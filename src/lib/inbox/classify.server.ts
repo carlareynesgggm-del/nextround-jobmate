@@ -270,35 +270,42 @@ export function classify(message: GmailMessage): Classification | null {
     });
   }
 
+  // Fechas importantes: se ofrecen para el calendario, nunca se añaden solas.
+  if (date && (best.type === "interview_invitation" || best.type === "next_stage" || best.type === "assessment_invitation")) {
+    suggestions.push({
+      kind: "calendar",
+      label: "Añadir esta fecha al calendario",
+      detail: date.slice(0, 10),
+      payload: {
+        title: message.subject || null,
+        starts_at: date,
+        kind: best.type === "assessment_invitation" ? "test" : "interview",
+        ...(url ? { location: url } : {}),
+      },
+    });
+  }
+
   return { emailType: best.type, confidence: best.weight, extracted, suggestions };
 }
-
-export type MatchTarget = { id: string; role_title: string; company: string | null };
 
 /** Empareja el correo con una candidatura existente sin adivinar de más. */
 export function matchApplication(
   message: GmailMessage,
   classification: Classification,
   apps: MatchTarget[],
-): { id: string | null; confident: boolean } {
-  const haystack = `${message.subject} ${message.snippet} ${message.fromEmail}`.toLowerCase();
-  const company = (classification.extracted.company ?? "").toLowerCase();
-
-  const byCompany = apps.filter((app) => {
-    const name = (app.company ?? "").toLowerCase();
-    return name.length > 2 && (haystack.includes(name) || (company && company.includes(name)));
-  });
-
-  if (byCompany.length === 1) return { id: byCompany[0]!.id, confident: true };
-
-  if (byCompany.length > 1) {
-    const byRole = byCompany.filter((app) => haystack.includes(app.role_title.toLowerCase()));
-    if (byRole.length === 1) return { id: byRole[0]!.id, confident: true };
-    return { id: null, confident: false };
-  }
-
-  const byRole = apps.filter((app) => app.role_title.length > 4 && haystack.includes(app.role_title.toLowerCase()));
-  if (byRole.length === 1) return { id: byRole[0]!.id, confident: false };
-
-  return { id: null, confident: false };
+): { id: string | null; confident: boolean; candidates: string[] } {
+  const result = findApplicationMatch(
+    {
+      subject: message.subject,
+      snippet: message.snippet,
+      fromEmail: message.fromEmail,
+      fromName: message.fromName,
+      company: classification.extracted.company ?? null,
+      role: classification.extracted.role ?? null,
+      url: classification.extracted.portal_url ?? null,
+    },
+    apps,
+  );
+  return { id: result.id, confident: result.id !== null, candidates: result.candidates };
 }
+
