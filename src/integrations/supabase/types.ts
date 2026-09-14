@@ -524,7 +524,6 @@ export type Database = {
           application_id: string | null
           created_at: string
           duration_min: number
-          email_event_id: string | null
           id: string
           is_demo: boolean
           kind: Database["public"]["Enums"]["event_kind"]
@@ -538,7 +537,6 @@ export type Database = {
           application_id?: string | null
           created_at?: string
           duration_min?: number
-          email_event_id?: string | null
           id?: string
           is_demo?: boolean
           kind?: Database["public"]["Enums"]["event_kind"]
@@ -552,7 +550,6 @@ export type Database = {
           application_id?: string | null
           created_at?: string
           duration_min?: number
-          email_event_id?: string | null
           id?: string
           is_demo?: boolean
           kind?: Database["public"]["Enums"]["event_kind"]
@@ -1052,28 +1049,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      apply_email_stage_suggestion: {
-        Args: {
-          p_application_id: string
-          p_automatic?: boolean
-          p_event_id: string
-          p_stage: Database["public"]["Enums"]["app_stage"]
-          p_suggestion_id: string
-        }
-        Returns: undefined
-      }
-      apply_email_calendar_suggestion: {
-        Args: { p_application_id: string; p_event_id: string; p_suggestion_id: string }
-        Returns: undefined
-      }
-      merge_applications: {
-        Args: { canonical_id: string; duplicate_id: string }
-        Returns: undefined
-      }
-      resolve_email_application: {
-        Args: { p_event_id: string; p_suggestion_id: string; p_application_id: string }
-        Returns: undefined
-      }
+      [_ in never]: never
     }
     Enums: {
       app_stage:

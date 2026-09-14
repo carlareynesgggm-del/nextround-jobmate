@@ -9,11 +9,9 @@ import { cn } from "@/lib/utils";
 export function NextBestActionCard({
   app,
   action,
-  onLinkCv,
 }: {
   app: ApplicationWithCompany;
   action: NextAction | null;
-  onLinkCv?: () => void;
 }) {
   const t = useT();
 
@@ -30,25 +28,9 @@ export function NextBestActionCard({
           <p className="mt-0.5 text-sm text-muted-foreground">{t(action.detail)}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {action.ctaLabel === "Vincular CV" ? (
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-1.5 rounded-xl"
-              onClick={onLinkCv}
-            >
-              {t("Vincular CV")}
-            </Button>
-          ) : (
-            <span
-              className={cn(
-                "rounded-full border px-2 py-0.5 text-[10px] font-medium",
-                nextActionTone(action.tone),
-              )}
-            >
-              {t(action.ctaLabel)}
-            </span>
-          )}
+          <span className={cn("rounded-full border px-2 py-0.5 text-[10px] font-medium", nextActionTone(action.tone))}>
+            {t(action.ctaLabel)}
+          </span>
           <Button
             size="sm"
             className="gap-1.5 rounded-xl"

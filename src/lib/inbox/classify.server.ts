@@ -1,9 +1,7 @@
 import type { GmailMessage } from "@/lib/inbox/gmail.server";
 import type { EmailType, ExtractedEmail, SuggestionKind } from "@/lib/inbox/domain";
-import {
-  findBestApplicationMatch,
-  type MatchTarget,
-} from "@/lib/inbox/matching";
+import { companyFromEmail, findApplicationMatch, type MatchTarget } from "@/lib/inbox/match";
+
 
 export type Classification = {
   emailType: EmailType;
@@ -73,31 +71,6 @@ const RULES: Rule[] = [
     ],
   },
   {
-    type: "case_study",
-    weight: 0.83,
-    words: [
-      "technical interview",
-      "technical assessment",
-      "technical task",
-      "case study",
-      "technical case",
-      "entrevista técnica",
-      "prueba técnica",
-      "caso práctico",
-    ],
-  },
-  {
-    type: "final_round",
-    weight: 0.84,
-    words: [
-      "final interview",
-      "final round",
-      "last stage",
-      "última fase",
-      "entrevista final",
-    ],
-  },
-  {
     type: "document_request",
     weight: 0.75,
     words: [
@@ -152,8 +125,6 @@ const STAGE_BY_TYPE: Partial<Record<EmailType, string>> = {
   application_confirmation: "applied",
   under_review: "screening",
   assessment_invitation: "assessment",
-  case_study: "technical",
-  final_round: "final",
   interview_invitation: "interview",
   next_stage: "interview",
   offer: "offer",
@@ -163,25 +134,6 @@ const STAGE_BY_TYPE: Partial<Record<EmailType, string>> = {
 function firstUrl(text: string): string | null {
   const match = /https?:\/\/[^\s"'<>)]+/.exec(text);
   return match ? match[0] : null;
-}
-
-function roleGuess(subject: string, snippet: string): string | null {
-  const candidates = [subject.trim(), snippet.trim()];
-
-  for (const candidate of candidates) {
-    if (!candidate) continue;
-    const cleaned = candidate
-      .replace(/^(re|fw|fwd):\s*/i, "")
-      .replace(
-        /^(thank you for applying|we have received your application|application received|application confirmation|hemos recibido tu candidatura|gracias por tu candidatura)\s*(to|for|[-:])?\s*/i,
-        "",
-      )
-      .trim();
-
-    if (cleaned.length > 4) return cleaned;
-  }
-
-  return null;
 }
 
 /** Fecha explícita en formato ISO o dd/mm/yyyy; si no hay, no se inventa nada. */
@@ -197,30 +149,25 @@ function findDate(text: string): string | null {
   return null;
 }
 
-const GENERIC_DOMAINS = new Set([
-  "gmail.com",
-  "googlemail.com",
-  "hotmail.com",
-  "outlook.com",
-  "yahoo.com",
-  "icloud.com",
-  "linkedin.com",
-  "indeed.com",
-  "myworkday.com",
-  "greenhouse.io",
-  "lever.co",
-  "smartrecruiters.com",
-  "successfactors.com",
-]);
-
 export function companyGuess(message: GmailMessage): string | null {
-  const domain = message.fromEmail.split("@")[1] ?? "";
-  const base = domain.split(".").slice(0, -1).pop() ?? "";
-  if (domain && !GENERIC_DOMAINS.has(domain) && base.length > 2) {
-    return base.charAt(0).toUpperCase() + base.slice(1);
-  }
+  const fromDomain = companyFromEmail(message.fromEmail);
+  if (fromDomain) return fromDomain.charAt(0).toUpperCase() + fromDomain.slice(1);
   const named = /\bat\s+([A-Z][\w&.-]+(?:\s[A-Z][\w&.-]+)?)/.exec(message.subject);
   return named?.[1] ?? (message.fromName || null);
+}
+
+/** Puesto mencionado en el asunto, cuando el formato lo deja claro. */
+function roleGuess(subject: string): string | null {
+  const patterns = [
+    /(?:for the|para el puesto de|para la posición de|application (?:for|to)|candidatura (?:a|para))\s+([^–—|,.:]{4,80})/i,
+    /[–—-]\s*([A-Z][^–—|]{6,80}(?:Intern|Internship|Analyst|Engineer|Manager|Graduate|Trainee|Programme|Program)[^–—|]{0,30})/,
+  ];
+  for (const pattern of patterns) {
+    const match = pattern.exec(subject);
+    const value = match?.[1]?.trim();
+    if (value) return value;
+  }
+  return null;
 }
 
 /** Devuelve null cuando el correo no parece del proceso de selección. */
@@ -237,7 +184,7 @@ export function classify(message: GmailMessage): Classification | null {
   const url = firstUrl(`${message.subject} ${message.snippet}`);
   const date = findDate(`${message.subject} ${message.snippet}`);
   const company = companyGuess(message);
-  const role = roleGuess(message.subject, message.snippet);
+  const role = roleGuess(message.subject);
 
   const extracted: ExtractedEmail = {
     company,
@@ -249,6 +196,7 @@ export function classify(message: GmailMessage): Classification | null {
     ...(STAGE_BY_TYPE[best.type] ? { stage: STAGE_BY_TYPE[best.type] ?? null } : {}),
     notes: message.snippet || null,
   };
+
 
   const suggestions: Classification["suggestions"] = [
     {
@@ -270,7 +218,6 @@ export function classify(message: GmailMessage): Classification | null {
   }
 
   if (best.type === "assessment_invitation" || best.type === "interview_invitation") {
-    const calendarKind = best.type === "assessment_invitation" ? "test" : "interview";
     suggestions.push({
       kind: best.type === "assessment_invitation" ? "assessment" : "interview",
       label:
@@ -285,20 +232,6 @@ export function classify(message: GmailMessage): Classification | null {
         instructions: message.snippet || null,
       },
     });
-    if (date) {
-      suggestions.push({
-        kind: "calendar",
-        label: "Añadir la cita al calendario",
-        detail: message.subject || null,
-        payload: {
-          title: message.subject || "Evento de Gmail",
-          kind: calendarKind,
-          starts_at: date,
-          duration_min: 45,
-          notes: message.snippet || null,
-        },
-      });
-    }
   }
 
   if (date && (best.type === "assessment_invitation" || best.type === "offer" || best.type === "document_request")) {
@@ -307,21 +240,6 @@ export function classify(message: GmailMessage): Classification | null {
       label: "Añadir la fecha límite a la candidatura",
       detail: date.slice(0, 10),
       payload: { deadline_at: date },
-    });
-  }
-
-  if (date && (best.type === "offer" || best.type === "document_request")) {
-    suggestions.push({
-      kind: "calendar",
-      label: "Añadir la fecha límite al calendario",
-      detail: message.subject || null,
-      payload: {
-        title: message.subject || "Fecha límite de Gmail",
-        kind: "deadline",
-        starts_at: date,
-        duration_min: 30,
-        notes: message.snippet || null,
-      },
     });
   }
 
@@ -352,36 +270,42 @@ export function classify(message: GmailMessage): Classification | null {
     });
   }
 
+  // Fechas importantes: se ofrecen para el calendario, nunca se añaden solas.
+  if (date && (best.type === "interview_invitation" || best.type === "next_stage" || best.type === "assessment_invitation")) {
+    suggestions.push({
+      kind: "calendar",
+      label: "Añadir esta fecha al calendario",
+      detail: date.slice(0, 10),
+      payload: {
+        title: message.subject || null,
+        starts_at: date,
+        kind: best.type === "assessment_invitation" ? "test" : "interview",
+        ...(url ? { location: url } : {}),
+      },
+    });
+  }
+
   return { emailType: best.type, confidence: best.weight, extracted, suggestions };
 }
 
-function normalizeCompany(value: string | null | undefined): string {
-  return (value ?? "")
-    .toLowerCase()
-    .replace(/^lifeat/, "")
-    .replace(/^careersat/, "")
-    .replace(/^jobsat/, "")
-    .replace(/^join/, "")
-    .replace(/[^a-z0-9]/g, "");
-}
-
-function normalizeText(value: string | null | undefined): string {
-  return (value ?? "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-}
-
-/** Adapta un correo clasificado al comparador compartido de candidaturas. */
+/** Empareja el correo con una candidatura existente sin adivinar de más. */
 export function matchApplication(
   message: GmailMessage,
   classification: Classification,
   apps: MatchTarget[],
-): { id: string | null; confident: boolean } {
-  return findBestApplicationMatch({
-    company: classification.extracted.company,
-    roleTitle: classification.extracted.role,
-    portalUrl: classification.extracted.portal_url,
-    targets: apps,
-  });
+): { id: string | null; confident: boolean; candidates: string[] } {
+  const result = findApplicationMatch(
+    {
+      subject: message.subject,
+      snippet: message.snippet,
+      fromEmail: message.fromEmail,
+      fromName: message.fromName,
+      company: classification.extracted.company ?? null,
+      role: classification.extracted.role ?? null,
+      url: classification.extracted.portal_url ?? null,
+    },
+    apps,
+  );
+  return { id: result.id, confident: result.id !== null, candidates: result.candidates };
 }
+

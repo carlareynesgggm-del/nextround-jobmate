@@ -3,27 +3,23 @@ import { Check, Mail, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { ApplicationDialog } from "@/components/application-dialog";
 import { useApplications } from "@/lib/api";
 import {
   useEmailEvents,
   useEmailSuggestions,
   useIgnoreEmailEvent,
   useMatchEmailEvent,
-  useResolveEmailApplication,
 } from "@/lib/inbox/api";
 import { useApplyEmailSuggestions } from "@/lib/inbox/apply";
 import {
   EMAIL_TYPE_LABEL,
   SUGGESTION_KIND_LABEL,
   confidenceLabel,
-  extractedOf,
   type EmailEventRow,
   type EmailType,
 } from "@/lib/inbox/domain";
-import type { ApplicationSeed } from "@/components/add/types";
 import { fmtDateTime } from "@/lib/format";
-import { STAGE_META, UNKNOWN } from "@/lib/domain";
+import { UNKNOWN } from "@/lib/domain";
 import { useT } from "@/lib/i18n/provider";
 import { cn } from "@/lib/utils";
 
@@ -63,17 +59,11 @@ function EmailEventCard({ event }: { event: EmailEventRow }) {
   const apply = useApplyEmailSuggestions();
   const ignore = useIgnoreEmailEvent();
   const match = useMatchEmailEvent();
-  const resolveCreated = useResolveEmailApplication();
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [editOpen, setEditOpen] = useState(false);
 
   const pending = suggestions.filter((item) => item.status === "pending");
-  const newApplication = pending.find((item) => item.kind === "new_application");
-  const otherPending = pending.filter((item) => item.kind !== "new_application");
   const chosen = pending.filter((item) => selected.has(item.id));
   const needsMatch = !event.application_id;
-  const extracted = extractedOf(event);
-  const [seed, setSeed] = useState<ApplicationSeed | undefined>();
   const typeLabel = event.email_type
     ? t(EMAIL_TYPE_LABEL[event.email_type as EmailType] ?? event.email_type)
     : UNKNOWN;
@@ -87,35 +77,17 @@ function EmailEventCard({ event }: { event: EmailEventRow }) {
     });
   }
 
-  async function confirm(items = chosen) {
-    if (items.length === 0) {
+  async function confirm() {
+    if (chosen.length === 0) {
       toast.error(t("Marca al menos un cambio para guardarlo."));
       return;
     }
     try {
-      await apply.mutateAsync({ event, suggestions: items });
+      await apply.mutateAsync({ event, suggestions: chosen });
       toast.success(t("Cambios guardados"));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("No se pudo guardar"));
     }
-  }
-
-  function editBeforeAdd() {
-    if (!newApplication) return;
-    const payload = (newApplication.payload ?? {}) as Record<string, unknown>;
-    const text = (value: unknown): string | null =>
-      typeof value === "string" && value.trim() ? value.trim() : null;
-    setSeed({
-      company: text(payload.company) ?? extracted.company,
-      roleTitle: text(payload.role_title) ?? extracted.role ?? event.subject,
-      stage: (text(payload.stage) ?? extracted.stage) as ApplicationSeed["stage"],
-      appliedAt: text(payload.applied_at),
-      jobUrl: text(payload.job_url),
-      candidatePortalUrl: text(payload.candidate_portal_url) ?? extracted.portal_url,
-      applicationRef: text(payload.application_ref) ?? extracted.application_ref,
-      source: text(payload.source) ?? "email",
-    });
-    setEditOpen(true);
   }
 
   return (
@@ -137,35 +109,7 @@ function EmailEventCard({ event }: { event: EmailEventRow }) {
 
       {needsMatch ? (
         <div className="mt-4 space-y-2">
-          {newApplication ? (
-            <div className="rounded-xl border border-violet/25 bg-violet/5 p-3">
-              <p className="text-sm font-medium">{t("Nueva candidatura detectada")}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {[extracted.company, extracted.role].filter(Boolean).join(" · ") || event.subject || UNKNOWN}
-              </p>
-              <Button
-                size="sm"
-                className="mt-3"
-                onClick={() => void confirm([newApplication])}
-                disabled={apply.isPending}
-              >
-                {t("Añadir candidatura")}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="ml-2 mt-3"
-                onClick={editBeforeAdd}
-              >
-                {t("Editar antes de añadir")}
-              </Button>
-            </div>
-          ) : null}
-          <p className="text-sm">
-            {newApplication
-              ? t("¿A qué candidatura corresponde este correo si no es una nueva?")
-              : t("¿A qué candidatura corresponde este correo?")}
-          </p>
+          <p className="text-sm">{t("¿A qué candidatura corresponde este correo?")}</p>
           <select
             className="h-9 w-full rounded-xl border border-border bg-background px-3 text-sm"
             defaultValue=""
@@ -177,21 +121,16 @@ function EmailEventCard({ event }: { event: EmailEventRow }) {
             <option value="">{t("Elige una candidatura…")}</option>
             {applications.map((app) => (
               <option key={app.id} value={app.id}>
-                {(app.companies?.name ?? UNKNOWN) +
-                  " · " +
-                  app.role_title +
-                  " · " +
-                  (STAGE_META[app.stage]?.label ?? app.stage) +
-                  (app.applied_at ? ` · ${app.applied_at}` : "")}
+                {(app.companies?.name ?? UNKNOWN) + " · " + app.role_title}
               </option>
             ))}
           </select>
         </div>
       ) : null}
 
-      {otherPending.length > 0 && (
+      {pending.length > 0 && (
         <ul className="mt-4 space-y-2">
-          {otherPending.map((suggestion) => (
+          {pending.map((suggestion) => (
             <li key={suggestion.id}>
               <button
                 type="button"
@@ -240,19 +179,6 @@ function EmailEventCard({ event }: { event: EmailEventRow }) {
           <X className="size-3.5" /> {t("Descartar")}
         </Button>
       </div>
-      <ApplicationDialog
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        initialSeed={seed}
-        onCreated={async (applicationId) => {
-          await resolveCreated.mutateAsync({
-            eventId: event.id,
-            suggestionId: newApplication!.id,
-            applicationId,
-          });
-          toast.success(t("Candidatura creada y correo vinculado"));
-        }}
-      />
     </li>
   );
 }

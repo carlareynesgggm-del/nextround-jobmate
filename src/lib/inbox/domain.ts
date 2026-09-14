@@ -28,7 +28,6 @@ export const EMAIL_TYPES = [
   "interview_reschedule",
   "interview_cancellation",
   "case_study",
-  "final_round",
   "assessment_centre",
   "document_request",
   "portal_update",
@@ -56,7 +55,6 @@ export const EMAIL_TYPE_LABEL: Record<EmailType, string> = {
   interview_reschedule: "Cambio de fecha de entrevista",
   interview_cancellation: "Entrevista cancelada",
   case_study: "Caso práctico",
-  final_round: "Fase final",
   assessment_centre: "Assessment centre",
   document_request: "Petición de documentos",
   portal_update: "Novedad en el portal",
@@ -172,6 +170,9 @@ export type ExtractedEmail = {
   documents_requested?: string | null;
   offer_salary?: string | null;
   notes?: string | null;
+  /** Candidaturas plausibles cuando el correo no se pudo asociar con certeza. */
+  match_candidates?: string[];
+
 };
 
 export function extractedOf(event: EmailEventRow): ExtractedEmail {

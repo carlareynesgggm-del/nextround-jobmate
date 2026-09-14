@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ import {
 } from "@/lib/api";
 import type { ApplicationRow, ApplicationWithCompany } from "@/lib/domain";
 import type { JobImportResult } from "@/lib/job-import";
-import { findBestApplicationMatch } from "@/lib/inbox/matching";
 import { useT } from "@/lib/i18n/provider";
 
 import { AppliedForm } from "./applied-form";
@@ -28,7 +27,6 @@ import {
   emptyFlowDetails,
   emptySavedDetails,
   type AppliedDetails,
-  type ApplicationSeed,
   type FlowDetails,
   type SavedDetails,
 } from "./types";
@@ -38,17 +36,13 @@ type ScreenId = "entry" | "details" | "question" | "applied" | "saved";
 export function AddApplicationFlow({
   onOpenChange,
   onOpenExisting,
-  initialSeed,
-  onCreated,
 }: {
   onOpenChange: (open: boolean) => void;
   onOpenExisting: (id: string) => void;
-  initialSeed?: ApplicationSeed;
-  onCreated?: (id: string) => void | Promise<void>;
 }) {
   const t = useT();
   const { data: applications = [] } = useApplications();
-  const { data: companies = [], isLoading: companiesLoading } = useCompanies();
+  const { data: companies = [] } = useCompanies();
   const { data: documents = [] } = useDocuments();
   const saveApplication = useSaveApplication();
   const saveCompany = useSaveCompany();
@@ -61,32 +55,6 @@ export function AddApplicationFlow({
   const [convertingId, setConvertingId] = useState<string | null>(null);
   const [duplicateIgnored, setDuplicateIgnored] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (!initialSeed || details.roleTitle || companiesLoading) return;
-    const company = initialSeed.company?.trim() ?? "";
-    const existingCompany = companies.find(
-      (item) => item.name.trim().toLowerCase() === company.toLowerCase(),
-    );
-    setDetails((current) => ({
-      ...current,
-      companyId: existingCompany?.id ?? (company ? NEW_COMPANY : ""),
-      newCompanyName: existingCompany ? "" : company,
-      roleTitle: initialSeed.roleTitle ?? "",
-      location: initialSeed.location ?? "",
-      country: initialSeed.country ?? "",
-      description: initialSeed.description ?? "",
-      jobUrl: initialSeed.jobUrl ?? "",
-      source: initialSeed.source ?? "email",
-    }));
-    setApplied((current) => ({
-      ...current,
-      stage: initialSeed.stage ?? "applied",
-      appliedAt: initialSeed.appliedAt ?? current.appliedAt,
-      candidatePortalUrl: initialSeed.candidatePortalUrl ?? "",
-      applicationRef: initialSeed.applicationRef ?? "",
-    }));
-  }, [companies, companiesLoading, details.roleTitle, initialSeed]);
 
   const cvs = useMemo(() => documents.filter((doc) => doc.kind === "cv"), [documents]);
   const coverLetters = useMemo(
@@ -105,23 +73,17 @@ export function AddApplicationFlow({
 
   const duplicate: ApplicationWithCompany | null = useMemo(() => {
     if (!details.roleTitle.trim()) return null;
-    const eligible = applications.filter((app) => !(convertingId && app.id === convertingId));
-    const exactExternalId = details.externalId
-      ? eligible.find((app) => app.job_ref && app.job_ref === details.externalId)
-      : null;
-    if (exactExternalId) return exactExternalId;
-
-    const match = findBestApplicationMatch({
-      company: companyName,
-      roleTitle: details.roleTitle,
-      targets: eligible.map((app) => ({
-        id: app.id,
-        role_title: app.role_title,
-        company: app.companies?.name ?? null,
-      })),
-    });
-
-    return match.confident ? eligible.find((app) => app.id === match.id) ?? null : null;
+    const role = details.roleTitle.trim().toLowerCase();
+    return (
+      applications.find((app) => {
+        if (convertingId && app.id === convertingId) return false;
+        if (details.externalId && app.job_ref && app.job_ref === details.externalId) return true;
+        const sameCompany =
+          (companyName && app.companies?.name?.toLowerCase() === companyName.toLowerCase()) ||
+          (!companyName && !app.company_id && !details.companyId);
+        return sameCompany && app.role_title.trim().toLowerCase() === role;
+      }) ?? null
+    );
   }, [applications, companyName, convertingId, details.companyId, details.externalId, details.roleTitle]);
 
   function patchDetails(patch: Partial<FlowDetails>) {
@@ -205,11 +167,6 @@ export function AddApplicationFlow({
     }
     setSaving(true);
     try {
-      if (duplicate) {
-        toast.error(t("Puede que esta candidatura ya exista."));
-        onOpenExisting(duplicate.id);
-        return;
-      }
       const companyId = await resolveCompanyId();
       const savedRow = await saveApplication.mutateAsync({
         ...(convertingId ? { id: convertingId } : {}),
@@ -242,7 +199,6 @@ export function AddApplicationFlow({
           submitted: true,
         });
       }
-      await onCreated?.(id);
       toast.success(t("Candidatura creada"));
       onOpenChange(false);
     } catch (error) {
@@ -259,11 +215,6 @@ export function AddApplicationFlow({
     }
     setSaving(true);
     try {
-      if (duplicate) {
-        toast.error(t("Puede que esta candidatura ya exista."));
-        onOpenExisting(duplicate.id);
-        return;
-      }
       const companyId = await resolveCompanyId();
       const savedRow = await saveApplication.mutateAsync({
         ...(convertingId ? { id: convertingId } : {}),
@@ -286,7 +237,6 @@ export function AddApplicationFlow({
           submitted: false,
         });
       }
-      await onCreated?.(id);
       toast.success(t("Oportunidad guardada"));
       onOpenChange(false);
     } catch (error) {

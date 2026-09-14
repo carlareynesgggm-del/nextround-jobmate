@@ -54,7 +54,7 @@ export const syncGmail = createServerFn({ method: "POST" })
 
     const { data: apps } = await supabase
       .from("applications")
-      .select("id, role_title, stage, job_url, candidate_portal_url, companies(name)")
+      .select("id, role_title, job_url, candidate_portal_url, companies(name)")
       .eq("archived", false);
 
     const targets = (apps ?? []).map((app) => ({
@@ -65,6 +65,7 @@ export const syncGmail = createServerFn({ method: "POST" })
       company: (app.companies as { name: string } | null)?.name ?? null,
     }));
 
+
     let detected = 0;
 
     for (const message of messages) {
@@ -73,8 +74,8 @@ export const syncGmail = createServerFn({ method: "POST" })
       if (!classification) continue;
 
       const match = matchApplication(message, classification, targets);
-      const isNewApplication =
-        !match.id && classification.emailType === "application_confirmation";
+      // Sin coincidencia clara y sin candidatas: puede ser una candidatura nueva.
+      const isNewApplication = !match.id && match.candidates.length === 0;
 
       const { data: event, error } = await supabase
         .from("email_events")
@@ -90,12 +91,16 @@ export const syncGmail = createServerFn({ method: "POST" })
           received_at: new Date(Number(message.internalDate)).toISOString(),
           email_type: classification.emailType,
           confidence: classification.confidence,
-          extracted: classification.extracted as never,
+          extracted: {
+            ...classification.extracted,
+            match_candidates: match.candidates,
+          } as never,
           application_id: match.id,
           status: match.id ? "pending" : "needs_match",
         })
         .select("id")
         .single();
+
 
       if (error || !event) continue;
       detected += 1;
@@ -130,33 +135,7 @@ export const syncGmail = createServerFn({ method: "POST" })
         });
       }
 
-      const { data: insertedSuggestions, error: suggestionsError } = await supabase
-        .from("email_suggestions")
-        .insert(suggestions)
-        .select("id, kind");
-      if (suggestionsError) continue;
-
-      const matchedApp = apps?.find((app) => app.id === match.id);
-      const stageSuggestion = insertedSuggestions?.find((suggestion) => suggestion.kind === "stage");
-      const canAutoApply =
-        !connection.ask_before_update &&
-        match.confident &&
-        Boolean(match.id) &&
-        matchedApp?.stage === "applied" &&
-        classification.confidence >= 0.8 &&
-        suggestions.length === 2 &&
-        Boolean(stageSuggestion) &&
-        Boolean(classification.extracted.stage);
-
-      if (canAutoApply && match.id && stageSuggestion && classification.extracted.stage) {
-        await supabase.rpc("apply_email_stage_suggestion", {
-          p_event_id: event.id,
-          p_suggestion_id: stageSuggestion.id,
-          p_application_id: match.id,
-          p_stage: classification.extracted.stage as never,
-          p_automatic: true,
-        });
-      }
+      await supabase.from("email_suggestions").insert(suggestions);
     }
 
     await supabase

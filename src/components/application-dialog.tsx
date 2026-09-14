@@ -26,38 +26,22 @@ import { useT } from "@/lib/i18n/provider";
 import { useRouter } from "@tanstack/react-router";
 
 import { AddApplicationFlow } from "@/components/add/add-application-flow";
-import type { ApplicationSeed } from "@/components/add/types";
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   application?: ApplicationWithCompany | null;
-  initialSeed?: ApplicationSeed;
-  onCreated?: (id: string) => void | Promise<void>;
 };
 
 const NEW_COMPANY = "__new__";
 
-export function ApplicationDialog({
-  open,
-  onOpenChange,
-  application,
-  initialSeed,
-  onCreated,
-}: Props) {
+export function ApplicationDialog({ open, onOpenChange, application }: Props) {
   if (!application) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           <NewApplicationHeader />
-          {open && (
-            <AddApplicationFlow
-              onOpenChange={onOpenChange}
-              onOpenExisting={useNavigateToApplication()}
-              initialSeed={initialSeed}
-              onCreated={onCreated}
-            />
-          )}
+          {open && <AddApplicationFlow onOpenChange={onOpenChange} onOpenExisting={useNavigateToApplication()} />}
         </DialogContent>
       </Dialog>
     );

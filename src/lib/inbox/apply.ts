@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { qk } from "@/lib/api";
 import { affectedKeys, inboxKeys } from "@/lib/inbox/api";
 import type { EmailEventRow, EmailSuggestionRow } from "@/lib/inbox/domain";
-import { findBestApplicationMatch, type MatchTarget } from "@/lib/inbox/matching";
+import { findApplicationMatch } from "@/lib/inbox/match";
+
 
 type Payload = Record<string, unknown>;
 
@@ -40,16 +41,33 @@ async function applyOne(
     case "stage": {
       const stage = str(payload, "stage");
       if (!applicationId || !stage) return null;
-      const { error } = await supabase.rpc("apply_email_stage_suggestion", {
-        p_event_id: event.id,
-        p_suggestion_id: suggestion.id,
-        p_application_id: applicationId,
-        p_stage: stage as never,
-        p_automatic: false,
+      const current = await supabase
+        .from("applications")
+        .select("stage, applied_at")
+        .eq("id", applicationId)
+        .maybeSingle();
+      const from = current.data?.stage ?? null;
+      await supabase
+        .from("applications")
+        .update({
+          stage: stage as never,
+          updated_at: new Date().toISOString(),
+          ...(stage !== "saved" && !current.data?.applied_at
+            ? { applied_at: new Date().toISOString().slice(0, 10) }
+            : {}),
+        })
+        .eq("id", applicationId);
+      // El cambio queda también en el proceso de la candidatura.
+      await supabase.from("application_events").insert({
+        application_id: applicationId,
+        title: "Cambio de fase confirmado desde el correo",
+        detail: event.subject,
+        from_stage: from as never,
+        to_stage: stage as never,
       });
-      if (error) throw new Error(error.message);
       return applicationId;
     }
+
     case "deadline": {
       const deadline = str(payload, "deadline_at");
       if (!applicationId || !deadline) return null;
@@ -107,12 +125,15 @@ async function applyOne(
     case "calendar": {
       const startsAt = str(payload, "starts_at");
       if (!startsAt) return null;
-      const { error } = await supabase.rpc("apply_email_calendar_suggestion", {
-        p_event_id: event.id,
-        p_suggestion_id: suggestion.id,
-        p_application_id: applicationId,
+      await supabase.from("calendar_events").insert({
+        application_id: applicationId,
+        title: str(payload, "title") ?? suggestion.label,
+        kind: (str(payload, "kind") ?? "interview") as never,
+        starts_at: startsAt,
+        duration_min: num(payload, "duration_min") ?? 45,
+        location: str(payload, "location"),
+        notes: suggestion.detail,
       });
-      if (error) throw new Error(error.message);
       return applicationId;
     }
     case "task": {
@@ -141,30 +162,31 @@ async function applyOne(
       if (!roleTitle) return null;
       const companyName = str(payload, "company");
 
-      const { data: existingApplications } = await supabase
+      // Antes de crear nada, se comprueba que no exista ya esa candidatura.
+      const { data: existingApps } = await supabase
         .from("applications")
-        .select("id, role_title, companies(name)")
+        .select("id, role_title, job_url, candidate_portal_url, companies(name)")
         .eq("archived", false);
-      const targets: MatchTarget[] = (existingApplications ?? []).map((item) => ({
-        id: item.id,
-        role_title: item.role_title,
-        job_url: item.job_url,
-        candidate_portal_url: item.candidate_portal_url,
-        company: item.companies?.name ?? null,
-      }));
-      const duplicate = findBestApplicationMatch({
-        company: companyName,
-        roleTitle,
-        jobUrl: str(payload, "job_url"),
-        portalUrl: str(payload, "candidate_portal_url"),
-        targets,
-      });
-
-      if (duplicate.confident && duplicate.id) {
-        await supabase
-          .from("email_events")
-          .update({ application_id: duplicate.id, status: "pending" })
-          .eq("id", event.id);
+      const duplicate = findApplicationMatch(
+        {
+          subject: event.subject,
+          snippet: event.snippet,
+          fromEmail: event.from_email,
+          fromName: event.from_name,
+          company: companyName,
+          role: roleTitle,
+          url: str(payload, "candidate_portal_url") ?? str(payload, "job_url"),
+        },
+        (existingApps ?? []).map((app) => ({
+          id: app.id,
+          role_title: app.role_title,
+          job_url: app.job_url,
+          candidate_portal_url: app.candidate_portal_url,
+          company: (app.companies as { name: string } | null)?.name ?? null,
+        })),
+      );
+      if (duplicate.id) {
+        await supabase.from("email_events").update({ application_id: duplicate.id }).eq("id", event.id);
         return duplicate.id;
       }
 
@@ -184,9 +206,18 @@ async function applyOne(
         .select("id")
         .single();
       const newId = created.data?.id ?? null;
-      if (newId) await supabase.from("email_events").update({ application_id: newId }).eq("id", event.id);
+      if (newId) {
+        await supabase.from("email_events").update({ application_id: newId }).eq("id", event.id);
+        await supabase.from("application_events").insert({
+          application_id: newId,
+          title: "Candidatura creada desde un correo detectado",
+          detail: event.subject,
+          to_stage: (str(payload, "stage") ?? "applied") as never,
+        });
+      }
       return newId;
     }
+
     default:
       return applicationId;
   }
@@ -209,12 +240,7 @@ export function useApplyEmailSuggestions() {
         await supabase.from("email_suggestions").update({ status: "applied" }).eq("id", suggestion.id);
 
         // Cada cambio confirmado queda registrado en el historial.
-        if (
-          touched &&
-          suggestion.kind !== "activity" &&
-          suggestion.kind !== "stage" &&
-          suggestion.kind !== "calendar"
-        ) {
+        if (touched && suggestion.kind !== "activity") {
           await supabase.from("activity_feed").insert({
             application_id: touched,
             email_event_id: event.id,
