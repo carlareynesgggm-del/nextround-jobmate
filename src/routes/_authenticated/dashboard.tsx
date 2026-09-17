@@ -328,11 +328,27 @@ function HomePage() {
   );
 }
 
-function Metric({ label, value }: { label: string; value: string | number }) {
+function InlineMetric({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string | number;
+  accent?: boolean;
+}) {
   return (
-    <div>
-      <dd className="font-display text-[28px] font-semibold tabular-nums tracking-tight">{value}</dd>
-      <dt className="mt-1 text-xs text-muted-foreground">{label}</dt>
+    <div className="text-right">
+      <dd
+        className={
+          accent
+            ? "font-display text-[20px] font-semibold tabular-nums tracking-tight text-primary"
+            : "font-display text-[20px] font-semibold tabular-nums tracking-tight"
+        }
+      >
+        {value}
+      </dd>
+      <dt className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</dt>
     </div>
   );
 }
