@@ -31,6 +31,7 @@ Apply with any color utility: `bg-<name>`, `text-<name>`, `border-<name>`, `ring
 | `danger` | `--danger` |
 | `info` | `--info` |
 | `violet` | `--violet` |
+| `lime` | `--lime` |
 | `destructive` | `--destructive` |
 | `destructive-foreground` | `--destructive-foreground` |
 | `border` | `--border` |

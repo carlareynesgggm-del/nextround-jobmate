@@ -117,6 +117,12 @@ import { AssistantProvider } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9
 import { AttentionCard } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091"
 ```
 
+### BrandMark
+
+```ts
+import { BrandMark } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091"
+```
+
 ### Button
 
 ```ts
@@ -576,6 +582,12 @@ import { ScrollArea } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe
 import { ScrollBar } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091"
 ```
 
+### Section
+
+```ts
+import { Section } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091"
+```
+
 ### SectionCard
 
 ```ts
@@ -670,6 +682,30 @@ import { StepProgress } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2
 
 ```ts
 import { Switch } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091"
+```
+
+### Tabs
+
+```ts
+import { Tabs } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091"
+```
+
+### TabsContent
+
+```ts
+import { TabsContent } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091"
+```
+
+### TabsList
+
+```ts
+import { TabsList } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091"
+```
+
+### TabsTrigger
+
+```ts
+import { TabsTrigger } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091"
 ```
 
 ### Textarea
