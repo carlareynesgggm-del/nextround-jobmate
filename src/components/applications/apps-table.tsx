@@ -66,87 +66,101 @@ export function AppsTable({
   return (
     <>
       <div className="hidden overflow-visible md:block">
-        <div className="scrollbar-slim max-h-[calc(100dvh-20rem)] overflow-auto rounded-xl border border-border/70 bg-surface">
-          <table className="w-full text-sm">
+        <div className="scrollbar-slim max-h-[calc(100dvh-19rem)] overflow-auto rounded-xl border border-border/70 bg-surface">
+          <table className="w-full text-[13px]">
             <thead className="sticky top-0 z-10 bg-surface/95 backdrop-blur">
-              <tr className="border-b border-border/60 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                <th className="px-4 py-3 font-medium">{t("Empresa")}</th>
-                <th className="px-4 py-3 font-medium">{t("Puesto")}</th>
-                <th className="px-4 py-3 font-medium">{t("Tipo")}</th>
-                <th className="px-4 py-3 font-medium">{t("Ubicación")}</th>
-                <th className="px-4 py-3 font-medium">{t("Etapa")}</th>
-                <th className="px-4 py-3 font-medium">{t("Fecha de solicitud")}</th>
-                <th className="px-4 py-3 font-medium">{t("Días esperando")}</th>
-                <th className="px-4 py-3 font-medium">{t("Próxima acción")}</th>
-                <th className="px-4 py-3 font-medium">{t("Próxima fecha límite")}</th>
-                <th className="px-4 py-3 font-medium">{t("CV usado")}</th>
-                <th className="px-4 py-3 font-medium">{t("Salario")}</th>
-                <th className="px-4 py-3 font-medium">{t("Prioridad")}</th>
+              <tr className="border-b border-border/60 text-left text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground/80">
+                <th className="px-4 py-2.5 font-medium">{t("Candidatura")}</th>
+                <th className="px-3 py-2.5 font-medium">{t("Etapa")}</th>
+                <th className="px-3 py-2.5 font-medium">{t("Fecha de solicitud")}</th>
+                <th className="px-3 py-2.5 font-medium">{t("Próxima acción")}</th>
+                <th className="px-3 py-2.5 font-medium">{t("Próxima fecha límite")}</th>
+                <th className="px-3 py-2.5 font-medium">{t("CV usado")}</th>
+                <th className="px-3 py-2.5 font-medium">{t("Salario")}</th>
+                <th className="px-3 py-2.5 font-medium">{t("Prioridad")}</th>
+                <th className="w-10 px-2 py-2.5" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/50">
+            <tbody className="divide-y divide-border/40">
               {applications.map((app) => {
                 const waiting = daysWaiting(app);
                 const cv = cvName(app, documents);
+                const meta = [
+                  app.application_type,
+                  app.location,
+                  app.work_mode ? WORK_MODE_LABEL[app.work_mode] : null,
+                ].filter(Boolean) as string[];
                 return (
-                  <tr key={app.id} className="group relative transition-colors hover:bg-surface-2/70">
-                    <td className="px-4 py-3">
+                  <tr
+                    key={app.id}
+                    className="group relative transition-colors duration-150 hover:bg-surface-2/60"
+                  >
+                    <td className="px-4 py-2.5">
                       <Link
                         to="/applications/$id"
                         params={{ id: app.id }}
                         className="flex items-center gap-2.5 focus-visible:outline-none"
                       >
                         <CompanyMark name={app.companies?.name ?? app.role_title} size="sm" />
-                        <span className="max-w-[10rem] truncate font-medium">
-                          {app.companies?.name ?? t("Sin empresa")}
+                        <span className="min-w-0">
+                          <span className="flex items-center gap-1.5">
+                            <span className="max-w-[13rem] truncate font-medium">{app.role_title}</span>
+                            <AlertDot app={app} events={events} />
+                          </span>
+                          <span className="block max-w-[15rem] truncate text-[11px] text-muted-foreground">
+                            {app.companies?.name ?? t("Sin empresa")}
+                            {meta.length > 0 && ` · ${meta.join(" · ")}`}
+                          </span>
                         </span>
-                        <AlertDot app={app} events={events} />
                       </Link>
                     </td>
-                    <td className="px-4 py-3">
-                      <Link to="/applications/$id" params={{ id: app.id }} className="block max-w-[12rem] truncate">
-                        {app.role_title}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{app.application_type ?? UNKNOWN}</td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      <span className="block max-w-[9rem] truncate">{app.location ?? UNKNOWN}</span>
-                      {app.work_mode && (
-                        <span className="text-xs">{WORK_MODE_LABEL[app.work_mode]}</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-2.5">
                       <StageBadge stage={app.stage} />
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">{fmtDate(app.applied_at)}</td>
-                    <td className="px-4 py-3 tabular-nums text-muted-foreground">
-                      {waiting !== null ? `${waiting} ${t("días")}` : "—"}
+                    <td className="px-3 py-2.5 text-muted-foreground">
+                      <span className="block">{fmtDate(app.applied_at)}</span>
+                      {waiting !== null && (
+                        <span className="block text-[11px] tabular-nums text-muted-foreground/70">
+                          {waiting} {t("días")}
+                        </span>
+                      )}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-2.5">
                       {app.next_action ? (
                         <span>
                           <span className="block max-w-[10rem] truncate">{app.next_action}</span>
-                          <span className="block text-xs text-muted-foreground">
+                          <span className="block text-[11px] text-muted-foreground">
                             {relativeDay(app.next_action_at)}
                           </span>
                         </span>
                       ) : (
-                        <span className="text-muted-foreground">—</span>
+                        <span className="text-muted-foreground/60">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {app.deadline_at ? relativeDay(app.deadline_at) : "—"}
+                    <td className="px-3 py-2.5 text-muted-foreground">
+                      {app.deadline_at ? relativeDay(app.deadline_at) : <span className="text-muted-foreground/60">—</span>}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="px-3 py-2.5 text-muted-foreground">
                       <span className="block max-w-[8rem] truncate">{cv ?? t("Sin CV")}</span>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="px-3 py-2.5 tabular-nums text-muted-foreground">
                       {formatSalary(app.salary_min, app.salary_max, app.currency ?? "EUR")}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-2.5">
                       <Pill tone={priorityTone(app.priority ?? "medium")}>
                         {PRIORITY_LABEL[app.priority ?? "medium"]}
                       </Pill>
+                    </td>
+                    <td className="px-2 py-2.5">
+                      <Link
+                        to="/applications/$id"
+                        params={{ id: app.id }}
+                        aria-label={t("Abrir candidatura")}
+                        title={t("Abrir candidatura")}
+                        className="inline-flex rounded-md p-1.5 text-muted-foreground/50 opacity-0 transition-all duration-150 hover:bg-surface-2 hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100"
+                      >
+                        <ArrowUpRight className="size-4" />
+                      </Link>
                     </td>
                   </tr>
                 );
