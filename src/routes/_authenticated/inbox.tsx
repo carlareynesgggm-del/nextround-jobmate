@@ -77,12 +77,12 @@ function InboxPage() {
       <div className="space-y-6">
         <PageHeader
           title={t("Procesos detectados en tu correo")}
-          subtitle={t(
+          description={t(
             "NextRound revisa tus últimos 60 días de correo y te propone candidaturas y novedades. Nada se guarda sin tu confirmación.",
           )}
         />
         <EmptyState
-          icon={Mail}
+          icon={<Mail className="size-5" />}
           title={t("Conecta tu correo")}
           description={t(
             "NextRound puede detectar entrevistas, pruebas y respuestas relacionadas con tus candidaturas.",
@@ -109,10 +109,10 @@ function InboxPage() {
             ? t("Hemos encontrado {n} procesos en tu correo", { n: processes.length })
             : t("Procesos detectados en tu correo")
         }
-        subtitle={t(
+        description={t(
           "NextRound revisa tus últimos 60 días de correo y te propone candidaturas y novedades. Nada se guarda sin tu confirmación.",
         )}
-        action={
+        actions={
           <Button variant="secondary" className="gap-1.5" disabled={scanning} onClick={() => void runSync()}>
             <RefreshCw className={scanning ? "size-4 animate-spin" : "size-4"} />
             {scanning ? t("Escaneando tu correo…") : t("Escanear de nuevo")}
@@ -152,7 +152,7 @@ function InboxPage() {
 
       {isLoading ? null : processes.length === 0 && !scanning ? (
         <EmptyState
-          icon={Mail}
+          icon={<Mail className="size-5" />}
           title={showSnoozed ? t("Nada guardado para después") : t("Nada pendiente de revisar")}
           description={t("Cuando llegue un correo de un proceso, aparecerá aquí como propuesta.")}
         />
