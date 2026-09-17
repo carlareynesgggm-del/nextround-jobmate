@@ -244,8 +244,9 @@ function HomePage() {
         )}
       </Section>
 
-      {/* 4 — Próximos deadlines y entrevistas */}
+      {/* Próximos deadlines y entrevistas */}
       <Section
+        className="lg:col-span-5"
         title={t("Próximamente")}
         action={
           <Link
