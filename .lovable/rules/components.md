@@ -117,6 +117,12 @@ import { AssistantProvider } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9
 import { AttentionCard } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091"
 ```
 
+### BrandLogo
+
+```ts
+import { BrandLogo } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091"
+```
+
 ### BrandMark
 
 ```ts
@@ -552,6 +558,12 @@ import { ProcessTab } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe
 
 ```ts
 import { ProductPreview } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091"
+```
+
+### QuickDocumentUpload
+
+```ts
+import { QuickDocumentUpload } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091"
 ```
 
 ### SavedForm

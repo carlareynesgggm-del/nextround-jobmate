@@ -2,7 +2,7 @@
   "meta": {
     "name": "NextRound Career Hub",
     "package": "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "framework": "react",
     "css_framework": "tailwind",
     "starter_template": "custom_design_system_tailwind",
@@ -11,9 +11,10 @@
     ],
     "source_type": "local",
     "source_manifest": {
-      "#enrichment": "a7b324efda6010de39e4f060cd47219e60587ff042e1952b8df35171b4351d74",
+      "#enrichment": "160b27fe095401fd8f5a10fb3335eb26b1ecae660a04e14149f9f3c02e1a1724",
       ".gitignore": "6d9e901a692b46a83707c245fb03bc91",
       ".lovable/meta.yaml": "954a981e8847ec1692669dbb04ae9ae9",
+      ".lovable/plan/identidad-editorial-tech-de-nextround-2026-09-17.md": "061a50e5c93c5c07b15839c8936ed508",
       ".lovable/project.json": "abcf7c8844e04346fe68da53414a1cc7",
       ".lovable/sources.yaml": "450b1daaa8c0b7db60e3ff1897d94985",
       ".prettierignore": "7279a476f196a2da5f7edd18db568dc6",
@@ -25,41 +26,44 @@
       "docs/security-exceptions.md": "31eb56c4b716007145d572a8e188fe0a",
       "eslint.config.js": "345bdd57e188e0e4525edcd00e5003f5",
       "package.json": "3114665b6f7da57d49b38df5221b1d26",
-      "public/favicon.ico": "9f504444f85a5af2eef9264b02ae40be",
+      "public/favicon.png": "db653f8be43d40117973d066848faef0",
       "public/google87e792f9c5c8a1ee.html": "4120df0c01146ee5457f389b3bb399de",
       "public/robots.txt": "f9dff89adf98833e676de2205921996a",
-      "roadmap.md": "828504841d3dcea07d70b0ce7e2eaf49",
+      "roadmap.md": "09d96a69fa9a48f9087339456241938c",
+      "src/assets/nextround-logo.png.asset.json": "7f0a6b9bb56db943dcb9022a96a5c734",
+      "src/assets/nextround-mark.png.asset.json": "a72985f1b01a873c4372f0def695bc54",
       "src/components/add/add-application-flow.tsx": "7cc5f14a324e83d3be1473291391d756",
-      "src/components/add/applied-form.tsx": "e2622eca5392e8725499ce2680675f8a",
+      "src/components/add/applied-form.tsx": "11ca00780a7beb79f814c8c0f118e3be",
       "src/components/add/details-step.tsx": "ab331a6e9038588ed326ba42e13f2e15",
       "src/components/add/entry-step.tsx": "736e199d81063ce5856faabe909ea4fe",
       "src/components/add/outcome-question.tsx": "b66cc35f675a073340d1d4193836f8cc",
-      "src/components/add/saved-form.tsx": "c27691ace9f72ac0ed4495eb2555d389",
+      "src/components/add/saved-form.tsx": "8c423169b4aef1db34910b74e99f48ba",
       "src/components/add/shared.tsx": "0dea4e5081477b45f99da22982215132",
       "src/components/add/types.ts": "7dab994100563c3881bd9912ecee23cf",
-      "src/components/ai-assistant.tsx": "74791843c483e7d33b93db63392fb452",
+      "src/components/ai-assistant.tsx": "7451eda05d536a5632aa530d86152510",
       "src/components/alerts-bell.tsx": "db1820c10bb9ee5d0ebd59c54f707406",
-      "src/components/app-shell.tsx": "5f39667ef6bfdc52b51e2eba612ca5a3",
+      "src/components/app-shell.tsx": "8dc3e71f9a601cf0a003e6ed9a9dbd05",
       "src/components/application-dialog.tsx": "4e9a8daa072f04482cb2a4db294574e3",
-      "src/components/application-tabs.tsx": "7e9add75a602ea760437b2351a780e60",
+      "src/components/application-tabs.tsx": "aeb4aa51dcf7fc5d6a0a030d516bed00",
       "src/components/applications/apps-filters.tsx": "fd4c61b7927bda67402b156de75c3e32",
       "src/components/applications/apps-kanban.tsx": "17c1f9abcb1d8e9f5701b53fa9864490",
       "src/components/applications/apps-table.tsx": "73bc58dc0690bad59cf1677cf77a8946",
       "src/components/applications/types.ts": "b20a4d4f90efbd7b6d56f46d1453cfa4",
-      "src/components/brand-mark.tsx": "480a9a14a23aa42687f4d48d6d459e31",
+      "src/components/brand-mark.tsx": "5ad356ecf9fe6069337287f15366e92c",
       "src/components/detail/activity-feed.tsx": "131ea2b4ec282664525ea27a81a13aea",
-      "src/components/detail/application-header.tsx": "c677b5fef096fef0b6056e73d4e7550c",
+      "src/components/detail/application-header.tsx": "fee0790dfdb21541698a53a34ed4abea",
       "src/components/detail/job-tab.tsx": "08db0695d7a0383cdf5333c7f2cf6425",
-      "src/components/detail/next-best-action.tsx": "dad007aced3d665d080cac95a1cfb79e",
+      "src/components/detail/next-best-action.tsx": "0ad657b048f573196168ccc504624847",
       "src/components/detail/overview-tab.tsx": "9c1293a7245800eb5dde658c30f6d795",
-      "src/components/home/attention-list.tsx": "3aa8c090e050ef0e4bc4bb7c8903c140",
+      "src/components/documents/quick-upload.tsx": "d527a3ef25fb36c6a0779f82b1e95885",
+      "src/components/home/attention-list.tsx": "a13a59d2e0e80f60e3782c037c56555e",
       "src/components/inbox/email-connection-card.tsx": "ba6b96c1ad64f0115554db6b248145e4",
-      "src/components/inbox/gmail-home-card.tsx": "3eee594973820f047901b47c77902bbf",
+      "src/components/inbox/gmail-home-card.tsx": "70070432316048ed3250d95f25ecfda4",
       "src/components/inbox/updates-panel.tsx": "b77efc3cbd5e6d6e2bedd6b986e430be",
       "src/components/language-switcher.tsx": "470815b3e0bbb136e0399bf58b30bbc1",
       "src/components/marketing/ai-demo.tsx": "5dd9385d25231c4e8de6b46e07616abe",
       "src/components/marketing/product-preview.tsx": "82cd2539b4784c43a36b383d10fd442a",
-      "src/components/ui-bits.tsx": "a70adddb177c6cb639587279c4e73487",
+      "src/components/ui-bits.tsx": "43b99edea57a4eedeccf8a7e386c50d7",
       "src/components/ui/accordion.tsx": "55f9dda62b4e3913c9b23e5015a86aef",
       "src/components/ui/alert-dialog.tsx": "96350e949e9b7b674545430a410ab89c",
       "src/components/ui/alert.tsx": "7b905f7f819bd4395a459a97faaa771a",
@@ -68,7 +72,7 @@
       "src/components/ui/badge.tsx": "d418e7d17e73d698299284a0e46e3e9f",
       "src/components/ui/breadcrumb.tsx": "bb9ac254f12662b20d5d50b84308bf3a",
       "src/components/ui/button-group.tsx": "f10e07c96e62161432c70e75d4e0c4b9",
-      "src/components/ui/button.tsx": "4b73c105b79c9a7463fd77c24ada435f",
+      "src/components/ui/button.tsx": "d1044724ace2d11b66c809d6dbd1c7e3",
       "src/components/ui/calendar.tsx": "d849cc610e2683271f3f1c47d093cf30",
       "src/components/ui/card.tsx": "9f1da48791217371e13fa28ce90ae444",
       "src/components/ui/carousel.tsx": "005a47594c5c8f09e27f0ed1f02197cd",
@@ -84,7 +88,7 @@
       "src/components/ui/hover-card.tsx": "61e2e6b95ce28939056a397b0a4d9b9f",
       "src/components/ui/input-group.tsx": "1bf29e791a559bf6d0c535c748b758ea",
       "src/components/ui/input-otp.tsx": "65625f2f1c4d731a760aeed7b54459d1",
-      "src/components/ui/input.tsx": "3c63b521e22a80630f1be223d0a5fa62",
+      "src/components/ui/input.tsx": "d1a55d4e2465b184a86bbcec0c9004a8",
       "src/components/ui/label.tsx": "7e35df4ca8edd0835efd97ca7937ef92",
       "src/components/ui/menubar.tsx": "3c4121a1e78d3f424a7295381a8997d3",
       "src/components/ui/navigation-menu.tsx": "e85351147a02b29577ff83d188b63c24",
@@ -103,7 +107,7 @@
       "src/components/ui/sonner.tsx": "97f59f60be3413196d095fcbf7383216",
       "src/components/ui/switch.tsx": "82f5d8b0c59bb7ff305caa9f502e79ff",
       "src/components/ui/table.tsx": "7cc889989d53894b659903c73aded96e",
-      "src/components/ui/tabs.tsx": "5362e1e450ec8e699152ddb307b81427",
+      "src/components/ui/tabs.tsx": "fc3c43f0713fe0dbea0192ab15a547e4",
       "src/components/ui/textarea.tsx": "0077aac488fd601f735d7b41106ec93b",
       "src/components/ui/toggle-group.tsx": "ac26383acf721d116ca8e3ab5c5355d5",
       "src/components/ui/toggle.tsx": "ee8c5adac74e7242b85b544db1a8fbad",
@@ -122,7 +126,7 @@
       "src/lib/ai/prompt.ts": "8bff42645227eab31a01e05ccbe89551",
       "src/lib/ai/tools.server.ts": "5d67f087c073c2c9b17dd7a569673401",
       "src/lib/alerts.ts": "94ef044bfa82ec4c1248efe39c8f3ab4",
-      "src/lib/api.ts": "f0935ce632d86094193c883636a59b75",
+      "src/lib/api.ts": "3f4269f2cbd066d0f28b3b767a17c609",
       "src/lib/domain.ts": "23615716dea7db0a760ed6c4e783caf1",
       "src/lib/error-capture.ts": "f630d9686a9a989170f22eff4de7b30d",
       "src/lib/error-page.ts": "8da0ddd7569bac2676b9a5c8edff8a36",
@@ -163,29 +167,29 @@
       "src/routeTree.gen.ts": "ce1f94c61362ab44316f8fe817601ca8",
       "src/router.tsx": "8f905e713b0eba7fa8148b7995a708c9",
       "src/routes/README.md": "b3a2f259b66fd1a11f54b6d5ac83bf57",
-      "src/routes/__root.tsx": "2e09470414db8e6bd20bdd10dfe80857",
+      "src/routes/__root.tsx": "ddf3ac9776fa82cf4496bc483ae3a13f",
       "src/routes/_authenticated/analytics.tsx": "0c839963253ec36a8183bec42cfc32c8",
       "src/routes/_authenticated/applications.$id.tsx": "53f8709772fa684204cf53f9bbedf8c1",
       "src/routes/_authenticated/applications.index.tsx": "54e0424acaf1586ef8cbeafe03696aa8",
       "src/routes/_authenticated/calendar.tsx": "96024f1f426dbe9117a86b64fe4bf786",
       "src/routes/_authenticated/companies.tsx": "99d8c03959bedefa00b5c3444133ea40",
-      "src/routes/_authenticated/dashboard.tsx": "75341a3cbdc7b0924b3a0ef0fe040479",
+      "src/routes/_authenticated/dashboard.tsx": "4cdde8e533618442072b34115ee99675",
       "src/routes/_authenticated/help.tsx": "870423fcad6d223e93103ee4c2cb2569",
-      "src/routes/_authenticated/inbox.tsx": "57eecfb3242f816cfd1db8093233b76b",
+      "src/routes/_authenticated/inbox.tsx": "b32c4744d3bfec09d40e6c4d5fafe417",
       "src/routes/_authenticated/notes.tsx": "e0a6a0969f46f683a6ce8c14559a1bf0",
       "src/routes/_authenticated/route.tsx": "f7e2194173cdca35fd5c9c2827b174f2",
-      "src/routes/_authenticated/settings.tsx": "189417cacf5774f2ada5bd3303dc5a88",
+      "src/routes/_authenticated/settings.tsx": "35540e6fea839b7ffe8a700a97cf7c71",
       "src/routes/_authenticated/tasks.tsx": "bb47c2243f83ff97562d8b9b682f2dcb",
       "src/routes/_authenticated/vault.tsx": "331b5f4b8c5fb578e4d64f112d18b890",
       "src/routes/api/chat.ts": "73e5a53e5029778b5e63a6b2a516e1ce",
       "src/routes/api/public/gmail/callback.ts": "6eec7e54b4b6c5cad3ec278331831a32",
-      "src/routes/auth.tsx": "28e1ca903a31457052cf48013a051880",
-      "src/routes/index.tsx": "88e68581391f203b90c19fdde6217433",
+      "src/routes/auth.tsx": "2f199dec620734e5bbca0416fb8f9465",
+      "src/routes/index.tsx": "a24f5d3691e9674e1ed27953f025a716",
       "src/routes/privacy.tsx": "14b8f0b3d6f3872c83b035ab8e639327",
       "src/routes/terms.tsx": "a22598b8d4320307e025ff5e0e710734",
       "src/server.ts": "c7bbc49bb70e318af618d92775ee0f27",
       "src/start.ts": "d77c1c12904be5077c6955d9b30071af",
-      "src/styles.css": "4c06d5f2932037d870b561294c3b1018",
+      "src/styles.css": "e7b46ff5d8f8fd86bb1ee4bf4245e8ac",
       "supabase/config.toml": "b2e3c4e38c04d43b7db0c4eb7d8fbe64",
       "supabase/migrations/20260907160855_f79c2f79-9109-47a7-885d-e4e5779c35df.sql": "b5fd3e5445afec0f7cb35d05c75d8d6e",
       "supabase/migrations/20260907160908_be45cddc-7fb3-4022-9286-e205b7b56f5c.sql": "b67eb6b0acadea0b70bc91e97d1ae5c8",
@@ -207,127 +211,127 @@
     "color": [
       {
         "name": "--background",
-        "raw": "oklch(0.99 0.002 275)",
+        "raw": "#faf9f7",
         "source": "src/styles.css"
       },
       {
         "name": "--foreground",
-        "raw": "oklch(0.22 0.018 275)",
+        "raw": "#14141a",
         "source": "src/styles.css"
       },
       {
         "name": "--surface",
-        "raw": "oklch(1 0 0)",
+        "raw": "#ffffff",
         "source": "src/styles.css"
       },
       {
         "name": "--surface-2",
-        "raw": "oklch(0.972 0.003 275)",
+        "raw": "#f4f2ee",
         "source": "src/styles.css"
       },
       {
         "name": "--card",
-        "raw": "oklch(1 0 0)",
+        "raw": "#ffffff",
         "source": "src/styles.css"
       },
       {
         "name": "--card-foreground",
-        "raw": "oklch(0.22 0.018 275)",
+        "raw": "#14141a",
         "source": "src/styles.css"
       },
       {
         "name": "--popover",
-        "raw": "oklch(1 0 0)",
+        "raw": "#ffffff",
         "source": "src/styles.css"
       },
       {
         "name": "--popover-foreground",
-        "raw": "oklch(0.22 0.018 275)",
+        "raw": "#14141a",
         "source": "src/styles.css"
       },
       {
         "name": "--primary",
-        "raw": "oklch(0.51 0.185 281)",
+        "raw": "#443a94",
         "source": "src/styles.css"
       },
       {
         "name": "--primary-foreground",
-        "raw": "oklch(0.99 0.004 285)",
+        "raw": "#ffffff",
         "source": "src/styles.css"
       },
       {
         "name": "--secondary",
-        "raw": "oklch(0.966 0.003 275)",
+        "raw": "#f4f2ee",
         "source": "src/styles.css"
       },
       {
         "name": "--secondary-foreground",
-        "raw": "oklch(0.28 0.02 275)",
+        "raw": "#2a2833",
         "source": "src/styles.css"
       },
       {
         "name": "--muted",
-        "raw": "oklch(0.968 0.003 275)",
+        "raw": "#f4f2ee",
         "source": "src/styles.css"
       },
       {
         "name": "--muted-foreground",
-        "raw": "oklch(0.53 0.014 275)",
+        "raw": "#74737e",
         "source": "src/styles.css"
       },
       {
         "name": "--accent",
-        "raw": "oklch(0.962 0.008 285)",
+        "raw": "#f0eef9",
         "source": "src/styles.css"
       },
       {
         "name": "--accent-foreground",
-        "raw": "oklch(0.32 0.08 283)",
+        "raw": "#332a78",
         "source": "src/styles.css"
       },
       {
         "name": "--gold",
-        "raw": "oklch(0.68 0.1 72)",
+        "raw": "oklch(0.74 0.055 78)",
         "source": "src/styles.css"
       },
       {
         "name": "--gold-foreground",
-        "raw": "oklch(0.43 0.08 66)",
+        "raw": "oklch(0.46 0.05 70)",
         "source": "src/styles.css"
       },
       {
         "name": "--success",
-        "raw": "oklch(0.58 0.11 160)",
+        "raw": "oklch(0.55 0.075 158)",
         "source": "src/styles.css"
       },
       {
         "name": "--warning",
-        "raw": "oklch(0.7 0.11 76)",
+        "raw": "oklch(0.72 0.08 78)",
         "source": "src/styles.css"
       },
       {
         "name": "--danger",
-        "raw": "oklch(0.57 0.16 25)",
+        "raw": "oklch(0.55 0.12 24)",
         "source": "src/styles.css"
       },
       {
         "name": "--info",
-        "raw": "oklch(0.55 0.14 252)",
+        "raw": "#4a6ea8",
         "source": "src/styles.css"
       },
       {
         "name": "--violet",
-        "raw": "oklch(0.51 0.185 281)",
+        "raw": "#443a94",
         "source": "src/styles.css"
       },
       {
         "name": "--lime",
-        "raw": "oklch(0.82 0.18 128)",
+        "raw": "#c3d94f",
         "source": "src/styles.css"
       },
       {
         "name": "--destructive",
-        "raw": "oklch(0.57 0.16 25)",
+        "raw": "oklch(0.55 0.12 24)",
         "source": "src/styles.css"
       },
       {
@@ -337,94 +341,94 @@
       },
       {
         "name": "--border",
-        "raw": "oklch(0.928 0.004 275)",
+        "raw": "#e8e6e1",
         "source": "src/styles.css"
       },
       {
         "name": "--input",
-        "raw": "oklch(0.915 0.005 275)",
+        "raw": "#dedbd4",
         "source": "src/styles.css"
       },
       {
         "name": "--ring",
-        "raw": "oklch(0.51 0.185 281)",
+        "raw": "#443a94",
         "source": "src/styles.css"
       },
       {
         "name": "--chart-1",
-        "raw": "oklch(0.51 0.185 281)",
+        "raw": "oklch(0.45 0.13 285)",
         "source": "src/styles.css"
       },
       {
         "name": "--chart-2",
-        "raw": "oklch(0.55 0.14 252)",
+        "raw": "oklch(0.55 0.08 250)",
         "source": "src/styles.css"
       },
       {
         "name": "--chart-3",
-        "raw": "oklch(0.58 0.11 160)",
+        "raw": "oklch(0.55 0.075 158)",
         "source": "src/styles.css"
       },
       {
         "name": "--chart-4",
-        "raw": "oklch(0.7 0.11 76)",
+        "raw": "oklch(0.72 0.08 78)",
         "source": "src/styles.css"
       },
       {
         "name": "--chart-5",
-        "raw": "oklch(0.33 0.02 275)",
+        "raw": "oklch(0.34 0.015 275)",
         "source": "src/styles.css"
       },
       {
         "name": "--sidebar",
-        "raw": "oklch(0.976 0.003 275)",
+        "raw": "#f4f2ee",
         "source": "src/styles.css"
       },
       {
         "name": "--sidebar-foreground",
-        "raw": "oklch(0.26 0.018 275)",
+        "raw": "#2a2833",
         "source": "src/styles.css"
       },
       {
         "name": "--sidebar-primary",
-        "raw": "oklch(0.51 0.185 281)",
+        "raw": "#443a94",
         "source": "src/styles.css"
       },
       {
         "name": "--sidebar-primary-foreground",
-        "raw": "oklch(0.99 0.004 285)",
+        "raw": "#ffffff",
         "source": "src/styles.css"
       },
       {
         "name": "--sidebar-accent",
-        "raw": "oklch(1 0 0)",
+        "raw": "#ffffff",
         "source": "src/styles.css"
       },
       {
         "name": "--sidebar-accent-foreground",
-        "raw": "oklch(0.22 0.018 275)",
+        "raw": "#14141a",
         "source": "src/styles.css"
       },
       {
         "name": "--sidebar-border",
-        "raw": "oklch(0.928 0.004 275)",
+        "raw": "#e8e6e1",
         "source": "src/styles.css"
       },
       {
         "name": "--sidebar-ring",
-        "raw": "oklch(0.51 0.185 281)",
+        "raw": "#443a94",
         "source": "src/styles.css"
       }
     ],
     "typography": [
       {
         "name": "--font-display",
-        "raw": "\"Inter Tight\", \"Inter\", ui-sans-serif, system-ui, sans-serif",
+        "raw": "\"Sora\", \"Manrope\", ui-sans-serif, system-ui, sans-serif",
         "source": "src/styles.css"
       },
       {
         "name": "--font-sans",
-        "raw": "\"Inter\", ui-sans-serif, system-ui, sans-serif",
+        "raw": "\"Manrope\", ui-sans-serif, system-ui, sans-serif",
         "source": "src/styles.css"
       }
     ],
@@ -461,19 +465,19 @@
       },
       {
         "name": "--radius",
-        "raw": "0.75rem",
+        "raw": "0.875rem",
         "source": "src/styles.css"
       }
     ],
     "shadow": [
       {
         "name": "--shadow-soft",
-        "raw": "0 1px 1px oklch(0.22 0.02 275 / 0.03), 0 1px 3px oklch(0.22 0.02 275 / 0.04)",
+        "raw": "0 1px 2px oklch(0.22 0.02 275 / 0.025)",
         "source": "src/styles.css"
       },
       {
         "name": "--shadow-lift",
-        "raw": "0 1px 2px oklch(0.22 0.02 275 / 0.04), 0 10px 28px -14px oklch(0.22 0.02 275 / 0.16)",
+        "raw": "0 1px 2px oklch(0.22 0.02 275 / 0.03), 0 14px 34px -20px oklch(0.22 0.02 275 / 0.14)",
         "source": "src/styles.css"
       }
     ]
@@ -729,6 +733,11 @@
       "import_path": ""
     },
     {
+      "name": "BrandLogo",
+      "file": "src/components/brand-mark",
+      "import_path": ""
+    },
+    {
       "name": "ActivityFeed",
       "file": "src/components/detail/activity-feed",
       "import_path": ""
@@ -751,6 +760,11 @@
     {
       "name": "OverviewTab",
       "file": "src/components/detail/overview-tab",
+      "import_path": ""
+    },
+    {
+      "name": "QuickDocumentUpload",
+      "file": "src/components/documents/quick-upload",
       "import_path": ""
     },
     {
@@ -1235,6 +1249,20 @@
       "name": "LanguageProvider",
       "file": "src/lib/i18n/provider",
       "import_path": ""
+    }
+  ],
+  "assets": [
+    {
+      "file": "src/assets/nextround-logo.png.asset.json",
+      "kind": "logo",
+      "format": "png",
+      "pointer": true
+    },
+    {
+      "file": "src/assets/nextround-mark.png.asset.json",
+      "kind": "image",
+      "format": "png",
+      "pointer": true
     }
   ]
 }
