@@ -16,15 +16,18 @@ export const startGmailConnect = createServerFn({ method: "POST" })
     return { url: authorizeUrl(data.origin, state) };
   });
 
-/** Primera sincronización real: detecta correos de proceso y crea sugerencias. */
+/** Escaneo de los últimos 60 días: detecta correos de proceso y crea propuestas. */
 export const syncGmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((input: { max?: number } | undefined) => input ?? {})
+  .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { accessTokenFromRefresh, decryptToken, fetchRecruitmentMessages } = await import(
       "@/lib/inbox/gmail.server"
     );
     const { classify, matchApplication } = await import("@/lib/inbox/classify.server");
+    const { processKeyOf } = await import("@/lib/inbox/grouping");
+
 
     const { data: connection } = await supabase
       .from("email_connections")
@@ -39,7 +42,7 @@ export const syncGmail = createServerFn({ method: "POST" })
     let messages;
     try {
       const accessToken = await accessTokenFromRefresh(decryptToken(connection.connection_key_ciphertext));
-      messages = await fetchRecruitmentMessages(accessToken, 25);
+      messages = await fetchRecruitmentMessages(accessToken, Math.min(data.max ?? 120, 200));
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al leer Gmail.";
       await supabase
@@ -65,8 +68,9 @@ export const syncGmail = createServerFn({ method: "POST" })
       company: (app.companies as { name: string } | null)?.name ?? null,
     }));
 
-
     let detected = 0;
+    const processes = new Set<string>();
+
 
     for (const message of messages) {
       if (seen.has(message.id)) continue;
@@ -76,6 +80,17 @@ export const syncGmail = createServerFn({ method: "POST" })
       const match = matchApplication(message, classification, targets);
       // Sin coincidencia clara y sin candidatas: puede ser una candidatura nueva.
       const isNewApplication = !match.id && match.candidates.length === 0;
+
+      // Clave del proceso: agrupa varios correos de la misma empresa y puesto.
+      const processKey = processKeyOf({
+        applicationId: match.id,
+        company: classification.extracted.company ?? null,
+        role: classification.extracted.role ?? null,
+        fromEmail: message.fromEmail,
+        threadId: message.threadId,
+        fallback: message.id,
+      });
+      processes.add(processKey);
 
       const { data: event, error } = await supabase
         .from("email_events")
@@ -94,6 +109,7 @@ export const syncGmail = createServerFn({ method: "POST" })
           extracted: {
             ...classification.extracted,
             match_candidates: match.candidates,
+            process_key: processKey,
           } as never,
           application_id: match.id,
           status: match.id ? "pending" : "needs_match",
@@ -143,5 +159,5 @@ export const syncGmail = createServerFn({ method: "POST" })
       .update({ last_sync_at: new Date().toISOString(), status: "connected", last_error: null })
       .eq("id", connection.id);
 
-    return { scanned: messages.length, detected };
+    return { scanned: messages.length, detected, processes: processes.size };
   });

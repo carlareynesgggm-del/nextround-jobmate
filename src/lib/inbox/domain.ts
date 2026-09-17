@@ -172,6 +172,8 @@ export type ExtractedEmail = {
   notes?: string | null;
   /** Candidaturas plausibles cuando el correo no se pudo asociar con certeza. */
   match_candidates?: string[];
+  /** Clave del proceso de selección al que pertenece el correo. */
+  process_key?: string | null;
 
 };
 

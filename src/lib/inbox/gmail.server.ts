@@ -141,7 +141,7 @@ export async function googleEmailAddress(accessToken: string): Promise<string | 
 const GMAIL = "https://gmail.googleapis.com/gmail/v1/users/me";
 
 const RECRUITMENT_QUERY =
-  'newer_than:45d -in:spam (application OR candidatura OR candidature OR bewerbung OR interview OR entrevista OR entretien OR assessment OR "online test" OR prueba OR recruiter OR recruitment OR reclutamiento OR hiring OR internship OR "graduate programme" OR "graduate program" OR practicas OR vacancy OR "job" OR offer OR oferta OR "next stage" OR "siguiente fase" OR shortlist OR "we regret")';
+  'newer_than:60d -in:spam (application OR candidatura OR candidature OR bewerbung OR interview OR entrevista OR entretien OR assessment OR "online test" OR prueba OR recruiter OR recruitment OR reclutamiento OR hiring OR internship OR "graduate programme" OR "graduate program" OR practicas OR vacancy OR "job" OR offer OR oferta OR "next stage" OR "siguiente fase" OR shortlist OR "we regret")';
 
 export type GmailMessage = {
   id: string;
@@ -159,17 +159,30 @@ function header(headers: { name: string; value: string }[], name: string): strin
 
 export async function fetchRecruitmentMessages(
   accessToken: string,
-  max = 25,
+  max = 120,
 ): Promise<GmailMessage[]> {
-  const listUrl = new URL(`${GMAIL}/messages`);
-  listUrl.searchParams.set("q", RECRUITMENT_QUERY);
-  listUrl.searchParams.set("maxResults", String(max));
-  const listRes = await fetch(listUrl, { headers: { authorization: `Bearer ${accessToken}` } });
-  if (!listRes.ok) {
-    throw new Error(`Gmail respondió ${listRes.status}: ${await listRes.text()}`);
+  const ids: string[] = [];
+  let pageToken: string | undefined;
+
+  // Escaneo paginado: Gmail devuelve 100 por página como máximo.
+  while (ids.length < max) {
+    const listUrl = new URL(`${GMAIL}/messages`);
+    listUrl.searchParams.set("q", RECRUITMENT_QUERY);
+    listUrl.searchParams.set("maxResults", String(Math.min(100, max - ids.length)));
+    if (pageToken) listUrl.searchParams.set("pageToken", pageToken);
+    const listRes = await fetch(listUrl, { headers: { authorization: `Bearer ${accessToken}` } });
+    if (!listRes.ok) {
+      throw new Error(`Gmail respondió ${listRes.status}: ${await listRes.text()}`);
+    }
+    const list = (await listRes.json()) as {
+      messages?: { id: string }[];
+      nextPageToken?: string;
+    };
+    for (const message of list.messages ?? []) ids.push(message.id);
+    if (!list.nextPageToken || (list.messages ?? []).length === 0) break;
+    pageToken = list.nextPageToken;
   }
-  const list = (await listRes.json()) as { messages?: { id: string }[] };
-  const ids = (list.messages ?? []).map((m) => m.id);
+
 
   const messages: GmailMessage[] = [];
   for (const id of ids) {
