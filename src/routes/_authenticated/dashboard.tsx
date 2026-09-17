@@ -134,14 +134,14 @@ function HomePage() {
   }
 
   return (
-    <div className="space-y-14">
-      {/* 1 — Lo importante hoy */}
-      <section className="space-y-6">
-        <header>
-          <p className="text-[13px] text-muted-foreground">
+    <div className="space-y-10">
+      {/* Hero row: greeting + inline pulse */}
+      <header className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+        <div className="min-w-0">
+          <p className="text-[12px] uppercase tracking-wide text-muted-foreground">
             {greeting(t)}, {firstName}
           </p>
-          <h1 className="mt-2.5 max-w-2xl font-display text-[30px] font-semibold leading-[1.15] tracking-tight sm:text-[38px]">
+          <h1 className="mt-1.5 max-w-2xl font-display text-[26px] font-semibold leading-[1.15] tracking-tight sm:text-[32px]">
             {isLoading
               ? t("Cargando tu búsqueda…")
               : feed.length === 0
@@ -153,40 +153,52 @@ function HomePage() {
                     { n: feed.length },
                   )}
           </h1>
-        </header>
+        </div>
+        <dl className="flex items-center gap-6">
+          <InlineMetric label={t("Activos")} value={active.length} />
+          <InlineMetric label={t("Entrevistas")} value={interviewsThisWeek} />
+          <InlineMetric label={t("Ofertas")} value={offers} accent={offers > 0} />
+          <InlineMetric label={t("Totales")} value={applications.length} />
+        </dl>
+      </header>
 
-        {feed.length === 0 ? (
-          <EmptyState
-            title={t("Nada pendiente por ahora")}
-            description={t("Buen momento para añadir candidaturas nuevas o pulir tu CV.")}
-            icon={<Sparkles className="size-5" />}
-            action={
-              <Button asChild>
-                <Link to="/applications">{t("Ver candidaturas")}</Link>
-              </Button>
-            }
-          />
-        ) : (
-          <ul className="grid gap-3 lg:grid-cols-2">
-            {feed.map(({ app, action }) => {
-              const event = feedEvents.get(app.id);
-              return (
-                <AttentionCard key={app.id} app={app} action={action} {...(event ? { event } : {})} />
-              );
-            })}
-          </ul>
-        )}
-      </section>
+      {/* Above the fold: atención + correo, side by side */}
+      <div className="grid items-start gap-6 lg:grid-cols-12">
+        <section className="space-y-3 lg:col-span-7">
+          <h2 className="font-display text-[15px] font-semibold tracking-tight">
+            {t("Necesitan tu atención")}
+          </h2>
+          {feed.length === 0 ? (
+            <EmptyState
+              title={t("Nada pendiente por ahora")}
+              description={t("Buen momento para añadir candidaturas nuevas o pulir tu CV.")}
+              icon={<Sparkles className="size-5" />}
+              action={
+                <Button asChild>
+                  <Link to="/applications">{t("Ver candidaturas")}</Link>
+                </Button>
+              }
+            />
+          ) : (
+            <ul className="space-y-2">
+              {feed.map(({ app, action }) => {
+                const event = feedEvents.get(app.id);
+                return (
+                  <AttentionCard key={app.id} app={app} action={action} {...(event ? { event } : {})} />
+                );
+              })}
+            </ul>
+          )}
+        </section>
 
-      {/* 2 — Novedades del correo */}
-      <Section title={t("Tu correo")}>
-        <div className="space-y-3">
+        <section className="space-y-3 lg:col-span-5">
+          <h2 className="font-display text-[15px] font-semibold tracking-tight">{t("Tu correo")}</h2>
           <GmailHomeCard />
           <UpdatesPanel />
-        </div>
-      </Section>
+        </section>
+      </div>
 
-      {/* 3 — Candidaturas activas */}
+      {/* Candidaturas activas */}
       <Section
         title={t("Candidaturas activas")}
         {...(active.length > 0 ? { hint: String(active.length) } : {})}
