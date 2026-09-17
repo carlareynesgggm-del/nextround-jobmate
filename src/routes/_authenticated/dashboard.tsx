@@ -285,16 +285,10 @@ function HomePage() {
           </ul>
         )}
       </Section>
+      </div>
 
-      {/* 5 — Información secundaria */}
-      <section className="space-y-10 border-t border-border/60 pt-10">
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
-          <Metric label={t("Candidaturas totales")} value={applications.length} />
-          <Metric label={t("Procesos activos")} value={active.length} />
-          <Metric label={t("Entrevistas esta semana")} value={interviewsThisWeek} />
-          <Metric label={t("Ofertas")} value={offers} />
-        </dl>
-
+      {/* Información secundaria */}
+      <section className="space-y-8 border-t border-border/60 pt-8">
         <Section title={t("Actividad reciente")}>
           {recentActivity.length === 0 ? (
             <p className="text-sm text-muted-foreground">{t("Todavía no hay movimientos.")}</p>
