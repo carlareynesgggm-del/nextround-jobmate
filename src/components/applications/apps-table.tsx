@@ -66,31 +66,31 @@ export function AppsTable({
   return (
     <>
       <div className="hidden overflow-visible md:block">
-        <div className="scrollbar-slim max-h-[calc(100dvh-20rem)] overflow-auto rounded-2xl border border-border bg-surface">
+        <div className="scrollbar-slim max-h-[calc(100dvh-20rem)] overflow-auto rounded-xl border border-border/70 bg-surface">
           <table className="w-full text-sm">
-            <thead className="sticky top-0 z-10 bg-surface-2/95 backdrop-blur">
-              <tr className="border-b border-border text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                <th className="px-4 py-2.5 font-medium">{t("Empresa")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("Puesto")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("Tipo")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("Ubicación")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("Etapa")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("Fecha de solicitud")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("Días esperando")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("Próxima acción")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("Próxima fecha límite")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("CV usado")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("Salario")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("Prioridad")}</th>
+            <thead className="sticky top-0 z-10 bg-surface/95 backdrop-blur">
+              <tr className="border-b border-border/60 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                <th className="px-4 py-3 font-medium">{t("Empresa")}</th>
+                <th className="px-4 py-3 font-medium">{t("Puesto")}</th>
+                <th className="px-4 py-3 font-medium">{t("Tipo")}</th>
+                <th className="px-4 py-3 font-medium">{t("Ubicación")}</th>
+                <th className="px-4 py-3 font-medium">{t("Etapa")}</th>
+                <th className="px-4 py-3 font-medium">{t("Fecha de solicitud")}</th>
+                <th className="px-4 py-3 font-medium">{t("Días esperando")}</th>
+                <th className="px-4 py-3 font-medium">{t("Próxima acción")}</th>
+                <th className="px-4 py-3 font-medium">{t("Próxima fecha límite")}</th>
+                <th className="px-4 py-3 font-medium">{t("CV usado")}</th>
+                <th className="px-4 py-3 font-medium">{t("Salario")}</th>
+                <th className="px-4 py-3 font-medium">{t("Prioridad")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-border/50">
               {applications.map((app) => {
                 const waiting = daysWaiting(app);
                 const cv = cvName(app, documents);
                 return (
-                  <tr key={app.id} className="group relative transition-colors hover:bg-accent/40">
-                    <td className="px-4 py-2.5">
+                  <tr key={app.id} className="group relative transition-colors hover:bg-surface-2/70">
+                    <td className="px-4 py-3">
                       <Link
                         to="/applications/$id"
                         params={{ id: app.id }}
@@ -103,26 +103,26 @@ export function AppsTable({
                         <AlertDot app={app} events={events} />
                       </Link>
                     </td>
-                    <td className="px-4 py-2.5">
+                    <td className="px-4 py-3">
                       <Link to="/applications/$id" params={{ id: app.id }} className="block max-w-[12rem] truncate">
                         {app.role_title}
                       </Link>
                     </td>
-                    <td className="px-4 py-2.5 text-muted-foreground">{app.application_type ?? UNKNOWN}</td>
-                    <td className="px-4 py-2.5 text-muted-foreground">
+                    <td className="px-4 py-3 text-muted-foreground">{app.application_type ?? UNKNOWN}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
                       <span className="block max-w-[9rem] truncate">{app.location ?? UNKNOWN}</span>
                       {app.work_mode && (
                         <span className="text-xs">{WORK_MODE_LABEL[app.work_mode]}</span>
                       )}
                     </td>
-                    <td className="px-4 py-2.5">
+                    <td className="px-4 py-3">
                       <StageBadge stage={app.stage} />
                     </td>
-                    <td className="px-4 py-2.5 text-muted-foreground">{fmtDate(app.applied_at)}</td>
-                    <td className="px-4 py-2.5 tabular-nums text-muted-foreground">
+                    <td className="px-4 py-3 text-muted-foreground">{fmtDate(app.applied_at)}</td>
+                    <td className="px-4 py-3 tabular-nums text-muted-foreground">
                       {waiting !== null ? `${waiting} ${t("días")}` : "—"}
                     </td>
-                    <td className="px-4 py-2.5">
+                    <td className="px-4 py-3">
                       {app.next_action ? (
                         <span>
                           <span className="block max-w-[10rem] truncate">{app.next_action}</span>
@@ -134,16 +134,16 @@ export function AppsTable({
                         <span className="text-muted-foreground">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-2.5 text-muted-foreground">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {app.deadline_at ? relativeDay(app.deadline_at) : "—"}
                     </td>
-                    <td className="px-4 py-2.5 text-muted-foreground">
+                    <td className="px-4 py-3 text-muted-foreground">
                       <span className="block max-w-[8rem] truncate">{cv ?? t("Sin CV")}</span>
                     </td>
-                    <td className="px-4 py-2.5 text-muted-foreground">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {formatSalary(app.salary_min, app.salary_max, app.currency ?? "EUR")}
                     </td>
-                    <td className="px-4 py-2.5">
+                    <td className="px-4 py-3">
                       <Pill tone={priorityTone(app.priority ?? "medium")}>
                         {PRIORITY_LABEL[app.priority ?? "medium"]}
                       </Pill>
@@ -156,7 +156,7 @@ export function AppsTable({
         </div>
       </div>
 
-      <div className="space-y-2.5 md:hidden">
+      <div className="space-y-2 md:hidden">
         {applications.map((app) => {
           const waiting = daysWaiting(app);
           return (
@@ -164,7 +164,7 @@ export function AppsTable({
               key={app.id}
               to="/applications/$id"
               params={{ id: app.id }}
-              className="block rounded-xl border border-border bg-surface p-3.5 shadow-soft"
+              className="block rounded-xl border border-border/70 bg-surface p-4"
             >
               <div className="flex items-start gap-2.5">
                 <CompanyMark name={app.companies?.name ?? app.role_title} size="sm" />

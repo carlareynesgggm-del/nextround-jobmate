@@ -131,7 +131,7 @@ function ApplicationDetail() {
   const cvLink = links.find((link) => link.role === "cv" || link.documents?.kind === "cv");
 
   return (
-    <div className="space-y-10 py-6">
+    <div className="space-y-9">
       <ApplicationHeader
         app={app}
         days={days}
@@ -154,18 +154,8 @@ function ApplicationDetail() {
 
       <NextBestActionCard app={app} action={action} />
 
-      <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-surface-2 px-4 py-3">
-        <Sparkles className="size-4 text-violet" />
-        <p className="min-w-0 flex-1 text-xs leading-relaxed text-muted-foreground">
-          {t("Pregunta a NextRound AI sobre esta candidatura: usa su historial, correos, documentos y fechas reales.")}
-        </p>
-        <Button variant="outline" size="sm" className="rounded-xl" onClick={() => openAssistant(app.id)}>
-          {t("Preguntar sobre esta candidatura")}
-        </Button>
-      </div>
-
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="scrollbar-slim max-w-full overflow-x-auto">
+        <TabsList className="scrollbar-slim w-full max-w-full justify-start overflow-x-auto">
           <TabsTrigger value="overview">{t("Resumen")}</TabsTrigger>
           <TabsTrigger value="job">{t("Oferta")}</TabsTrigger>
           <TabsTrigger value="process">{t("Proceso")}</TabsTrigger>
@@ -173,30 +163,40 @@ function ApplicationDetail() {
           <TabsTrigger value="notes">{t("Notas")}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="mt-7 space-y-10">
+        <TabsContent value="overview" className="mt-8 space-y-10">
           <OverviewTab application={app} />
           <ActivityFeed applicationId={app.id} />
         </TabsContent>
 
-        <TabsContent value="job" className="mt-7">
+        <TabsContent value="job" className="mt-8">
           <JobTab application={app} />
         </TabsContent>
 
-        <TabsContent value="process" className="mt-7 space-y-10">
+        <TabsContent value="process" className="mt-8 space-y-10">
           <ProcessTab application={app} />
           <EventsTab applicationId={app.id} />
           <TasksTab applicationId={app.id} />
           <ContactsTab application={app} />
         </TabsContent>
 
-        <TabsContent value="documents" className="mt-7">
+        <TabsContent value="documents" className="mt-8">
           <DocumentsTab application={app} />
         </TabsContent>
 
-        <TabsContent value="notes" className="mt-7">
+        <TabsContent value="notes" className="mt-8">
           <NotesTab applicationId={app.id} />
         </TabsContent>
       </Tabs>
+
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/60 bg-surface-2/60 px-4 py-3">
+        <Sparkles className="size-4 shrink-0 text-primary" />
+        <p className="min-w-0 flex-1 text-xs leading-relaxed text-muted-foreground">
+          {t("Pregunta a NextRound AI sobre esta candidatura: usa su historial, correos, documentos y fechas reales.")}
+        </p>
+        <Button variant="outline" size="sm" onClick={() => openAssistant(app.id)}>
+          {t("Preguntar")}
+        </Button>
+      </div>
 
       <ApplicationDialog open={editOpen} onOpenChange={setEditOpen} application={app} />
     </div>

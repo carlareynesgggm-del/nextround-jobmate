@@ -146,18 +146,20 @@ function ApplicationsPage() {
   const view = search.view ?? "table";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title={t("Candidaturas")}
         description={t("{n} de {total} procesos", { n: sorted.length, total: active.length })}
         actions={
           <>
-            <div className="flex rounded-lg border border-border bg-surface p-0.5">
+            <div className="flex rounded-lg border border-border/70 bg-surface p-0.5">
               <button
                 onClick={() => patchSearch({ view: "table" })}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
-                  view === "table" ? "bg-secondary text-secondary-foreground" : "text-muted-foreground",
+                  "inline-flex items-center gap-1.5 rounded-[6px] px-2.5 py-1.5 text-xs font-medium transition-colors",
+                  view === "table"
+                    ? "bg-surface-2 text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <TableIcon className="size-3.5" /> {t("Tabla")}
@@ -165,8 +167,10 @@ function ApplicationsPage() {
               <button
                 onClick={() => patchSearch({ view: "kanban" })}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
-                  view === "kanban" ? "bg-secondary text-secondary-foreground" : "text-muted-foreground",
+                  "inline-flex items-center gap-1.5 rounded-[6px] px-2.5 py-1.5 text-xs font-medium transition-colors",
+                  view === "kanban"
+                    ? "bg-surface-2 text-foreground"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <LayoutGrid className="size-3.5" /> {t("Kanban")}
@@ -184,7 +188,7 @@ function ApplicationsPage() {
       {isLoading ? (
         <div className="grid gap-3 md:grid-cols-3">
           {[0, 1, 2].map((index) => (
-            <div key={index} className="h-32 animate-pulse rounded-2xl bg-surface-2" />
+            <div key={index} className="h-32 animate-pulse rounded-xl bg-surface-2" />
           ))}
         </div>
       ) : active.length === 0 ? (

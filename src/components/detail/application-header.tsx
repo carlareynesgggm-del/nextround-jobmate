@@ -10,7 +10,6 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,15 +19,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CompanyMark } from "@/components/ui-bits";
+import { CompanyMark, StageBadge } from "@/components/ui-bits";
 import { useMoveStage } from "@/lib/api";
 import {
   PIPELINE_STAGES,
   STAGE_META,
   WORK_MODE_LABEL,
-  formatSalary,
   type ApplicationWithCompany,
-  type Stage,
 } from "@/lib/domain";
 import { fmtDate } from "@/lib/format";
 import { useT } from "@/lib/i18n/provider";
@@ -55,38 +52,44 @@ export function ApplicationHeader({
 
   const meta = [
     app.location,
-    app.location ? app.country : app.country,
+    app.country,
     app.work_mode ? WORK_MODE_LABEL[app.work_mode] : null,
     app.application_type,
     app.applied_at ? t("Enviada el {date}", { date: fmtDate(app.applied_at) }) : null,
   ].filter(Boolean);
 
   return (
-    <header className="space-y-6">
+    <header className="space-y-7">
       <Link
         to="/applications"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
       >
-        <ArrowLeft className="size-4" /> {t("Candidaturas")}
+        <ArrowLeft className="size-3.5" /> {t("Candidaturas")}
       </Link>
 
       <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
         <div className="flex min-w-0 gap-4">
           <CompanyMark name={app.companies?.name ?? app.role_title} size="lg" />
           <div className="min-w-0">
-            <p className="font-display text-sm font-medium text-muted-foreground">
-              {app.companies?.name ?? t("Sin empresa")}
-            </p>
-            <h1 className="mt-0.5 font-display text-3xl font-semibold leading-tight tracking-tight">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <p className="text-[13px] font-medium text-muted-foreground">
+                {app.companies?.name ?? t("Sin empresa")}
+              </p>
+              <StageBadge stage={app.stage} />
+            </div>
+            <h1 className="mt-1 font-display text-[26px] font-semibold leading-tight tracking-tight sm:text-[32px]">
               {app.role_title}
             </h1>
-            <p className="mt-2 text-sm text-muted-foreground">{meta.join(" · ") || t("Sin especificar")}</p>
+            <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
+              {meta.join(" · ") || t("Sin especificar")}
+              {days !== null ? ` · ${t("hace {n} días", { n: days })}` : ""}
+            </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
           <Button
-            className="gap-1.5 rounded-xl"
+            className="gap-1.5"
             onClick={() =>
               window.dispatchEvent(
                 new CustomEvent("nextround:ai", {
@@ -103,7 +106,7 @@ export function ApplicationHeader({
             <Sparkles className="size-4" /> {t("Preparar con IA")}
           </Button>
           {app.candidate_portal_url && (
-            <Button asChild variant="outline" className="gap-1.5 rounded-xl">
+            <Button asChild variant="outline" className="gap-1.5">
               <a href={app.candidate_portal_url} target="_blank" rel="noreferrer">
                 <KeyRound className="size-4" /> {t("Abrir portal")}
               </a>
@@ -111,7 +114,7 @@ export function ApplicationHeader({
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label={t("Más acciones")} className="rounded-xl">
+              <Button variant="ghost" size="icon" aria-label={t("Más acciones")}>
                 <MoreHorizontal className="size-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -150,26 +153,24 @@ export function ApplicationHeader({
       </div>
 
       <div className="max-w-3xl">
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>{t("Etapa actual: {stage}", { stage: t(STAGE_META[app.stage].label) })}</span>
-          {days !== null && <span>{t("hace {n} días", { n: days })}</span>}
-        </div>
-        <div className="scrollbar-slim mt-3 flex items-center gap-1 overflow-x-auto">
+        <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          {t("Fase del proceso")}
+        </p>
+        <div className="scrollbar-slim mt-2.5 flex items-center gap-1 overflow-x-auto pb-1">
           {PIPELINE_STAGES.map((stage, index) => (
             <button
               key={stage}
               onClick={() => moveStage.mutate({ application: app, to: stage })}
               className={cn(
-                "flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                "flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
                 stage === app.stage
-                  ? "bg-violet text-primary-foreground"
+                  ? "bg-primary text-primary-foreground"
                   : stageIndex >= index
-                    ? "bg-violet/12 text-violet"
-                    : "text-muted-foreground hover:bg-accent",
+                    ? "bg-primary/8 text-primary"
+                    : "text-muted-foreground hover:bg-surface-2",
               )}
             >
               {t(STAGE_META[stage].short)}
-              {stageIndex > index && <span aria-hidden>✓</span>}
             </button>
           ))}
         </div>
