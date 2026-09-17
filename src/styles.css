@@ -6,13 +6,13 @@
 
 /*
  * NextRound design system.
- * Palette: cool neutral paper + a single violet/indigo accent.
+ * Palette: warm editorial paper + a sophisticated violet product accent.
  * All colors use oklch and are exposed as semantic tokens.
  */
 
 @theme inline {
-  --font-display: "Inter Tight", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Sora", "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -76,25 +76,25 @@
 :root {
   --radius: 0.75rem;
 
-  --background: oklch(0.99 0.002 275);
-  --foreground: oklch(0.22 0.018 275);
-  --surface: oklch(1 0 0);
-  --surface-2: oklch(0.972 0.003 275);
+  --background: #f7f7f5;
+  --foreground: #17171b;
+  --surface: #ffffff;
+  --surface-2: #f1efea;
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0.018 275);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0.018 275);
+  --card: #ffffff;
+  --card-foreground: #17171b;
+  --popover: #ffffff;
+  --popover-foreground: #17171b;
 
   /* Primary action: refined indigo-violet. */
-  --primary: oklch(0.51 0.185 281);
-  --primary-foreground: oklch(0.99 0.004 285);
-  --secondary: oklch(0.966 0.003 275);
-  --secondary-foreground: oklch(0.28 0.02 275);
-  --muted: oklch(0.968 0.003 275);
-  --muted-foreground: oklch(0.53 0.014 275);
-  --accent: oklch(0.962 0.008 285);
-  --accent-foreground: oklch(0.32 0.08 283);
+  --primary: #5746d9;
+  --primary-foreground: #ffffff;
+  --secondary: #f1efea;
+  --secondary-foreground: #2b2932;
+  --muted: #f1efea;
+  --muted-foreground: #686872;
+  --accent: #eeebff;
+  --accent-foreground: #35288f;
 
   /* Legacy accent token, retuned to a quiet amber. */
   --gold: oklch(0.68 0.1 72);
@@ -103,16 +103,16 @@
   --success: oklch(0.58 0.11 160);
   --warning: oklch(0.7 0.11 76);
   --danger: oklch(0.57 0.16 25);
-  --info: oklch(0.55 0.14 252);
-  --violet: oklch(0.51 0.185 281);
+  --info: #3978f6;
+  --violet: #5746d9;
   /* Brand secondary: lime. Used sparingly (mark accent, active markers). */
-  --lime: oklch(0.82 0.18 128);
+  --lime: #b7f23a;
 
   --destructive: oklch(0.57 0.16 25);
   --destructive-foreground: oklch(0.99 0.004 285);
-  --border: oklch(0.928 0.004 275);
-  --input: oklch(0.915 0.005 275);
-  --ring: oklch(0.51 0.185 281);
+  --border: #e3e2de;
+  --input: #d8d6d0;
+  --ring: #5746d9;
 
   --chart-1: oklch(0.51 0.185 281);
   --chart-2: oklch(0.55 0.14 252);
@@ -120,14 +120,14 @@
   --chart-4: oklch(0.7 0.11 76);
   --chart-5: oklch(0.33 0.02 275);
 
-  --sidebar: oklch(0.976 0.003 275);
-  --sidebar-foreground: oklch(0.26 0.018 275);
-  --sidebar-primary: oklch(0.51 0.185 281);
-  --sidebar-primary-foreground: oklch(0.99 0.004 285);
-  --sidebar-accent: oklch(1 0 0);
-  --sidebar-accent-foreground: oklch(0.22 0.018 275);
-  --sidebar-border: oklch(0.928 0.004 275);
-  --sidebar-ring: oklch(0.51 0.185 281);
+  --sidebar: #f1efea;
+  --sidebar-foreground: #2b2932;
+  --sidebar-primary: #5746d9;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ffffff;
+  --sidebar-accent-foreground: #17171b;
+  --sidebar-border: #e3e2de;
+  --sidebar-ring: #5746d9;
 }
 
 .dark {
@@ -141,7 +141,7 @@
   --popover: oklch(0.205 0.016 275);
   --popover-foreground: oklch(0.965 0.004 275);
 
-  --primary: oklch(0.63 0.17 285);
+  --primary: #8f82ff;
   --primary-foreground: oklch(0.16 0.014 275);
   --secondary: oklch(0.26 0.018 275);
   --secondary-foreground: oklch(0.965 0.004 275);
@@ -156,8 +156,8 @@
   --warning: oklch(0.76 0.11 78);
   --danger: oklch(0.68 0.16 25);
   --info: oklch(0.66 0.13 252);
-  --violet: oklch(0.66 0.17 285);
-  --lime: oklch(0.84 0.19 128);
+  --violet: #8f82ff;
+  --lime: #b7f23a;
 
   --destructive: oklch(0.68 0.16 25);
   --destructive-foreground: oklch(0.98 0.004 275);
@@ -186,7 +186,7 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    font-feature-settings: "cv11", "ss01";
+    font-feature-settings: "ss01", "ss02";
   }
 
   h1,
@@ -195,11 +195,11 @@
   h4,
   .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.021em;
+    letter-spacing: 0;
   }
 
   h1 {
-    letter-spacing: -0.03em;
+    letter-spacing: 0;
   }
 }
 

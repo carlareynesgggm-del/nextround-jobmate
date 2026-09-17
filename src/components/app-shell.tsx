@@ -61,10 +61,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         to={item.to}
         onClick={() => setMobileOpen(false)}
         className={cn(
-          "group relative flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[13px] transition-all duration-200",
+          "group relative flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-all duration-200",
           active
-            ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-            : "text-sidebar-foreground/65 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
+            ? "bg-sidebar-accent font-semibold text-sidebar-accent-foreground shadow-soft"
+            : "text-sidebar-foreground/65 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground",
         )}
       >
         <span
@@ -86,8 +86,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   const sidebarInner = (
-    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
-      <div className="flex items-center gap-2.5 px-5 pb-6 pt-5">
+      <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
+        <div className="flex items-center gap-2.5 px-5 pb-7 pt-5">
         <BrandMark />
         <p className="font-display text-[15px] font-semibold tracking-tight">NextRound</p>
       </div>
@@ -134,7 +134,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <AssistantProvider>
       <div className="min-h-screen bg-background">
-        <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] border-r border-sidebar-border lg:block">
+        <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] border-r border-sidebar-border shadow-soft lg:block">
           {sidebarInner}
         </aside>
 
@@ -159,7 +159,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
 
         <div className="lg:pl-[248px]">
-          <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b border-border/60 bg-background/85 px-5 backdrop-blur-md md:px-10">
+          <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b border-border/60 bg-background/90 px-5 backdrop-blur-xl md:px-10">
             <button
               onClick={() => setMobileOpen(true)}
               aria-label={t("Abrir menú")}
@@ -199,7 +199,7 @@ function AskAiHeaderButton() {
     <Button
       variant="ghost"
       size="sm"
-      className="hidden gap-1.5 border border-border/70 bg-surface/60 sm:inline-flex"
+      className="hidden gap-1.5 border border-primary/15 bg-accent/45 text-primary hover:bg-accent sm:inline-flex"
       onClick={() => openAssistant(null)}
     >
       <Sparkles className="size-3.5" />

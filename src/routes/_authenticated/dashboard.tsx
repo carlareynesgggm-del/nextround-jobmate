@@ -136,12 +136,12 @@ function HomePage() {
   return (
     <div className="space-y-10">
       {/* Hero row: greeting + inline pulse */}
-      <header className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+      <header className="relative flex flex-wrap items-end justify-between gap-x-8 gap-y-4 overflow-hidden border-b border-border/70 pb-7 after:absolute after:bottom-0 after:left-0 after:h-[3px] after:w-16 after:bg-lime">
         <div className="min-w-0">
-          <p className="text-[12px] uppercase tracking-wide text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
             {greeting(t)}, {firstName}
           </p>
-          <h1 className="mt-1.5 max-w-2xl font-display text-[26px] font-semibold leading-[1.15] tracking-tight sm:text-[32px]">
+          <h1 className="mt-2 max-w-2xl font-display text-[28px] font-semibold leading-[1.12] sm:text-[36px]">
             {isLoading
               ? t("Cargando tu búsqueda…")
               : feed.length === 0
@@ -154,7 +154,7 @@ function HomePage() {
                   )}
           </h1>
         </div>
-        <dl className="flex items-center gap-6">
+        <dl className="flex items-center gap-7 rounded-xl bg-surface px-5 py-3 shadow-soft ring-1 ring-inset ring-border/60">
           <InlineMetric label={t("Activos")} value={active.length} />
           <InlineMetric label={t("Entrevistas")} value={interviewsThisWeek} />
           <InlineMetric label={t("Ofertas")} value={offers} accent={offers > 0} />
@@ -164,8 +164,8 @@ function HomePage() {
 
       {/* Above the fold: atención + correo, side by side */}
       <div className="grid items-start gap-6 lg:grid-cols-12">
-        <section className="space-y-3 lg:col-span-7">
-          <h2 className="font-display text-[15px] font-semibold tracking-tight">
+        <section className="min-w-0 space-y-3 lg:col-span-7">
+          <h2 className="font-display text-[16px] font-semibold">
             {t("Necesitan tu atención")}
           </h2>
           {feed.length === 0 ? (
@@ -191,8 +191,8 @@ function HomePage() {
           )}
         </section>
 
-        <section className="space-y-3 lg:col-span-5">
-          <h2 className="font-display text-[15px] font-semibold tracking-tight">{t("Tu correo")}</h2>
+        <section className="min-w-0 space-y-3 lg:col-span-5">
+          <h2 className="font-display text-[16px] font-semibold">{t("Tu correo")}</h2>
           <GmailHomeCard />
           <UpdatesPanel />
         </section>
@@ -201,7 +201,7 @@ function HomePage() {
       {/* Candidaturas activas + próximamente */}
       <div className="grid items-start gap-x-8 gap-y-10 lg:grid-cols-12">
       <Section
-        className="lg:col-span-7"
+        className="min-w-0 lg:col-span-7"
         title={t("Candidaturas activas")}
         {...(active.length > 0 ? { hint: String(active.length) } : {})}
         action={
@@ -246,7 +246,7 @@ function HomePage() {
 
       {/* Próximos deadlines y entrevistas */}
       <Section
-        className="lg:col-span-5"
+        className="min-w-0 lg:col-span-5"
         title={t("Próximamente")}
         action={
           <Link
@@ -343,7 +343,7 @@ function InlineMetric({
         className={
           accent
             ? "font-display text-[20px] font-semibold tabular-nums tracking-tight text-primary"
-            : "font-display text-[20px] font-semibold tabular-nums tracking-tight"
+            : "font-display text-[20px] font-semibold tabular-nums"
         }
       >
         {value}

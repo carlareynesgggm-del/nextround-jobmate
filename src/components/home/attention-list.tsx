@@ -128,7 +128,7 @@ export function AttentionCard({
   );
 
   return (
-    <li className="group relative overflow-hidden rounded-xl border border-border/70 bg-surface px-4 py-3.5 transition-all duration-200 hover:border-border hover:bg-surface-2/40">
+    <li className="group relative overflow-hidden rounded-xl border border-border/70 bg-surface px-4 py-3.5 shadow-soft transition-all duration-200 hover:-translate-y-px hover:border-primary/20 hover:shadow-lift">
       <span
         className={cn(
           "absolute inset-y-0 left-0 w-[2px]",
@@ -139,10 +139,10 @@ export function AttentionCard({
       <div className="flex items-start gap-3">
         <CompanyMark name={company} size="sm" className="mt-0.5" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[11px] uppercase tracking-wide text-muted-foreground">
+          <p className="truncate text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             {company} · {app.role_title}
           </p>
-          <p className="mt-1 truncate font-display text-[14px] font-semibold tracking-tight">
+          <p className="mt-1 truncate font-display text-[14px] font-semibold">
             {t(fact)}
           </p>
           <p className="mt-0.5 truncate text-[12px] text-muted-foreground">

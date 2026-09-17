@@ -10,7 +10,7 @@ export function StageBadge({ stage, className }: { stage: Stage; className?: str
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-md border px-2 py-[3px] text-[11px] font-medium",
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-[3px] text-[10px] font-semibold uppercase tracking-wide",
         meta.tone,
         className,
       )}
@@ -89,7 +89,7 @@ export function SectionCard({
   bodyClassName?: string;
 }) {
   return (
-    <section className={cn("rounded-xl border border-border/70 bg-surface", className)}>
+    <section className={cn("rounded-xl border border-border/70 bg-surface shadow-soft", className)}>
       {(title || action) && (
         <header className="flex items-start justify-between gap-4 border-b border-border/60 px-5 py-3.5">
           <div>
@@ -154,7 +154,7 @@ export function KpiCard({
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
         {icon && <span className="text-muted-foreground/70">{icon}</span>}
       </div>
-      <p className="mt-3 font-display text-[28px] font-semibold tabular-nums tracking-tight">{value}</p>
+      <p className="mt-3 font-display text-[28px] font-semibold tabular-nums">{value}</p>
       <div className="mt-1 flex items-center gap-2">
         {hint && <span className="text-xs text-muted-foreground">{hint}</span>}
         {trend && (
@@ -179,9 +179,9 @@ export function EmptyState({
   icon?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-border/60 bg-surface px-6 py-16 text-center">
+    <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-surface px-6 py-16 text-center shadow-soft before:absolute before:left-0 before:top-0 before:h-1 before:w-20 before:bg-lime">
       {icon && (
-        <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-surface-2 text-muted-foreground ring-1 ring-inset ring-border/60">
+        <div className="mb-4 flex size-11 items-center justify-center rounded-xl bg-accent text-primary ring-1 ring-inset ring-primary/10">
           {icon}
         </div>
       )}

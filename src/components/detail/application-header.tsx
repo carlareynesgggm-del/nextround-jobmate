@@ -59,7 +59,7 @@ export function ApplicationHeader({
   ].filter(Boolean);
 
   return (
-    <header className="space-y-7">
+    <header className="space-y-7 border-b border-border/70 pb-7">
       <Link
         to="/applications"
         className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
@@ -77,7 +77,7 @@ export function ApplicationHeader({
               </p>
               <StageBadge stage={app.stage} />
             </div>
-            <h1 className="mt-1 font-display text-[26px] font-semibold leading-tight tracking-tight sm:text-[32px]">
+            <h1 className="mt-1 font-display text-[28px] font-semibold leading-tight sm:text-[36px]">
               {app.role_title}
             </h1>
             <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
@@ -153,7 +153,7 @@ export function ApplicationHeader({
       </div>
 
       <div className="max-w-3xl">
-        <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
           {t("Fase del proceso")}
         </p>
         <div className="scrollbar-slim mt-2.5 flex items-center gap-1 overflow-x-auto pb-1">

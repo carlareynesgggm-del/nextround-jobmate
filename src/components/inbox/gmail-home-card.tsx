@@ -15,14 +15,14 @@ export function GmailHomeCard() {
   const connected = gmail?.status === "connected";
 
   return (
-    <section className="rounded-xl border border-border/70 bg-surface p-5">
+    <section className="relative overflow-hidden rounded-xl border border-border/70 bg-surface p-5 shadow-soft before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-primary">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 gap-3">
-          <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-muted-foreground ring-1 ring-inset ring-border/60">
+          <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent text-primary ring-1 ring-inset ring-primary/10">
             <Mail className="size-4" />
           </span>
           <div className="min-w-0">
-            <h3 className="font-display text-[15px] font-semibold tracking-tight">
+            <h3 className="font-display text-[15px] font-semibold">
               {connected ? t("Tu correo está conectado") : t("Conecta tu correo")}
             </h3>
             {connected ? (
