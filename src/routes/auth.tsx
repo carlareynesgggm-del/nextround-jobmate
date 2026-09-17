@@ -124,7 +124,7 @@ function AuthPage() {
       <div className="flex items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm">
           <Link to="/" className="mb-8 flex justify-center lg:justify-start">
-            <BrandLogo className="size-24 lg:size-20" />
+            <BrandLogo />
           </Link>
 
 

@@ -94,7 +94,7 @@ function HomePage() {
     return (
       <div className="space-y-12">
         <header>
-          <BrandLogo className="mb-6 size-16 rounded-xl" />
+          <BrandLogo className="mb-7" />
           <p className="text-[13px] text-muted-foreground">
             {greeting(t)}, {firstName}
           </p>

@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import markAsset from "@/assets/nextround-mark.png.asset.json";
-import logoAsset from "@/assets/nextround-logo.png.asset.json";
 
 /**
  * NextRound mark: the official NR symbol on its black tile.
