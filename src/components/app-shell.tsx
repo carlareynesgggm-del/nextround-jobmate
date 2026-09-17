@@ -80,9 +80,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const sidebarInner = (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex items-center gap-2.5 px-5 pb-6 pt-5">
-        <span className="flex size-7 items-center justify-center rounded-lg bg-primary font-display text-[13px] font-bold text-primary-foreground">
-          N
-        </span>
+        <BrandMark />
         <p className="font-display text-[15px] font-semibold tracking-tight">NextRound</p>
       </div>
 
