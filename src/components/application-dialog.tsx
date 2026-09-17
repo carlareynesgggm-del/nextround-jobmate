@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useCompanies, useSaveApplication, useSaveCompany } from "@/lib/api";
+import { useCompanies, useMoveStage, useSaveApplication, useSaveCompany } from "@/lib/api";
 import {
   STAGES,
   STAGE_META,
@@ -81,6 +81,7 @@ function EditApplicationDialog({
   const { data: companies = [] } = useCompanies();
   const saveApplication = useSaveApplication();
   const saveCompany = useSaveCompany();
+  const moveStage = useMoveStage();
 
   const [roleTitle, setRoleTitle] = useState("");
   const [companyId, setCompanyId] = useState<string>("");
