@@ -16,7 +16,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { ApplicationDialog } from "@/components/application-dialog";
-import { AiAssistant, AiAssistantButton } from "@/components/ai-assistant";
+import { AiAssistantButton, AssistantProvider, useAssistant } from "@/components/ai-assistant";
 import { AlertsBell } from "@/components/alerts-bell";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
@@ -35,7 +35,6 @@ const NAV = [
 export function AppShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [newOpen, setNewOpen] = useState(false);
-  const [aiOpen, setAiOpen] = useState(false);
   const { user } = useSession();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
@@ -119,6 +118,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 
   return (
+    <AssistantProvider>
     <div className="min-h-screen bg-background">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 border-r border-sidebar-border lg:block">
         {sidebarInner}
@@ -157,14 +157,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="ml-auto flex items-center gap-1.5">
             <AlertsBell />
             <LanguageSwitcher />
-            <Button
-              variant="outline"
-              size="sm"
-              className="hidden gap-1.5 rounded-xl sm:inline-flex"
-              onClick={() => setAiOpen(true)}
-            >
-              {t("Pregunta a NextRound AI")}
-            </Button>
+            <AskAiHeaderButton />
             <Button size="sm" className="gap-1.5 rounded-xl lg:hidden" onClick={() => setNewOpen(true)}>
               <Plus className="size-3.5" />
               {t("Nueva")}
@@ -175,9 +168,29 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="mx-auto w-full max-w-[1180px] px-5 pb-24 pt-2 md:px-8">{children}</main>
       </div>
 
-      <AiAssistantButton onClick={() => setAiOpen(true)} />
-      <AiAssistant open={aiOpen} onOpenChange={setAiOpen} />
+      <FloatingAssistantButton />
       <ApplicationDialog open={newOpen} onOpenChange={setNewOpen} />
     </div>
+    </AssistantProvider>
   );
+}
+
+function AskAiHeaderButton() {
+  const t = useT();
+  const { openAssistant } = useAssistant();
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      className="hidden gap-1.5 rounded-xl sm:inline-flex"
+      onClick={() => openAssistant(null)}
+    >
+      {t("Pregunta a NextRound AI")}
+    </Button>
+  );
+}
+
+function FloatingAssistantButton() {
+  const { openAssistant } = useAssistant();
+  return <AiAssistantButton onClick={() => openAssistant(null)} />;
 }
