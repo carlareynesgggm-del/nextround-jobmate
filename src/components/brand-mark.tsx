@@ -22,12 +22,15 @@ export function BrandMark({ className }: { className?: string }) {
 /** Full lockup (symbol + wordmark) for prominent, welcoming moments. */
 export function BrandLogo({ className }: { className?: string }) {
   return (
-    <img
-      src={logoAsset.url}
-      alt="NextRound"
-      width={120}
-      height={120}
-      className={cn("size-20 shrink-0 rounded-2xl object-cover", className)}
-    />
+    <span className={cn("flex items-center gap-3.5", className)}>
+      <img
+        src={markAsset.url}
+        alt="NextRound"
+        width={120}
+        height={120}
+        className="size-14 shrink-0 rounded-2xl object-cover"
+      />
+      <span className="font-display text-[22px] font-semibold tracking-tight">NextRound</span>
+    </span>
   );
 }
