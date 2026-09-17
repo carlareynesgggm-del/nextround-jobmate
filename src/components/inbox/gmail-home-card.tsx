@@ -1,4 +1,5 @@
-import { Mail, Plug, RefreshCw } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Inbox, Mail, Plug, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { fmtDateTime } from "@/lib/format";
@@ -8,7 +9,7 @@ import { useGmailActions, useGmailCallbackToast } from "@/lib/inbox/use-gmail";
 /** Tarjeta de Gmail en Inicio: conectar o revisar correos sin entrar en Ajustes. */
 export function GmailHomeCard() {
   const t = useT();
-  const { gmail, busy, startConnect, runSync } = useGmailActions();
+  const { gmail, busy, startConnect, runSync } = useGmailActions({ autoInitialScan: true });
   useGmailCallbackToast();
 
   const connected = gmail?.status === "connected";
@@ -28,9 +29,11 @@ export function GmailHomeCard() {
               <>
                 <p className="text-sm text-muted-foreground">{gmail?.email_address}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {gmail?.last_sync_at
+                  {busy === "sync"
+                    ? t("Escaneando tus últimos 60 días de correo…")
+                    : gmail?.last_sync_at
                     ? t("Última revisión: {date}", { date: fmtDateTime(gmail.last_sync_at) })
-                    : t("Sin revisiones todavía")}
+                      : t("Sin revisiones todavía")}
                 </p>
               </>
             ) : (
@@ -44,10 +47,22 @@ export function GmailHomeCard() {
         </div>
 
         {connected ? (
-          <Button className="gap-1.5" disabled={busy === "sync"} onClick={() => void runSync()}>
-            <RefreshCw className={busy === "sync" ? "size-4 animate-spin" : "size-4"} />
-            {t("Revisar correos ahora")}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild className="gap-1.5">
+              <Link to="/inbox">
+                <Inbox className="size-4" /> {t("Revisar novedades")}
+              </Link>
+            </Button>
+            <Button
+              variant="secondary"
+              className="gap-1.5"
+              disabled={busy === "sync"}
+              onClick={() => void runSync()}
+            >
+              <RefreshCw className={busy === "sync" ? "size-4 animate-spin" : "size-4"} />
+              {t("Escanear ahora")}
+            </Button>
+          </div>
         ) : (
           <Button
             className="gap-1.5"

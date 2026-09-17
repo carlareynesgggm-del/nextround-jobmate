@@ -7,6 +7,7 @@ import {
   FileText,
   HelpCircle,
   Home,
+  Inbox,
   LogOut,
   Menu,
   Plus,
@@ -27,6 +28,7 @@ import { useT } from "@/lib/i18n/provider";
 const NAV = [
   { to: "/dashboard", label: "Inicio", icon: Home },
   { to: "/applications", label: "Candidaturas", icon: Briefcase },
+  { to: "/inbox", label: "Novedades", icon: Inbox },
   { to: "/calendar", label: "Calendario", icon: CalendarDays },
   { to: "/vault", label: "CVs", icon: FileText },
   { to: "/analytics", label: "Insights", icon: BarChart3 },
