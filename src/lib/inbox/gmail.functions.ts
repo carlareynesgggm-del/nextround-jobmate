@@ -159,5 +159,5 @@ export const syncGmail = createServerFn({ method: "POST" })
       .update({ last_sync_at: new Date().toISOString(), status: "connected", last_error: null })
       .eq("id", connection.id);
 
-    return { scanned: messages.length, detected };
+    return { scanned: messages.length, detected, processes: processes.size };
   });
