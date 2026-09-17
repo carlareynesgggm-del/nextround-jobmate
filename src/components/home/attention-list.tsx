@@ -88,26 +88,46 @@ export function AttentionCard({
   const company = app.companies?.name ?? UNKNOWN;
 
   const isFollowup = action.kind === "followup" || action.kind === "ghosted";
-  const secondary = app.candidate_portal_url ? (
-    <Button asChild size="sm" variant="outline" className="gap-1.5 rounded-xl">
-      <a href={app.candidate_portal_url} target="_blank" rel="noreferrer">
-        {t("Abrir portal")} <ExternalLink className="size-3.5" />
-      </a>
-    </Button>
-  ) : isFollowup ? (
-    <Button
-      size="sm"
-      variant="outline"
-      className="rounded-xl"
-      onClick={() => openAssistant(app.id, `Redacta un email breve de seguimiento para ${app.role_title} en ${company}.`)}
-    >
-      {t("Redactar seguimiento")}
+
+  const TAB_BY_KIND: Partial<Record<NextAction["kind"], string>> = {
+    cv: "documents",
+    jd: "job",
+    notes: "notes",
+    assessment: "process",
+    interview: "process",
+  };
+  const PRIMARY_LABEL: Partial<Record<NextAction["kind"], string>> = {
+    cv: "Vincular CV",
+    jd: "Añadir descripción",
+    notes: "Añadir notas",
+    portal: "Añadir portal",
+  };
+
+  const primaryLabel = PRIMARY_LABEL[action.kind];
+  const primary = primaryLabel ? (
+    <Button asChild size="sm" className="rounded-xl">
+      <Link
+        to="/applications/$id"
+        params={{ id: app.id }}
+        hash={TAB_BY_KIND[action.kind] ?? "overview"}
+      >
+        {t(primaryLabel)}
+      </Link>
     </Button>
   ) : (
-    <Button asChild size="sm" variant="outline" className="rounded-xl">
-      <Link to="/applications/$id" params={{ id: app.id }}>
-        {t("Ver candidatura")}
-      </Link>
+    <Button
+      size="sm"
+      className="gap-1.5 rounded-xl"
+      onClick={() =>
+        openAssistant(
+          app.id,
+          isFollowup
+            ? `Redacta un email breve de seguimiento para ${app.role_title} en ${company}.`
+            : aiPrompt(app, action, fact),
+        )
+      }
+    >
+      <Sparkles className="size-3.5" /> {t(isFollowup ? "Redactar seguimiento" : "Preparar con IA")}
     </Button>
   );
 
@@ -137,15 +157,21 @@ export function AttentionCard({
       {!when && <p className="mt-1 text-sm text-muted-foreground">{t(action.detail)}</p>}
 
       <div className="mt-5 flex flex-wrap items-center gap-2.5">
-        <Button
-          size="sm"
-          className="gap-1.5 rounded-xl"
-          onClick={() => openAssistant(app.id, aiPrompt(app, action, fact))}
-        >
-          <Sparkles className="size-3.5" /> {t("Preparar con IA")}
+        {primary}
+        <Button asChild size="sm" variant="outline" className="rounded-xl">
+          <Link to="/applications/$id" params={{ id: app.id }}>
+            {t("Ver candidatura")}
+          </Link>
         </Button>
-        {secondary}
+        {app.candidate_portal_url && (
+          <Button asChild size="sm" variant="ghost" className="gap-1.5 rounded-xl">
+            <a href={app.candidate_portal_url} target="_blank" rel="noreferrer">
+              {t("Abrir portal")} <ExternalLink className="size-3.5" />
+            </a>
+          </Button>
+        )}
       </div>
+
     </li>
   );
 }
