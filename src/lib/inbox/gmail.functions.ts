@@ -16,15 +16,18 @@ export const startGmailConnect = createServerFn({ method: "POST" })
     return { url: authorizeUrl(data.origin, state) };
   });
 
-/** Primera sincronización real: detecta correos de proceso y crea sugerencias. */
+/** Escaneo de los últimos 60 días: detecta correos de proceso y crea propuestas. */
 export const syncGmail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((input: { max?: number } | undefined) => input ?? {})
+  .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { accessTokenFromRefresh, decryptToken, fetchRecruitmentMessages } = await import(
       "@/lib/inbox/gmail.server"
     );
     const { classify, matchApplication } = await import("@/lib/inbox/classify.server");
+    const { processKeyOf } = await import("@/lib/inbox/grouping");
+
 
     const { data: connection } = await supabase
       .from("email_connections")
