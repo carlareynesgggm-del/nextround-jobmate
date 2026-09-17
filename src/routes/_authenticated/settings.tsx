@@ -47,9 +47,9 @@ function SettingsRow({
   children: ReactNode;
 }) {
   return (
-    <section className="grid gap-5 border-t border-border/60 py-8 md:grid-cols-[minmax(0,15rem)_1fr] md:gap-10">
+    <section className="grid gap-5 border-t border-border/60 py-8 md:grid-cols-[minmax(0,15rem)_1fr] md:gap-12">
       <div className="min-w-0">
-        <h2 className="font-display text-[15px] font-semibold tracking-tight">{title}</h2>
+        <h2 className="font-display text-[16px] font-semibold">{title}</h2>
         {description && (
           <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{description}</p>
         )}

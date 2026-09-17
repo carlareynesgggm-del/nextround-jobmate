@@ -116,7 +116,7 @@ function InboxPage() {
         }
       />
 
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 border-b border-border/60 pb-5 text-xs text-muted-foreground">
         <span>
           {gmail?.last_sync_at
             ? t("Última revisión: {date}", { date: fmtDateTime(gmail.last_sync_at) })
@@ -149,7 +149,7 @@ function InboxPage() {
           description={t("Cuando llegue un correo de un proceso, aparecerá aquí como propuesta.")}
         />
       ) : (
-        <ul className="space-y-3">
+        <ul className="grid gap-4 xl:grid-cols-2">
           {processes.map((process) => (
             <ProcessCard key={process.key} process={process} />
           ))}
@@ -207,7 +207,7 @@ function ProcessCard({ process }: { process: DetectedProcess }) {
   }
 
   return (
-    <li className="rounded-xl border border-border/70 bg-surface">
+    <li className="group overflow-hidden rounded-xl border border-border/70 bg-surface shadow-soft transition-all duration-200 hover:border-primary/20 hover:shadow-lift">
       <div className="flex flex-wrap items-start justify-between gap-3 px-5 pb-4 pt-5">
         <div className="min-w-0">
           <span
@@ -221,7 +221,7 @@ function ProcessCard({ process }: { process: DetectedProcess }) {
             <span className={cn("size-1.5 rounded-full", process.isNew ? "bg-primary" : "bg-info")} />
             {process.isNew ? t("Nueva candidatura detectada") : t("Novedad en una candidatura")}
           </span>
-          <h3 className="mt-2.5 font-display text-[15px] font-semibold tracking-tight">
+          <h3 className="mt-2.5 font-display text-[16px] font-semibold">
             {linked
               ? `${linked.companies?.name ?? UNKNOWN} · ${linked.role_title}`
               : `${process.company ?? UNKNOWN} · ${process.role ?? UNKNOWN}`}
@@ -245,7 +245,7 @@ function ProcessCard({ process }: { process: DetectedProcess }) {
       </ul>
 
       {others.length > 0 ? (
-        <ul className="space-y-2 px-5 py-4 text-[13px]">
+        <ul className="space-y-2 bg-accent/25 px-5 py-4 text-[13px]">
           {others.map((item) => (
             <li key={item.id} className="flex items-start gap-2">
               <Check className="mt-[3px] size-3.5 shrink-0 text-primary" />

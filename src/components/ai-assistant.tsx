@@ -158,9 +158,9 @@ export function AiAssistant({
         aria-label={t("Cerrar")}
         onClick={() => onOpenChange(false)}
       />
-      <aside className="relative flex h-full w-full flex-col bg-surface sm:w-[440px] sm:rounded-xl">
-        <header className="flex items-center gap-3 px-5 py-4">
-          <span className="flex size-8 items-center justify-center rounded-xl bg-violet/12 text-violet">
+      <aside className="relative flex h-full w-full flex-col overflow-hidden bg-surface shadow-lift sm:w-[440px] sm:rounded-xl">
+        <header className="relative flex items-center gap-3 border-b border-primary/10 bg-accent/45 px-5 py-4 after:absolute after:bottom-0 after:left-5 after:h-[2px] after:w-12 after:bg-lime">
+          <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-soft">
             <Sparkles className="size-4" />
           </span>
           <div className="min-w-0 flex-1">
@@ -174,7 +174,7 @@ export function AiAssistant({
           <button
             onClick={() => onOpenChange(false)}
             aria-label={t("Cerrar")}
-            className="text-muted-foreground hover:text-foreground"
+            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-surface hover:text-foreground"
           >
             <X className="size-4" />
           </button>
@@ -183,13 +183,16 @@ export function AiAssistant({
         <div className="scrollbar-slim flex-1 space-y-4 overflow-y-auto px-5 pb-4">
           {messages.length === 0 ? (
             <div className="space-y-4 pt-2">
-              <h2 className="font-display text-xl font-semibold tracking-tight">{t("¿Con qué te ayudo?")}</h2>
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">Career copilot</p>
+                <h2 className="mt-1.5 font-display text-2xl font-semibold leading-tight">{t("¿Con qué te ayudo?")}</h2>
+              </div>
               <div className="flex flex-col gap-2">
                 {suggestions.map((suggestion) => (
                   <button
                     key={suggestion}
                     onClick={() => send(suggestion)}
-                    className="rounded-xl bg-surface-2 px-3.5 py-2.5 text-left text-sm transition-colors hover:bg-accent"
+                    className="rounded-xl border border-border/60 bg-background px-3.5 py-3 text-left text-sm transition-all duration-200 hover:border-primary/20 hover:bg-accent/55 hover:text-primary"
                   >
                     {t(suggestion)}
                   </button>
@@ -210,7 +213,7 @@ export function AiAssistant({
                   key={message.id}
                   className={cn(
                     "max-w-[88%] whitespace-pre-wrap rounded-xl px-3.5 py-2.5 text-sm leading-relaxed",
-                    message.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "bg-surface-2",
+                    message.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "border border-border/60 bg-background",
                   )}
                 >
                   {text}
@@ -233,7 +236,7 @@ export function AiAssistant({
         </div>
 
         <form
-          className="flex items-center gap-2 px-5 pb-5 pt-1"
+          className="flex items-center gap-2 border-t border-border/60 bg-surface px-5 pb-5 pt-4"
           onSubmit={(event) => {
             event.preventDefault();
             send(input);
@@ -243,7 +246,7 @@ export function AiAssistant({
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder={t("Escribe lo que necesitas…")}
-            className="h-11 flex-1 rounded-xl bg-surface-2 px-3.5 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+            className="h-11 flex-1 rounded-xl border border-input bg-background px-3.5 text-sm shadow-soft outline-none placeholder:text-muted-foreground focus-visible:border-primary/40 focus-visible:ring-2 focus-visible:ring-ring/15"
           />
           <Button
             type="submit"
@@ -265,7 +268,7 @@ export function AiAssistantButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-violet px-4 py-3 text-sm font-medium text-primary-foreground transition-transform hover:-translate-y-0.5 lg:bottom-7 lg:right-7"
+      className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-lift transition-transform hover:-translate-y-0.5 lg:bottom-7 lg:right-7"
     >
       <Sparkles className="size-4" />
       {t("NextRound AI")}

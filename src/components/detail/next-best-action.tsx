@@ -17,13 +17,13 @@ export function NextBestActionCard({
   if (!action) return null;
 
   return (
-    <div className="rounded-xl border border-border/70 bg-surface p-5">
+    <div className="relative overflow-hidden rounded-xl border border-primary/15 bg-accent/40 p-5 shadow-soft before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-lime">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
             {t("Siguiente acción")}
           </p>
-          <p className="mt-1.5 font-display text-[17px] font-semibold tracking-tight">{t(action.label)}</p>
+          <p className="mt-1.5 font-display text-[18px] font-semibold">{t(action.label)}</p>
           <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{t(action.detail)}</p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
