@@ -12,6 +12,7 @@ import {
   useMatchEmailEvent,
 } from "@/lib/inbox/api";
 import { useApplyEmailSuggestions } from "@/lib/inbox/apply";
+import { useGmailActions } from "@/lib/inbox/use-gmail";
 import {
   EMAIL_TYPE_LABEL,
   SUGGESTION_KIND_LABEL,
@@ -33,10 +34,39 @@ const DATE_KINDS = new Set(["calendar", "interview", "assessment", "deadline"]);
 export function UpdatesPanel() {
   const t = useT();
   const { data: all = [] } = useEmailEvents();
+  const { gmail, busy, startConnect } = useGmailActions();
   const events = useMemo(
     () => all.filter((event) => event.status === "pending" || event.status === "needs_match"),
     [all],
   );
+
+  const connected = gmail?.status === "connected";
+
+  if (!connected) {
+    return (
+      <section className="space-y-4">
+        <h2 className="font-display text-lg font-semibold tracking-tight">
+          {t("Novedades detectadas en tu correo")}
+        </h2>
+        <div className="rounded-2xl border border-dashed border-border p-6 text-center">
+          <Mail className="mx-auto size-5 text-muted-foreground" />
+          <p className="mt-3 text-sm font-medium">{t("Conecta tu correo")}</p>
+          <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+            {t(
+              "NextRound puede detectar entrevistas, pruebas y respuestas relacionadas con tus candidaturas.",
+            )}
+          </p>
+          <Button
+            className="mt-4 gap-1.5"
+            disabled={busy === "connect"}
+            onClick={() => void startConnect("/dashboard")}
+          >
+            <Mail className="size-4" /> {t("Conectar Gmail")}
+          </Button>
+        </div>
+      </section>
+    );
+  }
 
   if (events.length === 0) return null;
 
