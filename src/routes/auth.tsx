@@ -123,12 +123,10 @@ function AuthPage() {
 
       <div className="flex items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm">
-          <Link to="/" className="mb-8 flex items-center gap-2.5 lg:hidden">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary font-display text-sm font-bold text-primary-foreground">
-              N
-            </span>
-            <span className="font-display text-sm font-semibold">NextRound</span>
+          <Link to="/" className="mb-8 flex justify-center lg:justify-start">
+            <BrandLogo className="size-24 lg:size-20" />
           </Link>
+
 
           <h1 className="font-display text-2xl font-semibold tracking-tight">
             {mode === "signin" ? t("Bienvenida de nuevo") : t("Crea tu cuenta")}
