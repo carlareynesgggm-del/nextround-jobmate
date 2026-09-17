@@ -46,7 +46,7 @@ export function EntryStep({ savedOpportunities, onImported, onManual, onPickSave
           {t("← Volver")}
         </button>
         {savedOpportunities.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+          <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
             {t("No tienes oportunidades guardadas todavía.")}
           </p>
         ) : (
@@ -55,7 +55,7 @@ export function EntryStep({ savedOpportunities, onImported, onManual, onPickSave
               <button
                 key={app.id}
                 onClick={() => onPickSaved(app)}
-                className="flex w-full items-center gap-3 rounded-2xl border border-border bg-surface-2 p-3 text-left hover:bg-accent"
+                className="flex w-full items-center gap-3 rounded-xl border border-border/70 bg-surface-2 p-3 text-left hover:bg-accent"
               >
                 <CompanyMark name={app.companies?.name ?? UNKNOWN} size="sm" />
                 <span className="min-w-0 flex-1">
@@ -75,7 +75,7 @@ export function EntryStep({ savedOpportunities, onImported, onManual, onPickSave
 
   return (
     <div className="space-y-3">
-      <div className="rounded-2xl border border-violet/30 bg-violet/8 p-4">
+      <div className="rounded-xl border border-violet/30 bg-violet/8 p-4">
         <label htmlFor="import-url" className="flex items-center gap-1.5 text-sm font-medium">
           <Link2 className="size-3.5 text-violet" /> {t("Pega el enlace de la oferta")}
         </label>

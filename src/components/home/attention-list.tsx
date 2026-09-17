@@ -1,12 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { ExternalLink, Sparkles } from "lucide-react";
+import { ArrowUpRight, Sparkles } from "lucide-react";
 
 import { CompanyMark } from "@/components/ui-bits";
 import { Button } from "@/components/ui/button";
 import type { ApplicationWithCompany, CalendarRow } from "@/lib/domain";
 import { UNKNOWN } from "@/lib/domain";
 import type { NextAction } from "@/lib/next-action";
-import { nextActionTone } from "@/lib/next-action";
 import { fmtTime, relativeDay, toDate } from "@/lib/format";
 import { useT } from "@/lib/i18n/provider";
 import { cn } from "@/lib/utils";
@@ -73,6 +72,21 @@ function openAssistant(applicationId: string, prompt: string) {
   window.dispatchEvent(new CustomEvent("nextround:ai", { detail: { applicationId, prompt } }));
 }
 
+const TAB_BY_KIND: Partial<Record<NextAction["kind"], string>> = {
+  cv: "documents",
+  jd: "job",
+  notes: "notes",
+  assessment: "process",
+  interview: "process",
+};
+
+const PRIMARY_LABEL: Partial<Record<NextAction["kind"], string>> = {
+  cv: "Vincular CV",
+  jd: "Añadir descripción",
+  notes: "Añadir notas",
+  portal: "Añadir portal",
+};
+
 export function AttentionCard({
   app,
   action,
@@ -86,38 +100,20 @@ export function AttentionCard({
   const fact = factLabel(action, event);
   const when = whenLabel(event);
   const company = app.companies?.name ?? UNKNOWN;
-
   const isFollowup = action.kind === "followup" || action.kind === "ghosted";
-
-  const TAB_BY_KIND: Partial<Record<NextAction["kind"], string>> = {
-    cv: "documents",
-    jd: "job",
-    notes: "notes",
-    assessment: "process",
-    interview: "process",
-  };
-  const PRIMARY_LABEL: Partial<Record<NextAction["kind"], string>> = {
-    cv: "Vincular CV",
-    jd: "Añadir descripción",
-    notes: "Añadir notas",
-    portal: "Añadir portal",
-  };
+  const urgent = action.tone === "red" || action.tone === "amber";
 
   const primaryLabel = PRIMARY_LABEL[action.kind];
   const primary = primaryLabel ? (
-    <Button asChild size="sm" className="rounded-xl">
-      <Link
-        to="/applications/$id"
-        params={{ id: app.id }}
-        hash={TAB_BY_KIND[action.kind] ?? "overview"}
-      >
+    <Button asChild size="sm">
+      <Link to="/applications/$id" params={{ id: app.id }} hash={TAB_BY_KIND[action.kind] ?? "overview"}>
         {t(primaryLabel)}
       </Link>
     </Button>
   ) : (
     <Button
       size="sm"
-      className="gap-1.5 rounded-xl"
+      className="gap-1.5"
       onClick={() =>
         openAssistant(
           app.id,
@@ -132,46 +128,40 @@ export function AttentionCard({
   );
 
   return (
-    <li className="rounded-3xl bg-surface p-6 shadow-soft transition-shadow hover:shadow-lift sm:p-7">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-3.5">
-          <CompanyMark name={company} size="lg" />
-          <div className="min-w-0">
-            <p className="truncate font-display text-lg font-semibold tracking-tight">{company}</p>
-            <p className="truncate text-sm text-muted-foreground">{app.role_title}</p>
+    <li className="group relative rounded-xl border border-border/70 bg-surface p-5 transition-colors hover:border-border">
+      <span
+        className={cn(
+          "absolute inset-y-5 left-0 w-[2px] rounded-full",
+          urgent ? "bg-primary" : "bg-transparent",
+        )}
+        aria-hidden
+      />
+      <div className="flex items-start gap-3">
+        <CompanyMark name={company} size="md" />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-baseline gap-x-2">
+            <p className="truncate text-[13px] font-medium">{company}</p>
+            <p className="truncate text-[13px] text-muted-foreground">{app.role_title}</p>
           </div>
+          <p className="mt-2 font-display text-[15px] font-semibold leading-snug tracking-tight">
+            {t(fact)}
+          </p>
+          <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+            {when ?? t(action.detail)}
+          </p>
         </div>
-        {when && (
-          <span
-            className={cn(
-              "shrink-0 rounded-full border px-3 py-1 text-xs font-medium",
-              nextActionTone(action.tone),
-            )}
-          >
-            {when}
-          </span>
-        )}
       </div>
 
-      <p className="mt-5 text-base font-medium leading-snug">{t(fact)}</p>
-      {!when && <p className="mt-1 text-sm text-muted-foreground">{t(action.detail)}</p>}
-
-      <div className="mt-5 flex flex-wrap items-center gap-2.5">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         {primary}
-        <Button asChild size="sm" variant="outline" className="rounded-xl">
-          <Link to="/applications/$id" params={{ id: app.id }}>
-            {t("Ver candidatura")}
-          </Link>
-        </Button>
-        {app.candidate_portal_url && (
-          <Button asChild size="sm" variant="ghost" className="gap-1.5 rounded-xl">
-            <a href={app.candidate_portal_url} target="_blank" rel="noreferrer">
-              {t("Abrir portal")} <ExternalLink className="size-3.5" />
-            </a>
-          </Button>
-        )}
+        <Link
+          to="/applications/$id"
+          params={{ id: app.id }}
+          className="inline-flex items-center gap-1 px-1 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+        >
+          {t("Ver candidatura")} <ArrowUpRight className="size-3.5" />
+        </Link>
       </div>
-
     </li>
   );
 }

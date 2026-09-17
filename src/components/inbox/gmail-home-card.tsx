@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Inbox, Mail, Plug, RefreshCw } from "lucide-react";
+import { ArrowUpRight, Mail, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { fmtDateTime } from "@/lib/format";
@@ -15,29 +15,29 @@ export function GmailHomeCard() {
   const connected = gmail?.status === "connected";
 
   return (
-    <section className="rounded-2xl border border-border bg-surface p-5">
+    <section className="rounded-xl border border-border/70 bg-surface p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex gap-3">
-          <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl border border-border">
+        <div className="flex min-w-0 gap-3">
+          <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-muted-foreground ring-1 ring-inset ring-border/60">
             <Mail className="size-4" />
           </span>
-          <div>
-            <h2 className="font-display text-base font-semibold tracking-tight">
+          <div className="min-w-0">
+            <h3 className="font-display text-[15px] font-semibold tracking-tight">
               {connected ? t("Tu correo está conectado") : t("Conecta tu correo")}
-            </h2>
+            </h3>
             {connected ? (
               <>
-                <p className="text-sm text-muted-foreground">{gmail?.email_address}</p>
+                <p className="mt-0.5 truncate text-[13px] text-muted-foreground">{gmail?.email_address}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {busy === "sync"
                     ? t("Escaneando tus últimos 60 días de correo…")
                     : gmail?.last_sync_at
-                    ? t("Última revisión: {date}", { date: fmtDateTime(gmail.last_sync_at) })
+                      ? t("Última revisión: {date}", { date: fmtDateTime(gmail.last_sync_at) })
                       : t("Sin revisiones todavía")}
                 </p>
               </>
             ) : (
-              <p className="max-w-xl text-sm text-muted-foreground">
+              <p className="mt-1 max-w-xl text-[13px] leading-relaxed text-muted-foreground">
                 {t(
                   "NextRound puede detectar automáticamente candidaturas, entrevistas, pruebas, rechazos y ofertas de los últimos 60 días.",
                 )}
@@ -47,33 +47,31 @@ export function GmailHomeCard() {
         </div>
 
         {connected ? (
-          <div className="flex flex-wrap gap-2">
-            <Button
-              className="gap-1.5"
-              disabled={busy === "sync"}
-              onClick={() => void runSync()}
-            >
-              <RefreshCw className={busy === "sync" ? "size-4 animate-spin" : "size-4"} />
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <Button size="sm" className="gap-1.5" disabled={busy === "sync"} onClick={() => void runSync()}>
+              <RefreshCw className={busy === "sync" ? "size-3.5 animate-spin" : "size-3.5"} />
               {t("Revisar correos ahora")}
             </Button>
-            <Button asChild variant="secondary" className="gap-1.5">
-              <Link to="/inbox">
-                <Inbox className="size-4" /> {t("Ver novedades")}
-              </Link>
-            </Button>
+            <Link
+              to="/inbox"
+              className="inline-flex items-center gap-1 px-1 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {t("Ver novedades")} <ArrowUpRight className="size-3.5" />
+            </Link>
           </div>
         ) : (
           <Button
-            className="gap-1.5"
+            size="sm"
+            className="shrink-0 gap-1.5"
             disabled={busy === "connect"}
             onClick={() => void startConnect("/dashboard")}
           >
-            <Plug className="size-4" /> {t("Conectar Gmail")}
+            <Mail className="size-3.5" /> {t("Conectar Gmail")}
           </Button>
         )}
       </div>
       {!connected && (
-        <p className="mt-3 text-[11px] text-muted-foreground">
+        <p className="mt-3.5 text-[11px] text-muted-foreground">
           {t("Solo lectura de correos, sin contraseñas y puedes desconectarlo cuando quieras.")}
         </p>
       )}

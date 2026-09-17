@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, CalendarClock, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUpRight, CalendarClock, Sparkles } from "lucide-react";
 
 import { AttentionCard } from "@/components/home/attention-list";
 import { UpdatesPanel } from "@/components/inbox/updates-panel";
 import { GmailHomeCard } from "@/components/inbox/gmail-home-card";
-import { EmptyState } from "@/components/ui-bits";
+import { EmptyState, Section, StageBadge } from "@/components/ui-bits";
 import { useT } from "@/lib/i18n/provider";
 import { Button } from "@/components/ui/button";
 import { useAllApplicationDocuments, useApplications, useCalendar, useProfile } from "@/lib/api";
@@ -91,35 +91,38 @@ function HomePage() {
 
   if (!isLoading && applications.length === 0) {
     return (
-      <div className="space-y-10 py-12">
-        <div>
-          <p className="text-sm text-muted-foreground">
+      <div className="space-y-12">
+        <header>
+          <p className="text-[13px] text-muted-foreground">
             {greeting(t)}, {firstName}
           </p>
-          <h1 className="mt-2 max-w-2xl font-display text-3xl font-semibold leading-tight tracking-tight sm:text-[2.6rem]">
+          <h1 className="mt-2.5 max-w-2xl font-display text-[30px] font-semibold leading-[1.15] tracking-tight sm:text-[38px]">
             {t("Empecemos por tu primera candidatura")}
           </h1>
-          <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
             {t(
               "Aquí verás cada proceso, sus fechas y lo que necesita tu atención. Todavía no hay nada guardado.",
             )}
           </p>
-        </div>
+        </header>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-3">
           <FirstStep
+            step="1"
             title={t("Añade tu primera candidatura")}
             description={t("Guarda el puesto, la empresa y en qué fase estás.")}
             to="/applications"
-            cta={t("+ Añadir candidatura")}
+            cta={t("Añadir candidatura")}
           />
           <FirstStep
+            step="2"
             title={t("Sube un CV")}
             description={t("Así sabrás qué versión enviaste a cada proceso.")}
             to="/vault"
             cta={t("Subir CV")}
           />
           <FirstStep
+            step="3"
             title={t("Conecta tu correo")}
             description={t("NextRound detecta entrevistas y respuestas, y te pregunta antes de cambiar nada.")}
             to="/settings"
@@ -131,13 +134,14 @@ function HomePage() {
   }
 
   return (
-    <div className="space-y-16 py-8">
-      <section className="space-y-8">
-        <div>
-          <p className="text-sm text-muted-foreground">
+    <div className="space-y-14">
+      {/* 1 — Lo importante hoy */}
+      <section className="space-y-6">
+        <header>
+          <p className="text-[13px] text-muted-foreground">
             {greeting(t)}, {firstName}
           </p>
-          <h1 className="mt-2 max-w-2xl font-display text-3xl font-semibold leading-tight tracking-tight sm:text-[2.6rem]">
+          <h1 className="mt-2.5 max-w-2xl font-display text-[30px] font-semibold leading-[1.15] tracking-tight sm:text-[38px]">
             {isLoading
               ? t("Cargando tu búsqueda…")
               : feed.length === 0
@@ -149,13 +153,13 @@ function HomePage() {
                     { n: feed.length },
                   )}
           </h1>
-        </div>
+        </header>
 
         {feed.length === 0 ? (
           <EmptyState
             title={t("Nada pendiente por ahora")}
             description={t("Buen momento para añadir candidaturas nuevas o pulir tu CV.")}
-            icon={<Sparkles className="size-6" />}
+            icon={<Sparkles className="size-5" />}
             action={
               <Button asChild>
                 <Link to="/applications">{t("Ver candidaturas")}</Link>
@@ -163,140 +167,153 @@ function HomePage() {
             }
           />
         ) : (
-          <ul className="grid gap-4 lg:grid-cols-2">
+          <ul className="grid gap-3 lg:grid-cols-2">
             {feed.map(({ app, action }) => {
               const event = feedEvents.get(app.id);
               return (
-                <AttentionCard
-                  key={app.id}
-                  app={app}
-                  action={action}
-                  {...(event ? { event } : {})}
-                />
+                <AttentionCard key={app.id} app={app} action={action} {...(event ? { event } : {})} />
               );
             })}
           </ul>
         )}
       </section>
 
-      <GmailHomeCard />
+      {/* 2 — Novedades del correo */}
+      <Section title={t("Tu correo")}>
+        <div className="space-y-3">
+          <GmailHomeCard />
+          <UpdatesPanel />
+        </div>
+      </Section>
 
-      <UpdatesPanel />
+      {/* 3 — Candidaturas activas */}
+      <Section
+        title={t("Candidaturas activas")}
+        {...(active.length > 0 ? { hint: String(active.length) } : {})}
+        action={
+          <Link
+            to="/applications"
+            className="inline-flex items-center gap-1 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {t("Ver todas")} <ArrowUpRight className="size-3.5" />
+          </Link>
+        }
+      >
+        {waiting.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("Aquí empieza tu próxima oportunidad.")}</p>
+        ) : (
+          <ul className="overflow-hidden rounded-xl border border-border/70 bg-surface">
+            {waiting.map(({ app, days }, index) => (
+              <li
+                key={app.id}
+                className={index > 0 ? "border-t border-border/60" : undefined}
+              >
+                <Link
+                  to="/applications/$id"
+                  params={{ id: app.id }}
+                  className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-2/70"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-medium">{app.companies?.name ?? UNKNOWN}</p>
+                    <p className="truncate text-xs text-muted-foreground">{app.role_title}</p>
+                  </div>
+                  <StageBadge stage={app.stage} className="hidden shrink-0 sm:inline-flex" />
+                  {days !== null && (
+                    <span className="w-16 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
+                      {t("{n} días", { n: days })}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
 
-      <section>
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-8 border-t border-border pt-6 sm:grid-cols-4">
+      {/* 4 — Próximos deadlines y entrevistas */}
+      <Section
+        title={t("Próximamente")}
+        action={
+          <Link
+            to="/calendar"
+            className="inline-flex items-center gap-1 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {t("Calendario")} <ArrowUpRight className="size-3.5" />
+          </Link>
+        }
+      >
+        {upcoming.length === 0 ? (
+          <p className="flex items-center gap-2 text-sm text-muted-foreground">
+            <CalendarClock className="size-4" /> {t("Nada agendado todavía.")}
+          </p>
+        ) : (
+          <ul className="divide-y divide-border/60">
+            {upcoming.map((event) => (
+              <li key={event.id} className="flex items-center gap-4 py-3">
+                <div className="w-28 shrink-0">
+                  <p className="text-[13px] font-medium">{relativeDay(event.starts_at)}</p>
+                  <p className="text-[11px] text-muted-foreground">{fmtDateTime(event.starts_at)}</p>
+                </div>
+                {event.application_id ? (
+                  <Link
+                    to="/applications/$id"
+                    params={{ id: event.application_id }}
+                    className="min-w-0 flex-1 truncate text-[13px] transition-colors hover:text-primary"
+                  >
+                    {event.title}
+                  </Link>
+                ) : (
+                  <p className="min-w-0 flex-1 truncate text-[13px]">{event.title}</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      {/* 5 — Información secundaria */}
+      <section className="space-y-10 border-t border-border/60 pt-10">
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
           <Metric label={t("Candidaturas totales")} value={applications.length} />
           <Metric label={t("Procesos activos")} value={active.length} />
           <Metric label={t("Entrevistas esta semana")} value={interviewsThisWeek} />
           <Metric label={t("Ofertas")} value={offers} />
         </dl>
-        <div className="mt-6">
-          <Link to="/analytics" className="inline-flex items-center gap-1.5 text-sm text-violet hover:underline">
-            {t("Ver insights completos")} <ArrowRight className="size-3.5" />
-          </Link>
-        </div>
-      </section>
 
-      <section className="grid gap-10 lg:grid-cols-2">
-        <div>
-          <div className="flex items-baseline justify-between">
-            <h2 className="font-display text-lg font-semibold tracking-tight">{t("Próximamente")}</h2>
-            <Link to="/calendar" className="text-xs text-muted-foreground hover:text-foreground">
-              {t("Calendario")}
-            </Link>
-          </div>
-          {upcoming.length === 0 ? (
-            <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-              <CalendarClock className="size-4" /> {t("Nada agendado todavía.")}
-            </p>
+        <Section title={t("Actividad reciente")}>
+          {recentActivity.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t("Todavía no hay movimientos.")}</p>
           ) : (
-            <ul className="mt-4 divide-y divide-border">
-              {upcoming.map((event) => (
-                <li key={event.id} className="flex items-center gap-4 py-3.5">
-                  <div className="w-24 shrink-0">
-                    <p className="text-xs font-semibold">{relativeDay(event.starts_at)}</p>
-                    <p className="text-[11px] text-muted-foreground">{fmtDateTime(event.starts_at)}</p>
-                  </div>
-                  {event.application_id ? (
-                    <Link
-                      to="/applications/$id"
-                      params={{ id: event.application_id }}
-                      className="min-w-0 flex-1 truncate text-sm hover:text-violet"
-                    >
-                      {event.title}
-                    </Link>
-                  ) : (
-                    <p className="min-w-0 flex-1 truncate text-sm">{event.title}</p>
-                  )}
+            <ul className="divide-y divide-border/60">
+              {recentActivity.map((app) => (
+                <li key={app.id} className="flex items-center gap-4 py-3">
+                  <span className="w-28 shrink-0 text-xs text-muted-foreground">
+                    {app.updated_at ? relativeDay(app.updated_at) : UNKNOWN}
+                  </span>
+                  <Link
+                    to="/applications/$id"
+                    params={{ id: app.id }}
+                    className="min-w-0 flex-1 truncate text-[13px] transition-colors hover:text-primary"
+                  >
+                    {app.companies?.name ?? UNKNOWN} · {app.role_title}
+                  </Link>
+                  <span className="shrink-0 text-[11px] text-muted-foreground">
+                    {CLOSED_STAGES.includes(app.stage)
+                      ? t(STAGE_META[app.stage].label)
+                      : t(STAGE_META[app.stage].short)}
+                  </span>
                 </li>
               ))}
             </ul>
           )}
-        </div>
+        </Section>
 
-        <div>
-          <div className="flex items-baseline justify-between">
-            <h2 className="font-display text-lg font-semibold tracking-tight">{t("Candidaturas activas")}</h2>
-            <Link to="/applications" className="text-xs text-muted-foreground hover:text-foreground">
-              {t("Ver todas")}
-            </Link>
-          </div>
-          {waiting.length === 0 ? (
-            <p className="mt-4 text-sm text-muted-foreground">
-              {t("Aquí empieza tu próxima oportunidad.")}
-            </p>
-          ) : (
-            <ul className="mt-4 divide-y divide-border">
-              {waiting.map(({ app, days }) => (
-                <li key={app.id} className="flex items-center gap-3 py-3.5">
-                  <div className="min-w-0 flex-1">
-                    <Link
-                      to="/applications/$id"
-                      params={{ id: app.id }}
-                      className="truncate text-sm font-medium hover:text-violet"
-                    >
-                      {app.companies?.name ?? UNKNOWN}
-                    </Link>
-                    <p className="truncate text-xs text-muted-foreground">{app.role_title}</p>
-                  </div>
-                  <span className="shrink-0 text-xs text-muted-foreground">{t(STAGE_META[app.stage].short)}</span>
-                  {days !== null && (
-                    <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
-                      {t("{n} días", { n: days })}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </section>
-
-      <section>
-        <h2 className="font-display text-lg font-semibold tracking-tight">{t("Actividad reciente")}</h2>
-        {recentActivity.length === 0 ? (
-          <p className="mt-4 text-sm text-muted-foreground">{t("Todavía no hay movimientos.")}</p>
-        ) : (
-          <ul className="mt-4 divide-y divide-border">
-            {recentActivity.map((app) => (
-              <li key={app.id} className="flex items-center gap-4 py-3.5">
-                <span className="w-28 shrink-0 text-xs text-muted-foreground">
-                  {app.updated_at ? relativeDay(app.updated_at) : UNKNOWN}
-                </span>
-                <Link
-                  to="/applications/$id"
-                  params={{ id: app.id }}
-                  className="min-w-0 flex-1 truncate text-sm hover:text-violet"
-                >
-                  {app.companies?.name ?? UNKNOWN} · {app.role_title}
-                </Link>
-                <span className="shrink-0 text-[11px] text-muted-foreground">
-                  {CLOSED_STAGES.includes(app.stage) ? t(STAGE_META[app.stage].label) : t(STAGE_META[app.stage].short)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
+        <Link
+          to="/analytics"
+          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-primary hover:underline"
+        >
+          {t("Ver insights completos")} <ArrowRight className="size-3.5" />
+        </Link>
       </section>
     </div>
   );
@@ -305,27 +322,32 @@ function HomePage() {
 function Metric({ label, value }: { label: string; value: string | number }) {
   return (
     <div>
-      <dd className="font-display text-3xl font-semibold tabular-nums tracking-tight">{value}</dd>
+      <dd className="font-display text-[28px] font-semibold tabular-nums tracking-tight">{value}</dd>
       <dt className="mt-1 text-xs text-muted-foreground">{label}</dt>
     </div>
   );
 }
 
 function FirstStep({
+  step,
   title,
   description,
   to,
   cta,
 }: {
+  step: string;
   title: string;
   description: string;
   to: "/applications" | "/vault" | "/settings";
   cta: string;
 }) {
   return (
-    <div className="flex flex-col rounded-2xl border border-border bg-surface p-5">
-      <p className="text-sm font-medium">{title}</p>
-      <p className="mt-1.5 flex-1 text-xs text-muted-foreground">{description}</p>
+    <div className="flex flex-col rounded-xl border border-border/70 bg-surface p-5">
+      <span className="flex size-6 items-center justify-center rounded-md bg-surface-2 text-[11px] font-semibold text-muted-foreground ring-1 ring-inset ring-border/60">
+        {step}
+      </span>
+      <p className="mt-3 text-[13px] font-medium">{title}</p>
+      <p className="mt-1.5 flex-1 text-[13px] leading-relaxed text-muted-foreground">{description}</p>
       <Button asChild variant="outline" size="sm" className="mt-4 w-full">
         <Link to={to}>{cta}</Link>
       </Button>

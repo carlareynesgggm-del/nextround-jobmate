@@ -12,6 +12,7 @@ import {
   Menu,
   Plus,
   Settings,
+  Sparkles,
   X,
 } from "lucide-react";
 
@@ -59,13 +60,18 @@ export function AppShell({ children }: { children: ReactNode }) {
         to={item.to}
         onClick={() => setMobileOpen(false)}
         className={cn(
-          "flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors",
+          "group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors",
           active
-            ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-            : "text-sidebar-foreground/65 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+            ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground shadow-soft"
+            : "text-sidebar-foreground/65 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
         )}
       >
-        <Icon className={cn("size-4", active ? "text-sidebar-primary" : "opacity-70")} />
+        <Icon
+          className={cn(
+            "size-[17px] transition-colors",
+            active ? "text-sidebar-primary" : "text-sidebar-foreground/45 group-hover:text-sidebar-foreground/70",
+          )}
+        />
         {t(item.label)}
       </Link>
     );
@@ -73,44 +79,44 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const sidebarInner = (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
-      <div className="flex items-center gap-2.5 px-5 py-6">
-        <span className="flex size-8 items-center justify-center rounded-xl bg-sidebar-primary font-display text-sm font-bold text-sidebar-primary-foreground">
+      <div className="flex items-center gap-2.5 px-5 pb-6 pt-5">
+        <span className="flex size-7 items-center justify-center rounded-lg bg-primary font-display text-[13px] font-bold text-primary-foreground">
           N
         </span>
-        <p className="font-display text-sm font-semibold tracking-tight">NextRound</p>
+        <p className="font-display text-[15px] font-semibold tracking-tight">NextRound</p>
       </div>
 
-      <div className="px-3 pb-5">
+      <div className="px-3 pb-6">
         <Button
           onClick={() => {
             setNewOpen(true);
             setMobileOpen(false);
           }}
-          className="w-full justify-start gap-2 rounded-xl"
+          className="w-full justify-start gap-2"
         >
           <Plus className="size-4" />
           {t("Nueva candidatura")}
         </Button>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1 px-3">{NAV.map(navLink)}</nav>
+      <nav className="flex flex-1 flex-col gap-0.5 px-3">{NAV.map(navLink)}</nav>
 
-      <div className="space-y-1 p-3">
-        <LanguageSwitcher variant="sidebar" />
-        {navLink({ to: "/help", label: t("Ayuda"), icon: HelpCircle })}
-        {navLink({ to: "/settings", label: t("Ajustes"), icon: Settings })}
-        <div className="flex items-center gap-3 rounded-xl px-3 py-2">
-          <span className="flex size-8 items-center justify-center rounded-full bg-sidebar-accent text-xs font-semibold text-sidebar-accent-foreground">
+      <div className="space-y-0.5 px-3 pb-4">
+        <div className="mb-2 h-px bg-sidebar-border" />
+        {navLink({ to: "/help", label: "Ayuda", icon: HelpCircle })}
+        {navLink({ to: "/settings", label: "Ajustes", icon: Settings })}
+        <div className="mt-2 flex items-center gap-2.5 rounded-lg px-2.5 py-2">
+          <span className="flex size-7 items-center justify-center rounded-full bg-surface-2 text-[11px] font-semibold text-foreground/70 ring-1 ring-inset ring-sidebar-border">
             {displayName.slice(0, 2).toUpperCase()}
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs font-medium">{displayName}</p>
-            <p className="truncate text-[11px] text-sidebar-foreground/55">{email}</p>
+            <p className="truncate text-[11px] text-sidebar-foreground/50">{email}</p>
           </div>
           <button
             onClick={signOut}
             aria-label={t("Cerrar sesión")}
-            className="rounded-lg p-1.5 text-sidebar-foreground/55 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            className="rounded-md p-1.5 text-sidebar-foreground/45 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
           >
             <LogOut className="size-4" />
           </button>
@@ -121,58 +127,58 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <AssistantProvider>
-    <div className="min-h-screen bg-background">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 border-r border-sidebar-border lg:block">
-        {sidebarInner}
-      </aside>
+      <div className="min-h-screen bg-background">
+        <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] border-r border-sidebar-border lg:block">
+          {sidebarInner}
+        </aside>
 
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <button
-            className="absolute inset-0 bg-foreground/30"
-            aria-label={t("Cerrar menú")}
-            onClick={() => setMobileOpen(false)}
-          />
-          <div className="absolute inset-y-0 left-0 w-72">
-            {sidebarInner}
+        {mobileOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
             <button
+              className="absolute inset-0 bg-foreground/25 backdrop-blur-[2px]"
+              aria-label={t("Cerrar menú")}
               onClick={() => setMobileOpen(false)}
-              className="absolute right-3 top-5 rounded-lg p-1.5 text-sidebar-foreground/70"
-              aria-label={t("Cerrar")}
+            />
+            <div className="absolute inset-y-0 left-0 w-[272px] border-r border-sidebar-border">
+              {sidebarInner}
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="absolute right-3 top-4 rounded-md p-1.5 text-sidebar-foreground/60"
+                aria-label={t("Cerrar")}
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="lg:pl-[248px]">
+          <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b border-border/60 bg-background/85 px-5 backdrop-blur-md md:px-10">
+            <button
+              onClick={() => setMobileOpen(true)}
+              aria-label={t("Abrir menú")}
+              className="rounded-lg border border-border p-2 lg:hidden"
             >
-              <X className="size-4" />
+              <Menu className="size-4" />
             </button>
-          </div>
+            <span className="font-display text-sm font-semibold lg:hidden">NextRound</span>
+            <div className="ml-auto flex items-center gap-1">
+              <AlertsBell />
+              <LanguageSwitcher />
+              <AskAiHeaderButton />
+              <Button size="sm" className="gap-1.5 lg:hidden" onClick={() => setNewOpen(true)}>
+                <Plus className="size-3.5" />
+                {t("Nueva")}
+              </Button>
+            </div>
+          </header>
+
+          <main className="mx-auto w-full max-w-[1120px] px-5 pb-28 pt-8 md:px-10 md:pt-10">{children}</main>
         </div>
-      )}
 
-      <div className="lg:pl-60">
-        <header className="sticky top-0 z-20 flex items-center gap-2 bg-background/80 px-4 py-3 backdrop-blur md:px-8">
-          <button
-            onClick={() => setMobileOpen(true)}
-            aria-label={t("Abrir menú")}
-            className="rounded-xl border border-border p-2 lg:hidden"
-          >
-            <Menu className="size-4" />
-          </button>
-          <span className="font-display text-sm font-semibold lg:hidden">NextRound</span>
-          <div className="ml-auto flex items-center gap-1.5">
-            <AlertsBell />
-            <LanguageSwitcher />
-            <AskAiHeaderButton />
-            <Button size="sm" className="gap-1.5 rounded-xl lg:hidden" onClick={() => setNewOpen(true)}>
-              <Plus className="size-3.5" />
-              {t("Nueva")}
-            </Button>
-          </div>
-        </header>
-
-        <main className="mx-auto w-full max-w-[1180px] px-5 pb-24 pt-2 md:px-8">{children}</main>
+        <FloatingAssistantButton />
+        <ApplicationDialog open={newOpen} onOpenChange={setNewOpen} />
       </div>
-
-      <FloatingAssistantButton />
-      <ApplicationDialog open={newOpen} onOpenChange={setNewOpen} />
-    </div>
     </AssistantProvider>
   );
 }
@@ -182,11 +188,12 @@ function AskAiHeaderButton() {
   const { openAssistant } = useAssistant();
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size="sm"
-      className="hidden gap-1.5 rounded-xl sm:inline-flex"
+      className="hidden gap-1.5 sm:inline-flex"
       onClick={() => openAssistant(null)}
     >
+      <Sparkles className="size-3.5" />
       {t("Pregunta a NextRound AI")}
     </Button>
   );

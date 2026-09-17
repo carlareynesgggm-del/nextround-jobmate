@@ -78,7 +78,7 @@ export function AppsKanban({
                 setDraggingId(null);
               }}
               className={cn(
-                "min-h-[3rem] space-y-2.5 rounded-2xl bg-surface-2/60 p-2.5 transition-colors",
+                "min-h-[3rem] space-y-2.5 rounded-xl bg-surface-2/60 p-2.5 transition-colors",
                 isOver && "bg-primary/10 ring-1 ring-primary/30",
               )}
             >
@@ -137,7 +137,7 @@ function KanbanCard({
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      className="group rounded-xl border border-border bg-surface p-3 shadow-soft transition-shadow hover:shadow-lift"
+      className="group rounded-xl border border-border/70 bg-surface p-3 transition-shadow hover:shadow-lift"
     >
       <div className="flex items-start justify-between gap-2">
         <Link to="/applications/$id" params={{ id: app.id }} className="flex min-w-0 flex-1 items-start gap-2.5">

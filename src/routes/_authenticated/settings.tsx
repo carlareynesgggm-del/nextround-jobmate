@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LogOut, Save } from "lucide-react";
 import { toast } from "sonner";
@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PageHeader, SectionCard } from "@/components/ui-bits";
+import { PageHeader } from "@/components/ui-bits";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { EmailConnectionCard } from "@/components/inbox/email-connection-card";
 import { useT } from "@/lib/i18n/provider";
@@ -35,6 +35,29 @@ export const Route = createFileRoute("/_authenticated/settings")({
   }),
   component: SettingsPage,
 });
+
+/** Fila de ajustes: título y descripción a la izquierda, controles a la derecha. */
+function SettingsRow({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="grid gap-5 border-t border-border/60 py-8 md:grid-cols-[minmax(0,15rem)_1fr] md:gap-10">
+      <div className="min-w-0">
+        <h2 className="font-display text-[15px] font-semibold tracking-tight">{title}</h2>
+        {description && (
+          <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{description}</p>
+        )}
+      </div>
+      <div className="min-w-0">{children}</div>
+    </section>
+  );
+}
 
 function SettingsPage() {
   const t = useT();
@@ -89,11 +112,11 @@ function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-3xl">
       <PageHeader title={t("Ajustes")} description={t("Tu perfil y tus objetivos de búsqueda.")} />
 
-      <div className="grid gap-5 lg:grid-cols-3">
-        <SectionCard title={t("Perfil")} className="lg:col-span-2">
+      <div className="mt-9">
+        <SettingsRow title={t("Perfil")} description={t("Cómo te llamamos dentro de NextRound.")}>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="s-name">{t("Nombre")}</Label>
@@ -143,20 +166,31 @@ function SettingsPage() {
               />
             </div>
           </div>
-          <Button className="mt-4 gap-1.5" onClick={save} disabled={saving}>
+          <Button className="mt-5 gap-1.5" onClick={save} disabled={saving}>
             <Save className="size-4" /> {saving ? t("Guardando…") : t("Guardar cambios")}
           </Button>
-        </SectionCard>
+        </SettingsRow>
 
-        <SectionCard title={t("Cuenta")}>
-          <p className="text-sm text-muted-foreground">{t("Sesión iniciada como")}</p>
-          <p className="mt-1 truncate text-sm font-medium">{user?.email}</p>
-          <p className="mt-4 text-xs text-muted-foreground">
-            {t("Tus candidaturas, notas y documentos son privados: nadie más puede verlos.")}
-          </p>
+        <SettingsRow
+          title={t("Correo conectado")}
+          description={t("Solo lectura, y nada se guarda sin tu confirmación.")}
+        >
+          <EmailConnectionCard />
+        </SettingsRow>
+
+        <SettingsRow title={t("Idioma")} description={t("Se aplica a toda la interfaz de inmediato.")}>
+          <LanguageSwitcher variant="sidebar" className="border border-border" />
+        </SettingsRow>
+
+        <SettingsRow
+          title={t("Cuenta")}
+          description={t("Tus candidaturas, notas y documentos son privados: nadie más puede verlos.")}
+        >
+          <p className="text-[13px] text-muted-foreground">{t("Sesión iniciada como")}</p>
+          <p className="mt-0.5 truncate text-[13px] font-medium">{user?.email}</p>
           <Button
             variant="outline"
-            className="mt-4 w-full gap-1.5"
+            className="mt-4 gap-1.5"
             onClick={async () => {
               await supabase.auth.signOut();
               navigate({ to: "/" });
@@ -164,18 +198,7 @@ function SettingsPage() {
           >
             <LogOut className="size-4" /> {t("Cerrar sesión")}
           </Button>
-        </SectionCard>
-
-        <EmailConnectionCard />
-
-        <SectionCard title={t("Idioma")}>
-          <p className="text-sm text-muted-foreground">
-            {t("Elige el idioma de la aplicación. Se aplicará a toda la interfaz de inmediato.")}
-          </p>
-          <div className="mt-4">
-            <LanguageSwitcher variant="sidebar" className="border border-border" />
-          </div>
-        </SectionCard>
+        </SettingsRow>
       </div>
     </div>
   );

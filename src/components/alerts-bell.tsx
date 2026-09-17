@@ -40,7 +40,7 @@ export function AlertsBell({ className }: { className?: string }) {
       {open && (
         <>
           <button className="fixed inset-0 z-30 cursor-default" aria-label={t("Cerrar avisos")} onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-40 mt-2 w-80 overflow-hidden rounded-2xl border border-border bg-surface shadow-lift">
+          <div className="absolute right-0 z-40 mt-2 w-80 overflow-hidden rounded-xl border border-border/70 bg-surface">
             <p className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
               {t("Avisos")}
             </p>
@@ -85,7 +85,7 @@ export function AlertsBell({ className }: { className?: string }) {
             {count === 0 ? (
               <p className="px-4 pb-4 text-sm text-muted-foreground">{t("Nada urgente ahora mismo.")}</p>
             ) : (
-              <ul className="divide-y divide-border">
+              <ul className="divide-y divide-border/60">
                 {feed.map(({ app, action }) => (
                   <li key={app.id}>
                     <Link

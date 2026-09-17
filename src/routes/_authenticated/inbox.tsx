@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, Clock, Link2, Mail, Plus, RefreshCw, X } from "lucide-react";
+import { ArrowUpRight, Check, Clock, Mail, Plus, RefreshCw, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -74,9 +74,9 @@ function InboxPage() {
 
   if (!connected) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <PageHeader
-          title={t("Procesos detectados en tu correo")}
+          title={t("Novedades de tu correo")}
           description={t(
             "NextRound revisa tus últimos 60 días de correo y te propone candidaturas y novedades. Nada se guarda sin tu confirmación.",
           )}
@@ -88,11 +88,7 @@ function InboxPage() {
             "NextRound puede detectar entrevistas, pruebas y respuestas relacionadas con tus candidaturas.",
           )}
           action={
-            <Button
-              className="gap-1.5"
-              disabled={busy === "connect"}
-              onClick={() => void startConnect("/inbox")}
-            >
+            <Button className="gap-1.5" disabled={busy === "connect"} onClick={() => void startConnect("/inbox")}>
               <Mail className="size-4" /> {t("Conectar Gmail")}
             </Button>
           }
@@ -102,39 +98,35 @@ function InboxPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         title={
           processes.length > 0
             ? t("Hemos encontrado {n} procesos en tu correo", { n: processes.length })
-            : t("Procesos detectados en tu correo")
+            : t("Novedades de tu correo")
         }
         description={t(
           "NextRound revisa tus últimos 60 días de correo y te propone candidaturas y novedades. Nada se guarda sin tu confirmación.",
         )}
         actions={
-          <Button variant="secondary" className="gap-1.5" disabled={scanning} onClick={() => void runSync()}>
-            <RefreshCw className={scanning ? "size-4 animate-spin" : "size-4"} />
+          <Button variant="outline" size="sm" className="gap-1.5" disabled={scanning} onClick={() => void runSync()}>
+            <RefreshCw className={scanning ? "size-3.5 animate-spin" : "size-3.5"} />
             {scanning ? t("Escaneando tu correo…") : t("Escanear de nuevo")}
           </Button>
         }
       />
 
-      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-xs text-muted-foreground">
         <span>
           {gmail?.last_sync_at
             ? t("Última revisión: {date}", { date: fmtDateTime(gmail.last_sync_at) })
             : t("Sin revisiones todavía")}
         </span>
-        {lastResult ? (
-          <span>
-            · {t("{n} correos revisados", { n: lastResult.scanned })}
-          </span>
-        ) : null}
+        {lastResult ? <span>· {t("{n} correos revisados", { n: lastResult.scanned })}</span> : null}
         {snoozedCount > 0 ? (
           <button
             type="button"
-            className="rounded-full border border-border px-2 py-0.5 hover:bg-accent/40"
+            className="rounded-md border border-border/70 px-2 py-0.5 transition-colors hover:bg-surface-2"
             onClick={() => setShowSnoozed((current) => !current)}
           >
             {showSnoozed
@@ -145,7 +137,7 @@ function InboxPage() {
       </div>
 
       {scanning && processes.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+        <div className="rounded-xl border border-border/60 bg-surface px-5 py-6 text-center text-sm text-muted-foreground">
           {t("Estamos revisando tu correo. Puedes seguir usando NextRound mientras termina.")}
         </div>
       ) : null}
@@ -157,7 +149,7 @@ function InboxPage() {
           description={t("Cuando llegue un correo de un proceso, aparecerá aquí como propuesta.")}
         />
       ) : (
-        <ul className="space-y-4">
+        <ul className="space-y-3">
           {processes.map((process) => (
             <ProcessCard key={process.key} process={process} />
           ))}
@@ -203,8 +195,7 @@ function ProcessCard({ process }: { process: DetectedProcess }) {
       for (const event of process.events) {
         const items = process.suggestions.filter(
           (item) =>
-            item.email_event_id === event.id &&
-            (kinds === "all" || item.kind === "new_application"),
+            item.email_event_id === event.id && (kinds === "all" || item.kind === "new_application"),
         );
         if (items.length === 0) continue;
         await apply.mutateAsync({ event, suggestions: items });
@@ -216,51 +207,54 @@ function ProcessCard({ process }: { process: DetectedProcess }) {
   }
 
   return (
-    <li className="rounded-2xl border border-border bg-surface p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <li className="rounded-xl border border-border/70 bg-surface">
+      <div className="flex flex-wrap items-start justify-between gap-3 px-5 pb-4 pt-5">
         <div className="min-w-0">
           <span
             className={cn(
-              "inline-flex rounded-full border px-2 py-0.5 text-[11px] font-medium",
+              "inline-flex items-center gap-1.5 rounded-md border px-2 py-[3px] text-[11px] font-medium",
               process.isNew
-                ? "border-violet/40 bg-violet/10 text-violet"
-                : "border-gold/40 bg-gold/10 text-gold",
+                ? "border-primary/25 bg-primary/8 text-primary"
+                : "border-border/70 bg-surface-2 text-muted-foreground",
             )}
           >
-            {process.isNew ? t("Nueva candidatura detectada") : t("Novedad detectada en candidatura existente")}
+            <span className={cn("size-1.5 rounded-full", process.isNew ? "bg-primary" : "bg-info")} />
+            {process.isNew ? t("Nueva candidatura detectada") : t("Novedad en una candidatura")}
           </span>
-          <h3 className="mt-2 font-display text-base font-semibold tracking-tight">
+          <h3 className="mt-2.5 font-display text-[15px] font-semibold tracking-tight">
             {linked
               ? `${linked.companies?.name ?? UNKNOWN} · ${linked.role_title}`
               : `${process.company ?? UNKNOWN} · ${process.role ?? UNKNOWN}`}
           </h3>
-          <p className="text-xs text-muted-foreground">
+          <p className="mt-0.5 text-xs text-muted-foreground">
             {t("{n} correos de este proceso", { n: process.events.length })}
             {process.lastReceivedAt ? ` · ${fmtDateTime(process.lastReceivedAt)}` : ""}
           </p>
         </div>
         {proposedStage ? (
-          <span className="rounded-full border border-border bg-background px-2 py-0.5 text-xs">
+          <span className="shrink-0 rounded-md border border-border/70 bg-surface-2 px-2 py-[3px] text-[11px] font-medium text-muted-foreground">
             {t("Propone")}: {t(STAGE_META[proposedStage]?.label ?? proposedStage)}
           </span>
         ) : null}
       </div>
 
-      <ul className="mt-3 space-y-2">
+      <ul className="divide-y divide-border/60 border-y border-border/60">
         {process.events.slice(0, 3).map((event) => (
           <EmailLine key={event.id} event={event} />
         ))}
       </ul>
 
       {others.length > 0 ? (
-        <ul className="mt-3 space-y-1 text-sm">
+        <ul className="space-y-2 px-5 py-4 text-[13px]">
           {others.map((item) => (
             <li key={item.id} className="flex items-start gap-2">
-              <Check className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+              <Check className="mt-[3px] size-3.5 shrink-0 text-primary" />
               <span>
                 <span className="font-medium">{item.label}</span>
                 {item.detail ? (
-                  <span className="block text-xs text-muted-foreground">{item.detail}</span>
+                  <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
+                    {item.detail}
+                  </span>
                 ) : null}
               </span>
             </li>
@@ -269,10 +263,10 @@ function ProcessCard({ process }: { process: DetectedProcess }) {
       ) : null}
 
       {needsMatch ? (
-        <div className="mt-4 rounded-xl border border-border bg-background p-4">
-          <p className="text-sm font-medium">{t("¿A qué candidatura pertenece este proceso?")}</p>
+        <div className="border-t border-border/60 px-5 py-4">
+          <p className="text-[13px] font-medium">{t("¿A qué candidatura pertenece este proceso?")}</p>
           <select
-            className="mt-2 h-9 w-full rounded-xl border border-border bg-background px-3 text-sm"
+            className="mt-2 h-9 w-full rounded-lg border border-input bg-surface px-3 text-sm outline-none focus-visible:border-ring/50 focus-visible:ring-[3px] focus-visible:ring-ring/15"
             defaultValue=""
             onChange={(changeEvent) => {
               const applicationId = changeEvent.target.value;
@@ -292,7 +286,7 @@ function ProcessCard({ process }: { process: DetectedProcess }) {
         </div>
       ) : null}
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2 border-t border-border/60 px-5 py-3.5">
         {process.isNew ? (
           <Button size="sm" className="gap-1.5" disabled={busy} onClick={() => void confirm("new")}>
             <Plus className="size-3.5" /> {t("Añadir")}
@@ -306,40 +300,43 @@ function ProcessCard({ process }: { process: DetectedProcess }) {
         {process.isNew && process.suggestions.length > 1 ? (
           <Button
             size="sm"
-            variant="secondary"
+            variant="outline"
             className="gap-1.5"
             disabled={busy}
             onClick={() => void confirm("all")}
           >
-            <Check className="size-3.5" /> {t("Añadir con todos los datos detectados")}
+            <Check className="size-3.5" /> {t("Añadir con todos los datos")}
           </Button>
         ) : null}
-        <Button
-          size="sm"
-          variant="secondary"
-          className="gap-1.5"
-          disabled={busy}
-          onClick={() => void snooze.mutateAsync(eventIds)}
-        >
-          <Clock className="size-3.5" /> {t("Revisar después")}
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          className="gap-1.5"
-          disabled={busy}
-          onClick={() => void ignore.mutateAsync(eventIds)}
-        >
-          <X className="size-3.5" /> {t("Ignorar")}
-        </Button>
-        {linked ? (
-          <a
-            href={`/applications/${linked.id}`}
-            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm text-muted-foreground hover:bg-accent/40"
+
+        <div className="ml-auto flex flex-wrap items-center gap-1">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="gap-1.5"
+            disabled={busy}
+            onClick={() => void snooze.mutateAsync(eventIds)}
           >
-            <Link2 className="size-3.5" /> {t("Abrir candidatura")}
-          </a>
-        ) : null}
+            <Clock className="size-3.5" /> {t("Revisar después")}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="gap-1.5"
+            disabled={busy}
+            onClick={() => void ignore.mutateAsync(eventIds)}
+          >
+            <X className="size-3.5" /> {t("Ignorar")}
+          </Button>
+          {linked ? (
+            <a
+              href={`/applications/${linked.id}`}
+              className="inline-flex items-center gap-1 px-2 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {t("Abrir candidatura")} <ArrowUpRight className="size-3.5" />
+            </a>
+          ) : null}
+        </div>
       </div>
     </li>
   );
@@ -351,13 +348,15 @@ function EmailLine({ event }: { event: EmailEventRow }) {
     ? t(EMAIL_TYPE_LABEL[event.email_type as EmailType] ?? event.email_type)
     : UNKNOWN;
   return (
-    <li className="rounded-xl border border-border bg-background px-3 py-2">
+    <li className="px-5 py-3">
       <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
         <Mail className="size-3" />
-        <span className="rounded-full border border-border px-1.5">{typeLabel}</span>
-        <span>{event.from_name ?? event.from_email ?? UNKNOWN}</span>
+        <span className="rounded-md border border-border/70 bg-surface-2 px-1.5 py-[1px] font-medium">
+          {typeLabel}
+        </span>
+        <span className="truncate">{event.from_name ?? event.from_email ?? UNKNOWN}</span>
       </div>
-      <p className="mt-1 text-sm">{event.subject ?? UNKNOWN}</p>
+      <p className="mt-1 text-[13px]">{event.subject ?? UNKNOWN}</p>
     </li>
   );
 }

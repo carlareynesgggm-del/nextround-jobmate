@@ -48,7 +48,7 @@ export function UpdatesPanel() {
         <h2 className="font-display text-lg font-semibold tracking-tight">
           {t("Novedades detectadas en tu correo")}
         </h2>
-        <div className="rounded-2xl border border-dashed border-border p-6 text-center">
+        <div className="rounded-xl border border-dashed border-border p-6 text-center">
           <Mail className="mx-auto size-5 text-muted-foreground" />
           <p className="mt-3 text-sm font-medium">{t("Conecta tu correo")}</p>
           <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
@@ -144,15 +144,15 @@ function EmailEventCard({ event }: { event: EmailEventRow }) {
   }
 
   return (
-    <li className="rounded-2xl border border-border bg-surface p-5">
+    <li className="rounded-xl border border-border/70 bg-surface p-5">
       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
         <Mail className="size-3.5" />
-        <span className="rounded-full border border-border px-2 py-0.5 font-medium">{typeLabel}</span>
+        <span className="rounded-full border border-border/70 px-2 py-0.5 font-medium">{typeLabel}</span>
         <span>
           {t("Confianza")}: {t(confidenceLabel(event.confidence === null ? null : Number(event.confidence)))}
         </span>
         <span>· {fmtDateTime(event.received_at)}</span>
-        <span className="rounded-full border border-border px-2 py-0.5">{t("Origen: Gmail")}</span>
+        <span className="rounded-full border border-border/70 px-2 py-0.5">{t("Origen: Gmail")}</span>
       </div>
 
       <p className="mt-2 text-sm font-medium leading-snug">{event.subject ?? UNKNOWN}</p>
@@ -303,7 +303,7 @@ function MatchBlock({
 }) {
   const t = useT();
   return (
-    <div className="mt-4 space-y-2 rounded-xl border border-border bg-background p-4">
+    <div className="mt-4 space-y-2 rounded-xl border border-border/70 bg-background p-4">
       <p className="text-sm font-medium">{t("¿A qué candidatura pertenece este correo?")}</p>
       {candidates.length > 0 ? (
         <ul className="space-y-2">
@@ -320,7 +320,7 @@ function MatchBlock({
         </ul>
       ) : null}
       <select
-        className="h-9 w-full rounded-xl border border-border bg-background px-3 text-sm"
+        className="h-9 w-full rounded-xl border border-border/70 bg-background px-3 text-sm"
         defaultValue=""
         onChange={(changeEvent) => {
           const applicationId = changeEvent.target.value;
@@ -386,7 +386,7 @@ function NewApplicationBlock({
           <label className="space-y-1 text-xs text-muted-foreground">
             {t("Estado")}
             <select
-              className="h-9 w-full rounded-xl border border-border bg-background px-3 text-sm"
+              className="h-9 w-full rounded-xl border border-border/70 bg-background px-3 text-sm"
               value={stage}
               onChange={(e) => setStage(e.target.value as Stage)}
             >
@@ -464,11 +464,11 @@ function StageBlock({
           : t("Nueva actualización detectada")}
       </p>
       <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-        <span className="rounded-full border border-border bg-background px-2 py-0.5 text-xs">
+        <span className="rounded-full border border-border/70 bg-background px-2 py-0.5 text-xs">
           {currentStage ? t(STAGE_META[currentStage].label) : UNKNOWN}
         </span>
         <ArrowRight className="size-3.5 text-muted-foreground" />
-        <span className="rounded-full border border-border bg-background px-2 py-0.5 text-xs font-medium">
+        <span className="rounded-full border border-border/70 bg-background px-2 py-0.5 text-xs font-medium">
           {t(STAGE_META[stage]?.label ?? stage)}
         </span>
       </div>
@@ -477,7 +477,7 @@ function StageBlock({
       )}
       {editing && (
         <select
-          className="mt-3 h-9 w-full rounded-xl border border-border bg-background px-3 text-sm sm:max-w-xs"
+          className="mt-3 h-9 w-full rounded-xl border border-border/70 bg-background px-3 text-sm sm:max-w-xs"
           value={stage}
           onChange={(e) => setStage(e.target.value as Stage)}
         >

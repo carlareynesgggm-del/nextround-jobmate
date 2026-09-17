@@ -48,10 +48,10 @@ export const PROCESS_STATUS_LABEL: Record<string, string> = {
 };
 
 export function processStatusTone(status: string): string {
-  if (status === "passed" || status === "done") return "bg-success/15 text-success border-success/30";
-  if (status === "failed" || status === "cancelled") return "bg-danger/10 text-danger border-danger/25";
-  if (status === "scheduled") return "bg-info/10 text-info border-info/25";
-  return "bg-warning/15 text-gold-foreground border-warning/30";
+  if (status === "passed" || status === "done") return "border-success/25 bg-success/10 text-success";
+  if (status === "failed" || status === "cancelled") return "border-danger/25 bg-danger/8 text-danger";
+  if (status === "scheduled") return "border-info/25 bg-info/8 text-info";
+  return "border-border/70 bg-surface-2 text-muted-foreground";
 }
 
 
@@ -240,74 +240,74 @@ export const STAGE_META: Record<Stage, StageMeta> = {
   saved: {
     label: "Guardada",
     short: "Guardada",
-    tone: "bg-muted text-muted-foreground border-border",
-    dot: "bg-muted-foreground",
+    tone: "border-border/70 bg-surface-2 text-muted-foreground",
+    dot: "bg-muted-foreground/50",
   },
   applied: {
     label: "Enviada",
     short: "Enviada",
-    tone: "bg-info/10 text-info border-info/25",
+    tone: "border-border/70 bg-surface-2 text-foreground/80",
     dot: "bg-info",
   },
   screening: {
     label: "Screening",
     short: "Screening",
-    tone: "bg-violet/10 text-violet border-violet/25",
+    tone: "border-border/70 bg-surface-2 text-foreground/80",
     dot: "bg-violet",
   },
   assessment: {
     label: "Prueba",
     short: "Prueba",
-    tone: "bg-warning/15 text-gold-foreground border-warning/35",
-    dot: "bg-warning",
+    tone: "border-border/70 bg-surface-2 text-foreground/80",
+    dot: "bg-gold",
   },
   interview: {
     label: "Entrevista",
     short: "Entrevista",
-    tone: "bg-gold/15 text-gold-foreground border-gold/35",
-    dot: "bg-gold",
+    tone: "border-border/70 bg-surface-2 text-foreground/80",
+    dot: "bg-violet",
   },
   technical: {
     label: "Prueba técnica",
     short: "Técnica",
-    tone: "bg-warning/15 text-gold-foreground border-warning/35",
-    dot: "bg-warning",
+    tone: "border-border/70 bg-surface-2 text-foreground/80",
+    dot: "bg-gold",
   },
   final: {
     label: "Ronda final",
     short: "Final",
-    tone: "bg-primary/10 text-primary border-primary/25",
+    tone: "border-border/70 bg-surface-2 text-foreground/80",
     dot: "bg-primary",
   },
   offer: {
     label: "Oferta",
     short: "Oferta",
-    tone: "bg-success/15 text-success border-success/30",
+    tone: "border-success/25 bg-success/10 text-success",
     dot: "bg-success",
   },
   rejected: {
     label: "Rechazada",
     short: "Rechazada",
-    tone: "bg-danger/10 text-danger border-danger/25",
+    tone: "border-danger/25 bg-danger/8 text-danger",
     dot: "bg-danger",
   },
   withdrawn: {
     label: "Retirada",
     short: "Retirada",
-    tone: "bg-muted text-muted-foreground border-border",
-    dot: "bg-muted-foreground",
+    tone: "border-border/70 bg-surface-2 text-muted-foreground",
+    dot: "bg-muted-foreground/50",
   },
   accepted: {
     label: "Aceptada",
     short: "Aceptada",
-    tone: "bg-success/20 text-success border-success/35",
+    tone: "border-success/30 bg-success/12 text-success",
     dot: "bg-success",
   },
   ghosted: {
     label: "Sin respuesta",
     short: "Sin resp.",
-    tone: "bg-muted text-muted-foreground border-border",
-    dot: "bg-muted-foreground",
+    tone: "border-border/70 bg-surface-2 text-muted-foreground",
+    dot: "bg-muted-foreground/40",
   },
 };
 
@@ -335,12 +335,12 @@ export const EVENT_KIND_LABEL: Record<EventKind, string> = {
 };
 
 export const EVENT_KIND_TONE: Record<EventKind, string> = {
-  interview: "bg-gold/15 text-gold-foreground border-gold/35",
-  call: "bg-info/10 text-info border-info/25",
-  test: "bg-violet/10 text-violet border-violet/25",
-  deadline: "bg-danger/10 text-danger border-danger/25",
-  followup: "bg-success/12 text-success border-success/25",
-  other: "bg-muted text-muted-foreground border-border",
+  interview: "border-violet/25 bg-violet/8 text-violet",
+  call: "border-info/25 bg-info/8 text-info",
+  test: "border-gold/30 bg-gold/10 text-gold-foreground",
+  deadline: "border-danger/25 bg-danger/8 text-danger",
+  followup: "border-border/70 bg-surface-2 text-muted-foreground",
+  other: "border-border/70 bg-surface-2 text-muted-foreground",
 };
 
 export const PRIORITY_LABEL: Record<string, string> = {
@@ -350,9 +350,9 @@ export const PRIORITY_LABEL: Record<string, string> = {
 };
 
 export function priorityTone(priority: string): string {
-  if (priority === "high") return "bg-danger/10 text-danger border-danger/25";
-  if (priority === "low") return "bg-muted text-muted-foreground border-border";
-  return "bg-warning/15 text-gold-foreground border-warning/30";
+  if (priority === "high") return "border-danger/25 bg-danger/8 text-danger";
+  if (priority === "low") return "border-border/70 bg-surface-2 text-muted-foreground";
+  return "border-border/70 bg-surface-2 text-foreground/70";
 }
 
 export function isActive(stage: Stage): boolean {
@@ -379,11 +379,9 @@ export function initials(name: string): string {
 /** Deterministic accent per company name so avatars stay stable. */
 export function companyTint(name: string): string {
   const tints = [
-    "bg-primary/10 text-primary",
-    "bg-gold/20 text-gold-foreground",
-    "bg-success/15 text-success",
-    "bg-info/12 text-info",
-    "bg-violet/12 text-violet",
+    "bg-violet/8 text-violet",
+    "bg-info/8 text-info",
+    "bg-surface-2 text-foreground/70",
   ];
   let sum = 0;
   for (const char of name) sum += char.charCodeAt(0);

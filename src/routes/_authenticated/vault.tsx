@@ -178,7 +178,7 @@ function VaultPage() {
                 </Button>
               </div>
 
-              <ul className="mt-3 divide-y divide-border rounded-2xl bg-surface px-4 shadow-soft">
+              <ul className="mt-3 divide-y divide-border rounded-xl bg-surface px-4">
                 {group.docs.map((doc) => (
                   <li key={doc.id} className="flex flex-wrap items-center gap-3 py-4">
                     <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-violet/10 text-violet">

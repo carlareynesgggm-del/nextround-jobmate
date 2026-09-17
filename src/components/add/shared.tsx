@@ -43,10 +43,10 @@ export function ChoiceCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full items-start gap-3 rounded-2xl border p-4 text-left transition-colors",
+        "flex w-full items-start gap-3 rounded-xl border p-4 text-left transition-colors",
         primary
           ? "border-violet/30 bg-violet/8 hover:bg-violet/12"
-          : "border-border bg-surface-2 hover:bg-accent",
+          : "border-border/70 bg-surface-2 hover:bg-accent",
       )}
     >
       <span
