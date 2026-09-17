@@ -39,7 +39,7 @@ export function GmailHomeCard() {
             ) : (
               <p className="max-w-xl text-sm text-muted-foreground">
                 {t(
-                  "NextRound puede detectar entrevistas, pruebas y respuestas relacionadas con tus candidaturas.",
+                  "NextRound puede detectar automáticamente candidaturas, entrevistas, pruebas, rechazos y ofertas de los últimos 60 días.",
                 )}
               </p>
             )}
