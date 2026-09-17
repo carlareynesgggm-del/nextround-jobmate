@@ -1,3 +1,4 @@
+import { BrandMark } from "@/components/brand-mark";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   ArrowRight,
