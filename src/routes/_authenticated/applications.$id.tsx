@@ -100,7 +100,10 @@ function ApplicationDetail() {
   const deleteApplication = useDeleteApplication();
   const { openAssistant } = useAssistant();
   const [editOpen, setEditOpen] = useState(false);
-  const [tab, setTab] = useState("overview");
+  const [tab, setTab] = useState(() => {
+    const hash = typeof window === "undefined" ? "" : window.location.hash.replace("#", "");
+    return ["overview", "job", "process", "documents", "notes"].includes(hash) ? hash : "overview";
+  });
 
 
   if (isLoading) {
