@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, CalendarClock, Sparkles } from "lucide-react";
 
+import { BrandLogo, BrandMark } from "@/components/brand-mark";
 import { AttentionCard } from "@/components/home/attention-list";
 import { UpdatesPanel } from "@/components/inbox/updates-panel";
 import { GmailHomeCard } from "@/components/inbox/gmail-home-card";
