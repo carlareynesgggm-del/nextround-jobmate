@@ -164,7 +164,7 @@ function HomePage() {
 
       {/* Above the fold: atención + correo, side by side */}
       <div className="grid items-start gap-6 lg:grid-cols-12">
-        <section className="space-y-3 lg:col-span-7">
+        <section className="min-w-0 space-y-3 lg:col-span-7">
           <h2 className="font-display text-[16px] font-semibold">
             {t("Necesitan tu atención")}
           </h2>
@@ -191,7 +191,7 @@ function HomePage() {
           )}
         </section>
 
-        <section className="space-y-3 lg:col-span-5">
+        <section className="min-w-0 space-y-3 lg:col-span-5">
           <h2 className="font-display text-[16px] font-semibold">{t("Tu correo")}</h2>
           <GmailHomeCard />
           <UpdatesPanel />
@@ -201,7 +201,7 @@ function HomePage() {
       {/* Candidaturas activas + próximamente */}
       <div className="grid items-start gap-x-8 gap-y-10 lg:grid-cols-12">
       <Section
-        className="lg:col-span-7"
+        className="min-w-0 lg:col-span-7"
         title={t("Candidaturas activas")}
         {...(active.length > 0 ? { hint: String(active.length) } : {})}
         action={
@@ -246,7 +246,7 @@ function HomePage() {
 
       {/* Próximos deadlines y entrevistas */}
       <Section
-        className="lg:col-span-5"
+        className="min-w-0 lg:col-span-5"
         title={t("Próximamente")}
         action={
           <Link
