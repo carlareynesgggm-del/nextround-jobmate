@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 
 import { ApplicationDialog } from "@/components/application-dialog";
+import { useAssistant } from "@/components/ai-assistant";
 import {
   ContactsTab,
   DocumentsTab,
@@ -122,6 +123,7 @@ function ApplicationDetail() {
   const progress = Math.round(((stageIndex + 1) / PIPELINE_STAGES.length) * 100);
   const days = daysSinceApplied(app);
   const action = nextBestAction(app, { events: calendar, timeline, links });
+  const { openAssistant } = useAssistant();
   const cvLink = links.find((link) => link.role === "cv" || link.documents?.kind === "cv");
 
   return (
