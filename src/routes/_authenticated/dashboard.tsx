@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ArrowUpRight, CalendarClock, Sparkles } from "lucide-react";
 
+import { BrandLogo, BrandMark } from "@/components/brand-mark";
 import { AttentionCard } from "@/components/home/attention-list";
 import { UpdatesPanel } from "@/components/inbox/updates-panel";
 import { GmailHomeCard } from "@/components/inbox/gmail-home-card";
@@ -93,6 +94,7 @@ function HomePage() {
     return (
       <div className="space-y-12">
         <header>
+          <BrandLogo className="mb-7" />
           <p className="text-[13px] text-muted-foreground">
             {greeting(t)}, {firstName}
           </p>
@@ -138,9 +140,12 @@ function HomePage() {
       {/* Hero row: greeting + inline pulse */}
       <header className="relative flex flex-wrap items-end justify-between gap-x-8 gap-y-4 overflow-hidden border-b border-border/70 pb-7 after:absolute after:bottom-0 after:left-0 after:h-[3px] after:w-16 after:bg-lime">
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
-            {greeting(t)}, {firstName}
-          </p>
+          <div className="flex items-center gap-2.5">
+            <BrandMark className="size-6 rounded-md" />
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
+              {greeting(t)}, {firstName}
+            </p>
+          </div>
           <h1 className="mt-2 max-w-2xl font-display text-[28px] font-semibold leading-[1.12] sm:text-[36px]">
             {isLoading
               ? t("Cargando tu búsqueda…")

@@ -1,3 +1,4 @@
+import { BrandMark } from "@/components/brand-mark";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
   ArrowRight,
@@ -140,9 +141,7 @@ function Landing() {
       <header className="sticky top-0 z-20 border-b border-border bg-background/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 md:px-8">
           <div className="flex items-center gap-2.5">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary font-display text-sm font-bold text-primary-foreground">
-              N
-            </span>
+            <BrandMark className="size-8 rounded-lg" />
             <span className="font-display text-sm font-semibold">NextRound</span>
           </div>
           <div className="flex items-center gap-2">

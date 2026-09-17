@@ -1,27 +1,35 @@
 import { cn } from "@/lib/utils";
+import markAsset from "@/assets/nextround-mark.png.asset.json";
 
 /**
- * NextRound mark: a violet rounded tile with an upward "next round" chevron
- * and a single lime dot as the brand's secondary accent.
+ * NextRound mark: the official NR symbol on its black tile.
+ * Discreet by default (sidebar, headers); use `BrandLogo` where the brand
+ * should be the hero (sign-in, empty first screens).
  */
 export function BrandMark({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 32 32"
-      role="img"
-      aria-label="NextRound"
-      className={cn("size-7 shrink-0", className)}
-    >
-      <rect x="0" y="0" width="32" height="32" rx="8" fill="var(--primary)" />
-      <path
-        d="M9 21.5 15 12.5 21 21.5"
-        fill="none"
-        stroke="var(--primary-foreground)"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+    <img
+      src={markAsset.url}
+      alt="NextRound"
+      width={32}
+      height={32}
+      className={cn("size-7 shrink-0 rounded-[9px] object-cover", className)}
+    />
+  );
+}
+
+/** Full lockup (symbol + wordmark) for prominent, welcoming moments. */
+export function BrandLogo({ className }: { className?: string }) {
+  return (
+    <span className={cn("flex items-center gap-3.5", className)}>
+      <img
+        src={markAsset.url}
+        alt="NextRound"
+        width={120}
+        height={120}
+        className="size-14 shrink-0 rounded-2xl object-cover"
       />
-      <circle cx="23.6" cy="9.4" r="2.4" fill="var(--lime)" />
-    </svg>
+      <span className="font-display text-[22px] font-semibold tracking-tight">NextRound</span>
+    </span>
   );
 }

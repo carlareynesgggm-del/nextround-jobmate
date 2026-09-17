@@ -3,6 +3,7 @@ import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { BrandLogo, BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -87,9 +88,7 @@ function AuthPage() {
       <div className="relative hidden flex-col justify-between bg-sidebar p-12 text-sidebar-foreground lg:flex">
         <div className="grid-paper pointer-events-none absolute inset-0 opacity-[0.15]" />
         <Link to="/" className="relative flex items-center gap-2.5">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary font-display text-sm font-bold text-sidebar-primary-foreground">
-            N
-          </span>
+          <BrandMark className="size-8" />
           <span className="font-display text-sm font-semibold">NextRound</span>
         </Link>
 
@@ -124,12 +123,10 @@ function AuthPage() {
 
       <div className="flex items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm">
-          <Link to="/" className="mb-8 flex items-center gap-2.5 lg:hidden">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-primary font-display text-sm font-bold text-primary-foreground">
-              N
-            </span>
-            <span className="font-display text-sm font-semibold">NextRound</span>
+          <Link to="/" className="mb-8 flex justify-center lg:justify-start">
+            <BrandLogo />
           </Link>
+
 
           <h1 className="font-display text-2xl font-semibold tracking-tight">
             {mode === "signin" ? t("Bienvenida de nuevo") : t("Crea tu cuenta")}
