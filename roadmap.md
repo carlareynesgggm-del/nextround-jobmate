@@ -1,6 +1,6 @@
 # Roadmap NextRound
 
-- [ ] Añadir meta tag de verificación Google Search Console y archivo público (en curso)
+- [x] Añadir meta tag de verificación Google Search Console y archivo público
 - [ ] Mejorar emparejamiento de correos con candidaturas (normalización, prevención de duplicados)
 - [ ] Tarjeta de revisión para nuevas candidaturas detectadas desde Gmail
 - [ ] Tarjeta de actualización con comparación before/after para candidaturas existentes
