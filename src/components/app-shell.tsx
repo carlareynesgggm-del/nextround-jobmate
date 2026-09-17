@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { BrandMark } from "@/components/brand-mark";
 import { ApplicationDialog } from "@/components/application-dialog";
 import { AiAssistantButton, AssistantProvider, useAssistant } from "@/components/ai-assistant";
 import { AlertsBell } from "@/components/alerts-bell";
