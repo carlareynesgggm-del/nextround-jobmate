@@ -81,6 +81,17 @@ export const syncGmail = createServerFn({ method: "POST" })
       // Sin coincidencia clara y sin candidatas: puede ser una candidatura nueva.
       const isNewApplication = !match.id && match.candidates.length === 0;
 
+      // Clave del proceso: agrupa varios correos de la misma empresa y puesto.
+      const processKey = processKeyOf({
+        applicationId: match.id,
+        company: classification.extracted.company ?? null,
+        role: classification.extracted.role ?? null,
+        fromEmail: message.fromEmail,
+        threadId: message.threadId,
+        fallback: message.id,
+      });
+      processes.add(processKey);
+
       const { data: event, error } = await supabase
         .from("email_events")
         .insert({
@@ -98,6 +109,7 @@ export const syncGmail = createServerFn({ method: "POST" })
           extracted: {
             ...classification.extracted,
             match_candidates: match.candidates,
+            process_key: processKey,
           } as never,
           application_id: match.id,
           status: match.id ? "pending" : "needs_match",
