@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/integrations/supabase/types";
+import { nextBestAction } from "@/lib/next-action";
 
 const SUPABASE_URL = process.env["SUPABASE_URL"] || process.env["VITE_SUPABASE_URL"] || "";
 const SUPABASE_ANON_KEY =
@@ -145,7 +146,7 @@ export async function buildUserContext(accessToken: string, applicationId?: stri
       const appEmails = (
         await db
           .from("email_events")
-          .select("subject, from_email, email_type, received_at, status, summary")
+          .select("subject, from_email, email_type, received_at, status")
           .eq("application_id", applicationId)
           .order("received_at", { ascending: false })
           .limit(15)
