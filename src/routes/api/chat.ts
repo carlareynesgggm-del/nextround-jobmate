@@ -81,10 +81,16 @@ export const Route = createFileRoute("/api/chat")({
         });
 
         try {
+          const focusNote = body.applicationId
+            ? `Modo: CONTEXTO DE CANDIDATURA. El usuario está dentro de una candidatura concreta (id ${body.applicationId}); prioriza su información y usa las herramientas sin pasar application_id para referirte a ella.`
+            : "Modo: CONTEXTO GENERAL. No hay candidatura abierta; responde con la visión global (candidaturas activas, tareas, eventos, deadlines) y usa las herramientas para bajar al detalle cuando haga falta.";
+
           const result = streamText({
             model: gateway.chatModel("google/gemini-3.7-flash"),
-            system: `${SYSTEM_PROMPT}\n\nNombre de pila del usuario: ${userName}.\n\n## Contexto real del usuario\n${contextMarkdown}`,
+            system: `${SYSTEM_PROMPT}\n\nNombre de pila del usuario: ${userName}.\nFecha actual: ${new Date().toISOString().slice(0, 10)}.\n${focusNote}\n\n## Contexto real del usuario\n${contextMarkdown}`,
             messages: await convertToModelMessages(messages),
+            tools: readOnlyTools(accessToken, body.applicationId ?? null),
+            stopWhen: stepCountIs(8),
           });
 
           return result.toUIMessageStreamResponse({
