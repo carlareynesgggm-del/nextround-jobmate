@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/integrations/supabase/types";
+import { nextBestAction } from "@/lib/next-action";
 
 const SUPABASE_URL = process.env["SUPABASE_URL"] || process.env["VITE_SUPABASE_URL"] || "";
 const SUPABASE_ANON_KEY =
@@ -115,6 +116,66 @@ export async function buildUserContext(accessToken: string, applicationId?: stri
     const target = apps.find((a) => a.id === applicationId);
     if (target) {
       parts.push("## Candidatura priorizada por el usuario", appBlock(target, true));
+
+      const appNotes = (notes ?? []).filter((n) => n.application_id === applicationId);
+      if (appNotes.length > 0) {
+        parts.push(
+          "### Notas de esta candidatura",
+          ...appNotes.slice(0, 12).map((n) => `· ${n.created_at?.slice(0, 10) ?? ""} ${n.body?.slice(0, 400) ?? ""}`),
+        );
+      }
+
+      const appTasks = (tasks ?? []).filter((t) => t.application_id === applicationId);
+      if (appTasks.length > 0) {
+        parts.push(
+          "### Tareas de esta candidatura",
+          ...appTasks
+            .slice(0, 12)
+            .map((t) => `· ${t.done ? "[hecha]" : "[pendiente]"} ${t.title}${t.due_date ? ` (vence ${t.due_date})` : ""}`),
+        );
+      }
+
+      const appEvents = (events ?? []).filter((e) => e.application_id === applicationId);
+      if (appEvents.length > 0) {
+        parts.push(
+          "### Eventos de esta candidatura",
+          ...appEvents.slice(0, 12).map((e) => `· ${e.title} — ${e.starts_at}${e.location ? ` (${e.location})` : ""}`),
+        );
+      }
+
+      const appEmails = (
+        await db
+          .from("email_events")
+          .select("subject, from_email, email_type, received_at, status")
+          .eq("application_id", applicationId)
+          .order("received_at", { ascending: false })
+          .limit(15)
+      ).data;
+      if (appEmails && appEmails.length > 0) {
+        parts.push(
+          "### Correos vinculados a esta candidatura",
+          ...appEmails.map(
+            (e) =>
+              `· ${e.received_at?.slice(0, 10) ?? ""} — ${e.email_type ?? "correo"} [${e.status}]: ${e.subject ?? ""} (${e.from_email ?? ""})`,
+          ),
+        );
+      }
+
+      try {
+        const action = nextBestAction(target as never, {
+          events: (events ?? []).filter((e) => e.application_id === applicationId) as never,
+          timeline: (timelineByApp[applicationId] ?? []) as never,
+          links: (appDocsByApp[applicationId] ?? []) as never,
+        });
+        if (action) {
+          parts.push(
+            "### Next Best Action calculada por el sistema (hecho del sistema, no opinión de la IA)",
+            `· ${action.label}${action.detail ? ` — ${action.detail}` : ""}`,
+          );
+        }
+      } catch {
+        // Si el cálculo no es posible, se omite en vez de inventar una acción.
+      }
     }
   }
 
