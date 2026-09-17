@@ -128,39 +128,39 @@ export function AttentionCard({
   );
 
   return (
-    <li className="group relative rounded-xl border border-border/70 bg-surface p-5 transition-colors hover:border-border">
+    <li className="group relative overflow-hidden rounded-xl border border-border/70 bg-surface px-4 py-3.5 transition-all duration-200 hover:border-border hover:bg-surface-2/40">
       <span
         className={cn(
-          "absolute inset-y-5 left-0 w-[2px] rounded-full",
-          urgent ? "bg-primary" : "bg-transparent",
+          "absolute inset-y-0 left-0 w-[2px]",
+          urgent ? "bg-primary/70" : "bg-transparent",
         )}
         aria-hidden
       />
       <div className="flex items-start gap-3">
-        <CompanyMark name={company} size="md" />
+        <CompanyMark name={company} size="sm" className="mt-0.5" />
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-baseline gap-x-2">
-            <p className="truncate text-[13px] font-medium">{company}</p>
-            <p className="truncate text-[13px] text-muted-foreground">{app.role_title}</p>
-          </div>
-          <p className="mt-2 font-display text-[15px] font-semibold leading-snug tracking-tight">
+          <p className="truncate text-[11px] uppercase tracking-wide text-muted-foreground">
+            {company} · {app.role_title}
+          </p>
+          <p className="mt-1 truncate font-display text-[14px] font-semibold tracking-tight">
             {t(fact)}
           </p>
-          <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+          <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
             {when ?? t(action.detail)}
           </p>
         </div>
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        {primary}
-        <Link
-          to="/applications/$id"
-          params={{ id: app.id }}
-          className="inline-flex items-center gap-1 px-1 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
-        >
-          {t("Ver candidatura")} <ArrowUpRight className="size-3.5" />
-        </Link>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {primary}
+          <Link
+            to="/applications/$id"
+            params={{ id: app.id }}
+            aria-label={t("Ver candidatura")}
+            title={t("Ver candidatura")}
+            className="rounded-md p-1.5 text-muted-foreground/60 opacity-0 transition-all duration-200 hover:bg-surface-2 hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100"
+          >
+            <ArrowUpRight className="size-4" />
+          </Link>
+        </div>
       </div>
     </li>
   );

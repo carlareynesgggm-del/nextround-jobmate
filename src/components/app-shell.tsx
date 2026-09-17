@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { BrandMark } from "@/components/brand-mark";
 import { ApplicationDialog } from "@/components/application-dialog";
 import { AiAssistantButton, AssistantProvider, useAssistant } from "@/components/ai-assistant";
 import { AlertsBell } from "@/components/alerts-bell";
@@ -60,12 +61,19 @@ export function AppShell({ children }: { children: ReactNode }) {
         to={item.to}
         onClick={() => setMobileOpen(false)}
         className={cn(
-          "group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors",
+          "group relative flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[13px] transition-all duration-200",
           active
-            ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground shadow-soft"
+            ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
             : "text-sidebar-foreground/65 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
         )}
       >
+        <span
+          aria-hidden
+          className={cn(
+            "absolute left-0 top-1/2 h-4 w-[2px] -translate-y-1/2 rounded-full bg-lime transition-opacity duration-200",
+            active ? "opacity-100" : "opacity-0",
+          )}
+        />
         <Icon
           className={cn(
             "size-[17px] transition-colors",
@@ -80,9 +88,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const sidebarInner = (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex items-center gap-2.5 px-5 pb-6 pt-5">
-        <span className="flex size-7 items-center justify-center rounded-lg bg-primary font-display text-[13px] font-bold text-primary-foreground">
-          N
-        </span>
+        <BrandMark />
         <p className="font-display text-[15px] font-semibold tracking-tight">NextRound</p>
       </div>
 
@@ -161,7 +167,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <Menu className="size-4" />
             </button>
-            <span className="font-display text-sm font-semibold lg:hidden">NextRound</span>
+            <span className="flex items-center gap-2 lg:hidden">
+              <BrandMark className="size-6" />
+              <span className="font-display text-sm font-semibold">NextRound</span>
+            </span>
             <div className="ml-auto flex items-center gap-1">
               <AlertsBell />
               <LanguageSwitcher />
@@ -173,7 +182,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </header>
 
-          <main className="mx-auto w-full max-w-[1120px] px-5 pb-28 pt-8 md:px-10 md:pt-10">{children}</main>
+          <main className="mx-auto w-full max-w-[1240px] px-5 pb-20 pt-6 md:px-8 md:pt-8">{children}</main>
         </div>
 
         <FloatingAssistantButton />
@@ -190,7 +199,7 @@ function AskAiHeaderButton() {
     <Button
       variant="ghost"
       size="sm"
-      className="hidden gap-1.5 sm:inline-flex"
+      className="hidden gap-1.5 border border-border/70 bg-surface/60 sm:inline-flex"
       onClick={() => openAssistant(null)}
     >
       <Sparkles className="size-3.5" />
@@ -199,7 +208,13 @@ function AskAiHeaderButton() {
   );
 }
 
+/** Only shown where the header entry point is hidden, so there is one visible
+ * way into NextRound AI at a time. */
 function FloatingAssistantButton() {
   const { openAssistant } = useAssistant();
-  return <AiAssistantButton onClick={() => openAssistant(null)} />;
+  return (
+    <div className="sm:hidden">
+      <AiAssistantButton onClick={() => openAssistant(null)} />
+    </div>
+  );
 }
