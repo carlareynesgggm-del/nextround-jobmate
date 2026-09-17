@@ -105,6 +105,12 @@ import { AppsKanban } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe
 import { AppsTable } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091"
 ```
 
+### AssistantProvider
+
+```ts
+import { AssistantProvider } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091"
+```
+
 ### AttentionCard
 
 ```ts
@@ -379,6 +385,12 @@ import { EntryStep } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9
 | `onImported` | function | `—` |
 | `onManual` | function | `—` |
 | `onPickSaved` | function | `—` |
+
+### GmailHomeCard
+
+```ts
+import { GmailHomeCard } from "@ws-d05cea16d590d212b9c4/97ba193c-e6d8-47b5-9b04-2fe9348f6091"
+```
 
 ### Input
 
