@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { ArrowUpRight } from "lucide-react";
 
 import { CompanyMark, Pill, StageBadge } from "@/components/ui-bits";
 import { applicationAlerts } from "@/lib/alerts";
