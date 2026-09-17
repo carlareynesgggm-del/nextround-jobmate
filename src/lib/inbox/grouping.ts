@@ -66,8 +66,8 @@ export function groupProcesses(
         ? `app:${event.application_id}`
         : (stored ??
           processKeyOf({
-            company: extracted.company,
-            role: extracted.role,
+            company: extracted.company ?? null,
+            role: extracted.role ?? null,
             fromEmail: event.from_email,
             threadId: event.thread_id,
             fallback: event.id,
