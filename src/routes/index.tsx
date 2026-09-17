@@ -171,7 +171,7 @@ function Landing() {
             </h1>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
               {t(
-                "Controla cada candidatura, recuerda exactamente qué enviaste, no vuelvas a perderte una entrevista o una prueba y sabe siempre qué hacer después.",
+                "Controla cada candidatura, recuerda exactamente qué enviaste, no vuelvas a perderte una entrevista o una prueba y asegúrate de saber siempre qué hacer después.",
               )}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
