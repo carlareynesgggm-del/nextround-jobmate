@@ -198,8 +198,10 @@ function HomePage() {
         </section>
       </div>
 
-      {/* Candidaturas activas */}
+      {/* Candidaturas activas + próximamente */}
+      <div className="grid items-start gap-x-8 gap-y-10 lg:grid-cols-12">
       <Section
+        className="lg:col-span-7"
         title={t("Candidaturas activas")}
         {...(active.length > 0 ? { hint: String(active.length) } : {})}
         action={
