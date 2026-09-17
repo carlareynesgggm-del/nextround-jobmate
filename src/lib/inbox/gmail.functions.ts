@@ -42,7 +42,7 @@ export const syncGmail = createServerFn({ method: "POST" })
     let messages;
     try {
       const accessToken = await accessTokenFromRefresh(decryptToken(connection.connection_key_ciphertext));
-      messages = await fetchRecruitmentMessages(accessToken, 25);
+      messages = await fetchRecruitmentMessages(accessToken, Math.min(data.max ?? 120, 200));
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al leer Gmail.";
       await supabase
@@ -68,8 +68,9 @@ export const syncGmail = createServerFn({ method: "POST" })
       company: (app.companies as { name: string } | null)?.name ?? null,
     }));
 
-
     let detected = 0;
+    const processes = new Set<string>();
+
 
     for (const message of messages) {
       if (seen.has(message.id)) continue;
