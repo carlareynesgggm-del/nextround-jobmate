@@ -40,7 +40,7 @@ export function DetailsStep({
   return (
     <div className="space-y-4">
       {duplicate && !duplicateIgnored && (
-        <div className="flex flex-col gap-2 rounded-2xl border border-warning/40 bg-warning/10 p-3.5 text-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 rounded-xl border border-warning/40 bg-warning/10 p-3.5 text-sm sm:flex-row sm:items-center sm:justify-between">
           <span className="flex items-center gap-2 text-gold-foreground">
             <AlertTriangle className="size-4 shrink-0" />
             {t("Posible candidatura duplicada")}

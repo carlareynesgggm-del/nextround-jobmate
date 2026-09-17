@@ -26,7 +26,7 @@ export function EmailConnectionCard() {
       ) : (
         <ul className="space-y-4">
           {connections.map((connection) => (
-            <li key={connection.id} className="rounded-xl border border-border p-3">
+            <li key={connection.id} className="rounded-xl border border-border/70 p-3">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-medium">
                   {t(EMAIL_PROVIDER_LABEL[connection.provider as EmailProvider] ?? connection.provider)}
@@ -34,7 +34,7 @@ export function EmailConnectionCard() {
                 <span
                   className={
                     connection.status === "connected"
-                      ? "rounded-full border border-border bg-surface px-2 py-0.5 text-[10px] font-medium"
+                      ? "rounded-full border border-border/70 bg-surface px-2 py-0.5 text-[10px] font-medium"
                       : "rounded-full border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive"
                   }
                 >

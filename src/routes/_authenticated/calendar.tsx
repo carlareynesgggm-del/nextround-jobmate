@@ -142,7 +142,7 @@ function CalendarPage() {
                 <div
                   key={date.toISOString()}
                   className={`min-h-[86px] rounded-lg border p-1.5 text-left ${
-                    outside ? "border-transparent bg-surface-2/40" : "border-border bg-surface"
+                    outside ? "border-transparent bg-surface-2/40" : "border-border/70 bg-surface"
                   }`}
                 >
                   <span
@@ -184,7 +184,7 @@ function CalendarPage() {
               <EmptyState title={t("Nada agendado")} description={t("Crea tu primer evento.")} />
             </div>
           ) : (
-            <ul className="divide-y divide-border">
+            <ul className="divide-y divide-border/60">
               {upcoming.map((event) => {
                 const app = applications.find((item) => item.id === event.application_id);
                 return (

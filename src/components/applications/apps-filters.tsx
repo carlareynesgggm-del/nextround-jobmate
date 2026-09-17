@@ -337,7 +337,7 @@ export function AppsFilters({
           {activeChips.map(({ key, value }) => (
             <span
               key={key}
-              className="inline-flex items-center gap-1 rounded-full border border-border bg-surface px-2.5 py-1 text-xs text-muted-foreground"
+              className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-surface px-2.5 py-1 text-xs text-muted-foreground"
             >
               {chipLabel(key, value)}
               <button

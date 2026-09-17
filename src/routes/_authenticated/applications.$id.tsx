@@ -107,7 +107,7 @@ function ApplicationDetail() {
 
 
   if (isLoading) {
-    return <div className="h-64 animate-pulse rounded-2xl bg-surface-2" />;
+    return <div className="h-64 animate-pulse rounded-xl bg-surface-2" />;
   }
 
   if (!app) {
@@ -307,7 +307,7 @@ function TasksTab({ applicationId }: { applicationId: string }) {
         <EmptyState title={t("Sin tareas")} description={t("Divide la preparación en pasos concretos.")} />
       ) : (
         <SectionCard bodyClassName="p-0">
-          <ul className="divide-y divide-border">
+          <ul className="divide-y divide-border/60">
             {mine.map((task) => (
               <li key={task.id} className="flex items-center gap-3 px-5 py-3">
                 <button
@@ -412,7 +412,7 @@ function EventsTab({ applicationId }: { applicationId: string }) {
         <EmptyState title={t("Sin entrevistas")} description={t("Agenda la próxima cita del proceso.")} />
       ) : (
         <SectionCard bodyClassName="p-0">
-          <ul className="divide-y divide-border">
+          <ul className="divide-y divide-border/60">
             {mine.map((event) => (
               <li key={event.id} className="flex items-center gap-4 px-5 py-3.5">
                 <Pill tone={EVENT_KIND_TONE[event.kind]}>{t(EVENT_KIND_LABEL[event.kind])}</Pill>

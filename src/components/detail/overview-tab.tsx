@@ -190,7 +190,7 @@ function OfferBlock({ application }: { application: ApplicationWithCompany }) {
   };
 
   return (
-    <section className="rounded-2xl border border-violet/25 bg-violet/5 p-6">
+    <section className="rounded-xl border border-violet/25 bg-violet/5 p-6">
       <h3 className="font-display text-base font-semibold tracking-tight text-violet">{t("Oferta")}</h3>
       <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div>

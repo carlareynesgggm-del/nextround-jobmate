@@ -348,7 +348,7 @@ function EditApplicationDialog({
                   className={`h-8 flex-1 rounded-xl border text-xs font-medium transition-colors ${
                     excitement >= value
                       ? "border-violet/35 bg-violet/12 text-violet"
-                      : "border-border bg-surface-2 text-muted-foreground hover:bg-accent"
+                      : "border-border/70 bg-surface-2 text-muted-foreground hover:bg-accent"
                   }`}
                 >
                   {value}

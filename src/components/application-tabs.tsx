@@ -878,7 +878,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
       </div>
 
       {form.stage_type === "test" ? (
-        <div className="mt-5 grid gap-4 rounded-xl border border-border bg-surface-2/40 p-4 md:grid-cols-2">
+        <div className="mt-5 grid gap-4 rounded-xl border border-border/70 bg-surface-2/40 p-4 md:grid-cols-2">
           <p className="font-display text-sm font-semibold md:col-span-2">{t("Detalles de la prueba")}</p>
           <Field label={t("Proveedor de la prueba")}>
             <Input
@@ -914,7 +914,7 @@ export function ProcessTab({ application }: { application: ApplicationWithCompan
           </Field>
         </div>
       ) : (
-        <div className="mt-5 grid gap-4 rounded-xl border border-border bg-surface-2/40 p-4 md:grid-cols-2">
+        <div className="mt-5 grid gap-4 rounded-xl border border-border/70 bg-surface-2/40 p-4 md:grid-cols-2">
           <p className="font-display text-sm font-semibold md:col-span-2">{t("Detalles de la entrevista")}</p>
           <Field label={t("Entrevistador")}>
             <Input

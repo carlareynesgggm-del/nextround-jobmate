@@ -74,7 +74,7 @@ function HelpPage() {
       </SectionCard>
 
       <SectionCard title={t("Preguntas frecuentes")}>
-        <div className="divide-y divide-border">
+        <div className="divide-y divide-border/60">
           {faqs.map(([question, answer]) => (
             <div key={question} className="flex gap-3 py-4 first:pt-0 last:pb-0">
               <HelpCircle className="mt-0.5 size-4 shrink-0 text-muted-foreground" />

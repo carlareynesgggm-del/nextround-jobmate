@@ -70,7 +70,7 @@ function CompaniesPage() {
       {isLoading ? (
         <div className="grid gap-4 md:grid-cols-3">
           {[0, 1, 2].map((index) => (
-            <div key={index} className="h-44 animate-pulse rounded-2xl bg-surface-2" />
+            <div key={index} className="h-44 animate-pulse rounded-xl bg-surface-2" />
           ))}
         </div>
       ) : companies.length === 0 ? (

@@ -158,7 +158,7 @@ export function AiAssistant({
         aria-label={t("Cerrar")}
         onClick={() => onOpenChange(false)}
       />
-      <aside className="relative flex h-full w-full flex-col bg-surface shadow-lift sm:w-[440px] sm:rounded-3xl">
+      <aside className="relative flex h-full w-full flex-col bg-surface sm:w-[440px] sm:rounded-xl">
         <header className="flex items-center gap-3 px-5 py-4">
           <span className="flex size-8 items-center justify-center rounded-xl bg-violet/12 text-violet">
             <Sparkles className="size-4" />
@@ -209,7 +209,7 @@ export function AiAssistant({
                 <div
                   key={message.id}
                   className={cn(
-                    "max-w-[88%] whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
+                    "max-w-[88%] whitespace-pre-wrap rounded-xl px-3.5 py-2.5 text-sm leading-relaxed",
                     message.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "bg-surface-2",
                   )}
                 >
@@ -265,7 +265,7 @@ export function AiAssistantButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-violet px-4 py-3 text-sm font-medium text-primary-foreground shadow-lift transition-transform hover:-translate-y-0.5 lg:bottom-7 lg:right-7"
+      className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-violet px-4 py-3 text-sm font-medium text-primary-foreground transition-transform hover:-translate-y-0.5 lg:bottom-7 lg:right-7"
     >
       <Sparkles className="size-4" />
       {t("NextRound AI")}
