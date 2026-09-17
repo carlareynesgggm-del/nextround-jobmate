@@ -9,3 +9,5 @@
 - [x] Vinculación de CV en candidaturas
 - [ ] Publicar versión actual en dominio principal
 - [ ] Mejorar edición completa de candidaturas (todos los campos, incluido estado rejected)
+- [ ] Aplicar identidad editorial-tech con Sora, Manrope, violeta profundo y acentos lima
+- [ ] Validar y capturar Home, Candidaturas, Novedades y NextRound AI antes de publicar
