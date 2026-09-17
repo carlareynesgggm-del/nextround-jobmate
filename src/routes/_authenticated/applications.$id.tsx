@@ -148,6 +148,16 @@ function ApplicationDetail() {
 
       <NextBestActionCard app={app} action={action} />
 
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-surface-2 px-4 py-3">
+        <Sparkles className="size-4 text-violet" />
+        <p className="min-w-0 flex-1 text-xs leading-relaxed text-muted-foreground">
+          {t("Pregunta a NextRound AI sobre esta candidatura: usa su historial, correos, documentos y fechas reales.")}
+        </p>
+        <Button variant="outline" size="sm" className="rounded-xl" onClick={() => openAssistant(app.id)}>
+          {t("Preguntar sobre esta candidatura")}
+        </Button>
+      </div>
+
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="scrollbar-slim max-w-full overflow-x-auto">
           <TabsTrigger value="overview">{t("Resumen")}</TabsTrigger>
