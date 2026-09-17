@@ -3,6 +3,7 @@ import { ArrowRight, CalendarClock, Sparkles } from "lucide-react";
 
 import { AttentionCard } from "@/components/home/attention-list";
 import { UpdatesPanel } from "@/components/inbox/updates-panel";
+import { GmailHomeCard } from "@/components/inbox/gmail-home-card";
 import { EmptyState } from "@/components/ui-bits";
 import { useT } from "@/lib/i18n/provider";
 import { Button } from "@/components/ui/button";
@@ -177,6 +178,8 @@ function HomePage() {
           </ul>
         )}
       </section>
+
+      <GmailHomeCard />
 
       <UpdatesPanel />
 
