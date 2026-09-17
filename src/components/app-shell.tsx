@@ -167,7 +167,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <Menu className="size-4" />
             </button>
-            <span className="font-display text-sm font-semibold lg:hidden">NextRound</span>
+            <span className="flex items-center gap-2 lg:hidden">
+              <BrandMark className="size-6" />
+              <span className="font-display text-sm font-semibold">NextRound</span>
+            </span>
             <div className="ml-auto flex items-center gap-1">
               <AlertsBell />
               <LanguageSwitcher />
@@ -179,7 +182,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </header>
 
-          <main className="mx-auto w-full max-w-[1120px] px-5 pb-28 pt-8 md:px-10 md:pt-10">{children}</main>
+          <main className="mx-auto w-full max-w-[1240px] px-5 pb-20 pt-6 md:px-8 md:pt-8">{children}</main>
         </div>
 
         <FloatingAssistantButton />
@@ -196,7 +199,7 @@ function AskAiHeaderButton() {
     <Button
       variant="ghost"
       size="sm"
-      className="hidden gap-1.5 sm:inline-flex"
+      className="hidden gap-1.5 border border-border/70 bg-surface/60 sm:inline-flex"
       onClick={() => openAssistant(null)}
     >
       <Sparkles className="size-3.5" />
@@ -205,7 +208,13 @@ function AskAiHeaderButton() {
   );
 }
 
+/** Only shown where the header entry point is hidden, so there is one visible
+ * way into NextRound AI at a time. */
 function FloatingAssistantButton() {
   const { openAssistant } = useAssistant();
-  return <AiAssistantButton onClick={() => openAssistant(null)} />;
+  return (
+    <div className="sm:hidden">
+      <AiAssistantButton onClick={() => openAssistant(null)} />
+    </div>
+  );
 }
