@@ -488,13 +488,31 @@ export function DocumentsTab({ application }: { application: ApplicationWithComp
                 toast.error(t("Elige un documento del vault."));
                 return;
               }
-              await link.mutateAsync({ application, documentId, role });
-              setDocumentId("");
-              toast.success(t("Documento vinculado"));
+              try {
+                await link.mutateAsync({ application, documentId, role });
+                setDocumentId("");
+                toast.success(t("Documento vinculado"));
+              } catch (error) {
+                toast.error(error instanceof Error ? error.message : t("No se pudo vincular"));
+              }
             }}
           >
             <Link2 className="size-4" /> {t("Vincular")}
           </Button>
+        </div>
+        <div className="mt-3">
+          <QuickDocumentUpload
+            kind={role === "cover_letter" ? "cover_letter" : role === "cv" ? "cv" : "other"}
+            label={t("Subir desde el ordenador y vincular")}
+            onUploaded={async (doc) => {
+              try {
+                await link.mutateAsync({ application, documentId: doc.id, role });
+                toast.success(t("Documento vinculado"));
+              } catch (error) {
+                toast.error(error instanceof Error ? error.message : t("No se pudo vincular"));
+              }
+            }}
+          />
         </div>
       </SectionCard>
 
