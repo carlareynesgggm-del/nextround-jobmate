@@ -449,9 +449,20 @@ function StageBlock({
   const [editing, setEditing] = useState(false);
   const [stage, setStage] = useState<Stage>(proposed);
 
+  const isRejection = proposed === "rejected";
+
   return (
-    <div className="mt-4 rounded-xl border border-gold/30 bg-gold/5 p-4">
-      <p className="text-sm font-medium">{t("Nueva actualización detectada")}</p>
+    <div
+      className={cn(
+        "mt-4 rounded-xl border p-4",
+        isRejection ? "border-danger/30 bg-danger/5" : "border-gold/30 bg-gold/5",
+      )}
+    >
+      <p className="text-sm font-medium">
+        {isRejection
+          ? t("Parece que esta candidatura ha sido rechazada. ¿Actualizar estado a Rechazada?")
+          : t("Nueva actualización detectada")}
+      </p>
       <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
         <span className="rounded-full border border-border bg-background px-2 py-0.5 text-xs">
           {currentStage ? t(STAGE_META[currentStage].label) : UNKNOWN}
