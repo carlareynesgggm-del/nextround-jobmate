@@ -1,3 +1,4 @@
+import { QuickDocumentUpload } from "@/components/documents/quick-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -62,6 +63,9 @@ export function SavedForm({ details, onChange, deadlineAt, onDeadlineChange, cvs
             </option>
           ))}
         </select>
+        <div className="mt-2">
+          <QuickDocumentUpload kind="cv" onUploaded={(doc) => onChange({ cvId: doc.id })} />
+        </div>
       </div>
 
       <div className="sm:col-span-2">

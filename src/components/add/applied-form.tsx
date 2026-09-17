@@ -1,3 +1,4 @@
+import { QuickDocumentUpload } from "@/components/documents/quick-upload";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -65,6 +66,9 @@ export function AppliedForm({ details, onChange, source, onSourceChange, cvs, co
             </option>
           ))}
         </select>
+        <div className="mt-2">
+          <QuickDocumentUpload kind="cv" onUploaded={(doc) => onChange({ cvId: doc.id })} />
+        </div>
       </div>
 
       <div>

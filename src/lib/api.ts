@@ -504,27 +504,31 @@ export function useLinkDocument() {
       submitted = true,
       note,
     }: {
-      application: ApplicationRow;
+      application: Pick<ApplicationRow, "id"> & Partial<Pick<ApplicationRow, "user_id" | "is_demo">>;
       documentId: string;
       role?: string | null;
       submitted?: boolean;
       note?: string | null;
-    }) =>
-      unwrap(
+    }) => {
+      // El asistente de alta no conoce el user_id todavía: lo resolvemos aquí
+      // para que la vinculación funcione igual desde cualquier pantalla.
+      const userId = application.user_id || (await currentUserId());
+      return unwrap(
         await supabase
           .from("application_documents")
           .insert({
             application_id: application.id,
             document_id: documentId,
-            user_id: application.user_id,
-            is_demo: application.is_demo,
+            user_id: userId,
+            is_demo: application.is_demo ?? false,
             role: role ?? null,
             submitted,
             note: note ?? null,
           })
           .select()
           .single(),
-      ),
+      );
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["appDocs"] }),
   });
 }
