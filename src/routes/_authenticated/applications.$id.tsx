@@ -98,8 +98,10 @@ function ApplicationDetail() {
   const { data: notes = [] } = useNotes();
   const moveStage = useMoveStage();
   const deleteApplication = useDeleteApplication();
+  const { openAssistant } = useAssistant();
   const [editOpen, setEditOpen] = useState(false);
   const [tab, setTab] = useState("overview");
+
 
   if (isLoading) {
     return <div className="h-64 animate-pulse rounded-2xl bg-surface-2" />;
@@ -123,7 +125,6 @@ function ApplicationDetail() {
   const progress = Math.round(((stageIndex + 1) / PIPELINE_STAGES.length) * 100);
   const days = daysSinceApplied(app);
   const action = nextBestAction(app, { events: calendar, timeline, links });
-  const { openAssistant } = useAssistant();
   const cvLink = links.find((link) => link.role === "cv" || link.documents?.kind === "cv");
 
   return (
