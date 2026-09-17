@@ -98,8 +98,10 @@ function ApplicationDetail() {
   const { data: notes = [] } = useNotes();
   const moveStage = useMoveStage();
   const deleteApplication = useDeleteApplication();
+  const { openAssistant } = useAssistant();
   const [editOpen, setEditOpen] = useState(false);
   const [tab, setTab] = useState("overview");
+
 
   if (isLoading) {
     return <div className="h-64 animate-pulse rounded-2xl bg-surface-2" />;
