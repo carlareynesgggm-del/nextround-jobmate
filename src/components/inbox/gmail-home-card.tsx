@@ -39,7 +39,7 @@ export function GmailHomeCard() {
             ) : (
               <p className="max-w-xl text-sm text-muted-foreground">
                 {t(
-                  "NextRound puede detectar entrevistas, pruebas y respuestas relacionadas con tus candidaturas.",
+                  "NextRound puede detectar automáticamente candidaturas, entrevistas, pruebas, rechazos y ofertas de los últimos 60 días.",
                 )}
               </p>
             )}
@@ -48,19 +48,18 @@ export function GmailHomeCard() {
 
         {connected ? (
           <div className="flex flex-wrap gap-2">
-            <Button asChild className="gap-1.5">
-              <Link to="/inbox">
-                <Inbox className="size-4" /> {t("Revisar novedades")}
-              </Link>
-            </Button>
             <Button
-              variant="secondary"
               className="gap-1.5"
               disabled={busy === "sync"}
               onClick={() => void runSync()}
             >
               <RefreshCw className={busy === "sync" ? "size-4 animate-spin" : "size-4"} />
-              {t("Escanear ahora")}
+              {t("Revisar correos ahora")}
+            </Button>
+            <Button asChild variant="secondary" className="gap-1.5">
+              <Link to="/inbox">
+                <Inbox className="size-4" /> {t("Ver novedades")}
+              </Link>
             </Button>
           </div>
         ) : (
