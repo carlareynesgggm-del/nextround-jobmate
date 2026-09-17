@@ -1049,7 +1049,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      merge_applications: {
+        Args: { canonical_id: string; duplicate_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_stage:
