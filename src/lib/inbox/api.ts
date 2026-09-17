@@ -83,6 +83,54 @@ export function useEmailSuggestions(eventId: string | null) {
   });
 }
 
+/** Todas las propuestas pendientes, para revisar varios correos de golpe. */
+export function useAllPendingSuggestions() {
+  return useQuery({
+    queryKey: ["email", "suggestions", "pending"] as const,
+    queryFn: async () =>
+      unwrap(
+        await supabase
+          .from("email_suggestions")
+          .select("*")
+          .eq("status", "pending")
+          .order("position"),
+      ) as EmailSuggestionRow[],
+  });
+}
+
+/** "Revisar después": el correo sale de la bandeja sin descartarse. */
+export function useSnoozeEmailEvent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (eventIds: string[]) => {
+      if (eventIds.length === 0) return;
+      const { error } = await supabase
+        .from("email_events")
+        .update({ status: "snoozed" })
+        .in("id", eventIds);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => void qc.invalidateQueries({ queryKey: inboxKeys.events }),
+  });
+}
+
+/** Descarta varios correos de un mismo proceso. */
+export function useIgnoreEmailEvents() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (eventIds: string[]) => {
+      if (eventIds.length === 0) return;
+      const { error } = await supabase
+        .from("email_events")
+        .update({ status: "ignored" })
+        .in("id", eventIds);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => void qc.invalidateQueries({ queryKey: inboxKeys.events }),
+  });
+}
+
+
 export function useIgnoreEmailEvent() {
   const qc = useQueryClient();
   return useMutation({
