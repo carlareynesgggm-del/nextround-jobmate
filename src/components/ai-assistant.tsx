@@ -54,6 +54,18 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<{ applicationId?: string | null }>).detail;
+      setApplicationId(detail?.applicationId ?? null);
+      setOpen(true);
+    };
+    window.addEventListener("nextround:ai", handler);
+    return () => window.removeEventListener("nextround:ai", handler);
+  }, []);
+
+
+
   return (
     <AssistantContext.Provider value={value}>
       {children}
