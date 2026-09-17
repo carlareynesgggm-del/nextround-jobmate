@@ -44,7 +44,7 @@ export function QuickDocumentUpload({
               name: file.name.replace(/\.[^.]+$/, ""),
               kind,
               version: "",
-            })) as DocumentRow;
+            })) as unknown as DocumentRow;
             toast.success(t("Documento subido"));
             onUploaded(doc);
           } catch (error) {
