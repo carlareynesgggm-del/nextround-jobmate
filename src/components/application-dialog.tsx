@@ -156,6 +156,10 @@ function EditApplicationDialog({
             : {}),
         },
       });
+      if (stage !== application.stage) {
+        // Registra el cambio de estado en la línea de tiempo y en la actividad.
+        await moveStage.mutateAsync({ application, to: stage });
+      }
       toast.success(t("Candidatura actualizada"));
       onOpenChange(false);
     } catch (error) {
