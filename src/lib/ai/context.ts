@@ -156,9 +156,7 @@ export async function buildUserContext(accessToken: string, applicationId?: stri
           "### Correos vinculados a esta candidatura",
           ...appEmails.map(
             (e) =>
-              `· ${e.received_at?.slice(0, 10) ?? ""} — ${e.email_type ?? "correo"} [${e.status}]: ${e.subject ?? ""} (${e.from_email ?? ""})${
-                e["summary"] ? ` — ${String(e["summary"]).slice(0, 200)}` : ""
-              }`,
+              `· ${e.received_at?.slice(0, 10) ?? ""} — ${e.email_type ?? "correo"} [${e.status}]: ${e.subject ?? ""} (${e.from_email ?? ""})`,
           ),
         );
       }
@@ -167,7 +165,7 @@ export async function buildUserContext(accessToken: string, applicationId?: stri
         const action = nextBestAction(target as never, {
           events: (events ?? []).filter((e) => e.application_id === applicationId) as never,
           timeline: (timelineByApp[applicationId] ?? []) as never,
-          docs: (appDocsByApp[applicationId] ?? []) as never,
+          links: (appDocsByApp[applicationId] ?? []) as never,
         });
         if (action) {
           parts.push(
