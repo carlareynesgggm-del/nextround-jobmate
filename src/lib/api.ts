@@ -15,6 +15,7 @@ import type {
   TaskRow,
   TimelineRow,
 } from "@/lib/domain";
+import { STAGE_META } from "@/lib/domain";
 
 
 const APP_SELECT = "*, companies(id,name,industry,location,website)";
