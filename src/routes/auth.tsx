@@ -87,9 +87,7 @@ function AuthPage() {
       <div className="relative hidden flex-col justify-between bg-sidebar p-12 text-sidebar-foreground lg:flex">
         <div className="grid-paper pointer-events-none absolute inset-0 opacity-[0.15]" />
         <Link to="/" className="relative flex items-center gap-2.5">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary font-display text-sm font-bold text-sidebar-primary-foreground">
-            N
-          </span>
+          <BrandMark className="size-8" />
           <span className="font-display text-sm font-semibold">NextRound</span>
         </Link>
 
