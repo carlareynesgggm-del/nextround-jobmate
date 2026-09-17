@@ -61,12 +61,19 @@ export function AppShell({ children }: { children: ReactNode }) {
         to={item.to}
         onClick={() => setMobileOpen(false)}
         className={cn(
-          "group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors",
+          "group relative flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[13px] transition-all duration-200",
           active
-            ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground shadow-soft"
+            ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
             : "text-sidebar-foreground/65 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
         )}
       >
+        <span
+          aria-hidden
+          className={cn(
+            "absolute left-0 top-1/2 h-4 w-[2px] -translate-y-1/2 rounded-full bg-lime transition-opacity duration-200",
+            active ? "opacity-100" : "opacity-0",
+          )}
+        />
         <Icon
           className={cn(
             "size-[17px] transition-colors",
