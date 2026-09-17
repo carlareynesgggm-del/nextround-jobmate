@@ -67,6 +67,9 @@ export type AlertCtx = {
  * propia acción sugerida. Se devuelven ordenados por urgencia (más urgente primero).
  */
 export function applicationAlerts(app: ApplicationWithCompany, ctx: AlertCtx = {}): AppAlert[] {
+  // Un proceso cerrado (rechazado o retirado) no genera avisos de proceso activo.
+  if (app.stage === "rejected" || app.stage === "withdrawn") return [];
+
   const alerts: AppAlert[] = [];
   const followUpDays = ctx.followUpDays && ctx.followUpDays > 0 ? ctx.followUpDays : 14;
   const events = (ctx.events ?? []).filter((event) => event.application_id === app.id);

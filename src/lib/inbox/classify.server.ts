@@ -211,8 +211,14 @@ export function classify(message: GmailMessage): Classification | null {
   if (stage) {
     suggestions.push({
       kind: "stage",
-      label: `Actualizar la fase a “${stage}”`,
-      detail: "Sólo se aplica si lo marcas.",
+      label:
+        stage === "rejected"
+          ? "Marcar esta candidatura como Rechazada"
+          : `Actualizar la fase a “${stage}”`,
+      detail:
+        stage === "rejected"
+          ? "Este correo parece un rechazo. Sólo se aplica si lo confirmas."
+          : "Sólo se aplica si lo marcas.",
       payload: { stage },
     });
   }

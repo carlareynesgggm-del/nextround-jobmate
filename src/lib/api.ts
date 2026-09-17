@@ -15,6 +15,7 @@ import type {
   TaskRow,
   TimelineRow,
 } from "@/lib/domain";
+import { STAGE_META } from "@/lib/domain";
 
 
 const APP_SELECT = "*, companies(id,name,industry,location,website)";
@@ -204,13 +205,24 @@ export function useMoveStage() {
         patch.applied_at = new Date().toISOString().slice(0, 10);
       }
       unwrap(await supabase.from("applications").update(patch).eq("id", application.id).select("id"));
+      const closed = to === "rejected" || to === "withdrawn";
       await supabase.from("application_events").insert({
         application_id: application.id,
         user_id: application.user_id,
         is_demo: application.is_demo,
-        title: "Cambio de etapa",
+        title: to === "rejected" ? "Rechazo registrado" : "Cambio de etapa",
         from_stage: application.stage,
         to_stage: to,
+      });
+      await supabase.from("activity_feed").insert({
+        application_id: application.id,
+        kind: closed ? "stage_closed" : "stage_change",
+        title:
+          to === "rejected"
+            ? "Candidatura marcada como Rechazada"
+            : `Fase actualizada a ${STAGE_META[to]?.label ?? to}`,
+        detail: `Antes: ${STAGE_META[application.stage]?.label ?? application.stage}`,
+        source: "app",
       });
       return true;
     },
