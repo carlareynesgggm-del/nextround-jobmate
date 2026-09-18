@@ -179,13 +179,18 @@ function AuthPage() {
                 id="password"
                 type="password"
                 required
-                minLength={6}
+                minLength={mode === "signup" ? 8 : 6}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="••••••••"
                 className="mt-1.5"
                 autoComplete={mode === "signin" ? "current-password" : "new-password"}
               />
+              {mode === "signup" && (
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  {t("Mínimo 8 caracteres, con una letra, un número y un carácter especial.")}
+                </p>
+              )}
             </div>
 
             <Button type="submit" className="w-full gap-2" disabled={busy}>
