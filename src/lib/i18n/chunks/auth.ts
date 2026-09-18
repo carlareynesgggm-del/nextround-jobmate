@@ -49,4 +49,19 @@ export const chunk: Record<string, [string, string, string]> = {
   "¿Ya tienes cuenta?": ["Already have an account?", "Vous avez déjà un compte ?", "Bereits ein Konto?"],
   "Regístrate": ["Sign up", "Inscrivez-vous", "Registrieren"],
   "Inicia sesión": ["Sign in", "Connectez-vous", "Anmelden"],
+  "Mínimo 8 caracteres, con una letra, un número y un carácter especial.": [
+    "At least 8 characters, including a letter, a number and a special character.",
+    "Au moins 8 caractères, avec une lettre, un chiffre et un caractère spécial.",
+    "Mindestens 8 Zeichen, mit einem Buchstaben, einer Zahl und einem Sonderzeichen.",
+  ],
+  "La contraseña debe tener": ["The password must have", "Le mot de passe doit contenir", "Das Passwort muss enthalten"],
+  "al menos 8 caracteres": ["at least 8 characters", "au moins 8 caractères", "mindestens 8 Zeichen"],
+  "un número": ["a number", "un chiffre", "eine Zahl"],
+  "un carácter especial": ["a special character", "un caractère spécial", "ein Sonderzeichen"],
+  "una letra": ["a letter", "une lettre", "einen Buchstaben"],
+  "No hemos podido leer esa oferta. Completa los datos a mano; el enlace ya está guardado.": [
+    "We couldn't read that job ad. Fill in the details manually; the link is already saved.",
+    "Nous n'avons pas pu lire cette offre. Complétez les données manuellement ; le lien est déjà enregistré.",
+    "Wir konnten diese Stellenanzeige nicht lesen. Ergänze die Daten manuell; der Link ist schon gespeichert.",
+  ],
 };

@@ -101,11 +101,21 @@ export function AddApplicationFlow({
       source: result.source,
       externalId: result.externalId ?? "",
       roleTitle: result.roleTitle ?? prev.roleTitle,
+      location: result.location ?? prev.location,
+      country: result.country ?? prev.country,
+      description: result.description ?? prev.description,
+      deadlineAt: result.deadlineAt ?? prev.deadlineAt,
       companyId: match ? match.id : result.company ? NEW_COMPANY : prev.companyId,
       newCompanyName: match ? "" : (result.company ?? prev.newCompanyName),
     }));
     setScreen("details");
-    toast.success(t("Oferta importada. Revisa y completa los datos."));
+    if (result.fetched) {
+      toast.success(t("Oferta importada. Revisa y completa los datos."));
+    } else {
+      toast.warning(
+        t("No hemos podido leer esa oferta. Completa los datos a mano; el enlace ya está guardado."),
+      );
+    }
   }
 
   function pickSaved(app: ApplicationWithCompany) {

@@ -46,12 +46,28 @@ function AuthPage() {
     if (!loading && session) navigate({ to: "/dashboard", replace: true });
   }, [loading, session, navigate]);
 
+  const passwordIssues = (value: string) => {
+    const issues: string[] = [];
+    if (value.length < 8) issues.push(t("al menos 8 caracteres"));
+    if (!/[0-9]/.test(value)) issues.push(t("un número"));
+    if (!/[^A-Za-z0-9]/.test(value)) issues.push(t("un carácter especial"));
+    if (!/[A-Za-z]/.test(value)) issues.push(t("una letra"));
+    return issues;
+  };
+
   async function submit(event: React.FormEvent) {
     event.preventDefault();
+    if (mode === "signup") {
+      const issues = passwordIssues(password);
+      if (issues.length > 0) {
+        toast.error(`${t("La contraseña debe tener")} ${issues.join(", ")}.`);
+        return;
+      }
+    }
     setBusy(true);
     try {
       if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -60,16 +76,9 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        if (!data.session) {
-          const retry = await supabase.auth.signInWithPassword({ email, password });
-          if (retry.error) {
-            toast.success(t("Cuenta creada. Confirma tu email para entrar."));
-            setMode("signin");
-            return;
-          }
-        }
-        toast.success(t("Cuenta creada. Ya puedes entrar."));
-        navigate({ to: "/dashboard", replace: true });
+        toast.success(t("Cuenta creada. Confirma tu email para entrar."), { duration: 8000 });
+        setMode("signin");
+        setPassword("");
       } else {
 
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -170,13 +179,18 @@ function AuthPage() {
                 id="password"
                 type="password"
                 required
-                minLength={6}
+                minLength={mode === "signup" ? 8 : 6}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="••••••••"
                 className="mt-1.5"
                 autoComplete={mode === "signin" ? "current-password" : "new-password"}
               />
+              {mode === "signup" && (
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  {t("Mínimo 8 caracteres, con una letra, un número y un carácter especial.")}
+                </p>
+              )}
             </div>
 
             <Button type="submit" className="w-full gap-2" disabled={busy}>

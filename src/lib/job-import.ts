@@ -7,6 +7,8 @@
  * analice la oferta real; el resto de la app solo depende de esta firma.
  */
 
+import { fetchJobPage } from "./job-import.functions";
+
 export type JobImportResult = {
   /** URL tal cual la pegó la persona, ya validada. */
   jobUrl: string;
@@ -18,6 +20,13 @@ export type JobImportResult = {
   externalId: string | null;
   /** Puesto deducido del slug de la URL, cuando es legible. */
   roleTitle: string | null;
+  location: string | null;
+  country: string | null;
+  description: string | null;
+  employmentType: string | null;
+  deadlineAt: string | null;
+  /** true si hemos podido leer de verdad el contenido de la oferta. */
+  fetched: boolean;
 };
 
 const KNOWN_PORTALS: Record<string, string> = {
@@ -64,9 +73,19 @@ function findExternalId(url: URL): string | null {
   return null;
 }
 
+const EMPLOYMENT_TYPE_LABEL: Record<string, string> = {
+  FULL_TIME: "Jornada completa",
+  PART_TIME: "Media jornada",
+  INTERN: "Prácticas",
+  CONTRACTOR: "Contrato temporal",
+  TEMPORARY: "Contrato temporal",
+  VOLUNTEER: "Voluntariado",
+  OTHER: "Otro",
+};
+
 /**
- * Deduce empresa, origen, identificador y puesto a partir del propio enlace,
- * sin hacer ninguna petición de red.
+ * Lee la oferta real (título, empresa, ubicación, descripción) y completa lo
+ * que falte deduciéndolo del propio enlace.
  */
 export async function importJob(rawUrl: string): Promise<JobImportResult> {
   const trimmed = rawUrl.trim();
@@ -93,13 +112,35 @@ export async function importJob(rawUrl: string): Promise<JobImportResult> {
 
   const segments = url.pathname.split("/").filter(Boolean);
   const lastSlug = segments.find((segment) => /[a-z]/i.test(segment) && segment.length > 4);
-  const roleTitle = lastSlug && !/^[0-9a-f-]+$/i.test(lastSlug) ? titleCase(lastSlug) : null;
+  let slugRole = lastSlug && !/^[0-9a-f-]+$/i.test(lastSlug) ? lastSlug : null;
+  let slugCompany: string | null = null;
+  if (slugRole) {
+    // LinkedIn: "role-title-at-company-1234567"
+    const split = slugRole.match(/^(.+?)-at-(.+?)-?\d*$/i);
+    if (split) {
+      slugRole = split[1] ?? slugRole;
+      slugCompany = split[2] ? titleCase(split[2]) : null;
+    }
+    slugRole = titleCase(slugRole.replace(/-\d{4,}$/, ""));
+  }
+
+  const page = await fetchJobPage({ data: { url: url.toString() } }).catch(() => null);
+
+  const employmentType = page?.employmentType
+    ? (EMPLOYMENT_TYPE_LABEL[page.employmentType.toUpperCase()] ?? page.employmentType)
+    : null;
 
   return {
     jobUrl: url.toString(),
-    company,
+    company: page?.company ?? company ?? slugCompany,
     source,
     externalId: findExternalId(url),
-    roleTitle,
+    roleTitle: page?.roleTitle ?? slugRole,
+    location: page?.location ?? null,
+    country: page?.country ?? null,
+    description: page?.description ?? null,
+    employmentType,
+    deadlineAt: page?.deadlineAt ?? null,
+    fetched: Boolean(page?.fetched),
   };
 }
