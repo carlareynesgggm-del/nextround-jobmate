@@ -71,9 +71,19 @@ function findExternalId(url: URL): string | null {
   return null;
 }
 
+const EMPLOYMENT_TYPE_LABEL: Record<string, string> = {
+  FULL_TIME: "Jornada completa",
+  PART_TIME: "Media jornada",
+  INTERN: "Prácticas",
+  CONTRACTOR: "Contrato temporal",
+  TEMPORARY: "Contrato temporal",
+  VOLUNTEER: "Voluntariado",
+  OTHER: "Otro",
+};
+
 /**
- * Deduce empresa, origen, identificador y puesto a partir del propio enlace,
- * sin hacer ninguna petición de red.
+ * Lee la oferta real (título, empresa, ubicación, descripción) y completa lo
+ * que falte deduciéndolo del propio enlace.
  */
 export async function importJob(rawUrl: string): Promise<JobImportResult> {
   const trimmed = rawUrl.trim();
