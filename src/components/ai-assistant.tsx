@@ -3,6 +3,7 @@ import { ArrowUp, Sparkles, X } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useApplications } from "@/lib/api";
@@ -208,16 +209,25 @@ export function AiAssistant({
             messages.map((message) => {
               const text = messageText(message);
               if (!text) return null;
+              const isUser = message.role === "user";
               return (
-                <div
-                  key={message.id}
-                  className={cn(
-                    "max-w-[88%] whitespace-pre-wrap rounded-xl px-3.5 py-2.5 text-sm leading-relaxed",
-                    message.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "border border-border/60 bg-background",
-                  )}
-                >
-                  {text}
-                </div>
+                <Message key={message.id} from={message.role} className={cn(isUser && "max-w-[88%]")}>
+                  <MessageContent
+                    className={cn(
+                      isUser
+                        ? "whitespace-pre-wrap rounded-xl bg-primary px-3.5 py-2.5 leading-relaxed text-primary-foreground"
+                        : "w-full gap-0 overflow-visible py-1 leading-relaxed",
+                    )}
+                  >
+                    {isUser ? (
+                      text
+                    ) : (
+                      <MessageResponse className="[&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_blockquote]:border-l-2 [&_blockquote]:border-primary/25 [&_blockquote]:pl-3 [&_h1]:font-display [&_h1]:text-xl [&_h1]:font-semibold [&_h2]:font-display [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:font-display [&_h3]:text-base [&_h3]:font-semibold [&_hr]:my-5 [&_hr]:border-border [&_li]:my-1 [&_ol]:my-3 [&_p]:my-2.5 [&_strong]:font-semibold [&_ul]:my-3">
+                        {text}
+                      </MessageResponse>
+                    )}
+                  </MessageContent>
+                </Message>
               );
             })
           )}
