@@ -1,4 +1,12 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { ArrowUp, Sparkles, X } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
@@ -64,8 +72,6 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     window.addEventListener("nextround:ai", handler);
     return () => window.removeEventListener("nextround:ai", handler);
   }, []);
-
-
 
   return (
     <AssistantContext.Provider value={value}>
@@ -185,8 +191,12 @@ export function AiAssistant({
           {messages.length === 0 ? (
             <div className="space-y-4 pt-2">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">Career copilot</p>
-                <h2 className="mt-1.5 font-display text-2xl font-semibold leading-tight">{t("¿Con qué te ayudo?")}</h2>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
+                  Career copilot
+                </p>
+                <h2 className="mt-1.5 font-display text-2xl font-semibold leading-tight">
+                  {t("¿Con qué te ayudo?")}
+                </h2>
               </div>
               <div className="flex flex-col gap-2">
                 {suggestions.map((suggestion) => (
@@ -211,7 +221,11 @@ export function AiAssistant({
               if (!text) return null;
               const isUser = message.role === "user";
               return (
-                <Message key={message.id} from={message.role} className={cn(isUser && "max-w-[88%]")}>
+                <Message
+                  key={message.id}
+                  from={message.role}
+                  className={cn(isUser && "max-w-[88%]")}
+                >
                   <MessageContent
                     className={cn(
                       isUser
@@ -233,12 +247,15 @@ export function AiAssistant({
           )}
 
           {busy && (
-            <p className="animate-pulse text-xs text-muted-foreground">{t("Pensando con tus datos…")}</p>
+            <p className="animate-pulse text-xs text-muted-foreground">
+              {t("Pensando con tus datos…")}
+            </p>
           )}
 
           {error && (
             <div className="rounded-xl bg-danger/8 px-3.5 py-2.5 text-xs leading-relaxed text-danger">
-              {error.message || t("El asistente no ha podido responder ahora mismo. Inténtalo de nuevo.")}
+              {error.message ||
+                t("El asistente no ha podido responder ahora mismo. Inténtalo de nuevo.")}
             </div>
           )}
 
