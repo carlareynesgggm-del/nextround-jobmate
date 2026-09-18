@@ -18,6 +18,13 @@ export type JobImportResult = {
   externalId: string | null;
   /** Puesto deducido del slug de la URL, cuando es legible. */
   roleTitle: string | null;
+  location: string | null;
+  country: string | null;
+  description: string | null;
+  employmentType: string | null;
+  deadlineAt: string | null;
+  /** true si hemos podido leer de verdad el contenido de la oferta. */
+  fetched: boolean;
 };
 
 const KNOWN_PORTALS: Record<string, string> = {
