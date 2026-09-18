@@ -7,6 +7,8 @@
  * analice la oferta real; el resto de la app solo depende de esta firma.
  */
 
+import { fetchJobPage } from "./job-import.functions";
+
 export type JobImportResult = {
   /** URL tal cual la pegó la persona, ya validada. */
   jobUrl: string;
