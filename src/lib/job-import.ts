@@ -110,13 +110,35 @@ export async function importJob(rawUrl: string): Promise<JobImportResult> {
 
   const segments = url.pathname.split("/").filter(Boolean);
   const lastSlug = segments.find((segment) => /[a-z]/i.test(segment) && segment.length > 4);
-  const roleTitle = lastSlug && !/^[0-9a-f-]+$/i.test(lastSlug) ? titleCase(lastSlug) : null;
+  let slugRole = lastSlug && !/^[0-9a-f-]+$/i.test(lastSlug) ? lastSlug : null;
+  let slugCompany: string | null = null;
+  if (slugRole) {
+    // LinkedIn: "role-title-at-company-1234567"
+    const split = slugRole.match(/^(.+?)-at-(.+?)-?\d*$/i);
+    if (split) {
+      slugRole = split[1] ?? slugRole;
+      slugCompany = split[2] ? titleCase(split[2]) : null;
+    }
+    slugRole = titleCase(slugRole.replace(/-\d{4,}$/, ""));
+  }
+
+  const page = await fetchJobPage({ data: { url: url.toString() } }).catch(() => null);
+
+  const employmentType = page?.employmentType
+    ? (EMPLOYMENT_TYPE_LABEL[page.employmentType.toUpperCase()] ?? page.employmentType)
+    : null;
 
   return {
     jobUrl: url.toString(),
-    company,
+    company: page?.company ?? company ?? slugCompany,
     source,
     externalId: findExternalId(url),
-    roleTitle,
+    roleTitle: page?.roleTitle ?? slugRole,
+    location: page?.location ?? null,
+    country: page?.country ?? null,
+    description: page?.description ?? null,
+    employmentType,
+    deadlineAt: page?.deadlineAt ?? null,
+    fetched: Boolean(page?.fetched),
   };
 }
