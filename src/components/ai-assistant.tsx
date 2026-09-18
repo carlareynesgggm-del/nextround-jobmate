@@ -1,8 +1,17 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { ArrowUp, Sparkles, X } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useApplications } from "@/lib/api";
@@ -63,8 +72,6 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     window.addEventListener("nextround:ai", handler);
     return () => window.removeEventListener("nextround:ai", handler);
   }, []);
-
-
 
   return (
     <AssistantContext.Provider value={value}>
@@ -184,8 +191,12 @@ export function AiAssistant({
           {messages.length === 0 ? (
             <div className="space-y-4 pt-2">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">Career copilot</p>
-                <h2 className="mt-1.5 font-display text-2xl font-semibold leading-tight">{t("¿Con qué te ayudo?")}</h2>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-primary">
+                  Career copilot
+                </p>
+                <h2 className="mt-1.5 font-display text-2xl font-semibold leading-tight">
+                  {t("¿Con qué te ayudo?")}
+                </h2>
               </div>
               <div className="flex flex-col gap-2">
                 {suggestions.map((suggestion) => (
@@ -208,27 +219,43 @@ export function AiAssistant({
             messages.map((message) => {
               const text = messageText(message);
               if (!text) return null;
+              const isUser = message.role === "user";
               return (
-                <div
+                <Message
                   key={message.id}
-                  className={cn(
-                    "max-w-[88%] whitespace-pre-wrap rounded-xl px-3.5 py-2.5 text-sm leading-relaxed",
-                    message.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "border border-border/60 bg-background",
-                  )}
+                  from={message.role}
+                  className={cn(isUser && "max-w-[88%]")}
                 >
-                  {text}
-                </div>
+                  <MessageContent
+                    className={cn(
+                      isUser
+                        ? "whitespace-pre-wrap rounded-xl bg-primary px-3.5 py-2.5 leading-relaxed text-primary-foreground"
+                        : "w-full gap-0 overflow-visible py-1 leading-relaxed",
+                    )}
+                  >
+                    {isUser ? (
+                      text
+                    ) : (
+                      <MessageResponse className="[&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_blockquote]:border-l-2 [&_blockquote]:border-primary/25 [&_blockquote]:pl-3 [&_h1]:font-display [&_h1]:text-xl [&_h1]:font-semibold [&_h2]:font-display [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:font-display [&_h3]:text-base [&_h3]:font-semibold [&_hr]:my-5 [&_hr]:border-border [&_li]:my-1 [&_ol]:my-3 [&_p]:my-2.5 [&_strong]:font-semibold [&_ul]:my-3">
+                        {text}
+                      </MessageResponse>
+                    )}
+                  </MessageContent>
+                </Message>
               );
             })
           )}
 
           {busy && (
-            <p className="animate-pulse text-xs text-muted-foreground">{t("Pensando con tus datos…")}</p>
+            <p className="animate-pulse text-xs text-muted-foreground">
+              {t("Pensando con tus datos…")}
+            </p>
           )}
 
           {error && (
             <div className="rounded-xl bg-danger/8 px-3.5 py-2.5 text-xs leading-relaxed text-danger">
-              {error.message || t("El asistente no ha podido responder ahora mismo. Inténtalo de nuevo.")}
+              {error.message ||
+                t("El asistente no ha podido responder ahora mismo. Inténtalo de nuevo.")}
             </div>
           )}
 
